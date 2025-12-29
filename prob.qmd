@@ -80,7 +80,7 @@ Không gian mẫu là 1 **tập hợp**, nên có thể sử dụng các phép t
 
 Là một phần tử của không gian mẫu.
 
-Ví dụ: không gian mẫu của tung đồng xu là $\Omega = \text{{sấp, ngửa}}$ thì sấp hoặc ngửa là một điểm mẫu.
+Ví dụ: không gian mẫu của tung đồng xu là $\Omega = \{ \text{sấp}, \text{ngửa} \}$ thì $\{ \text{sấp} \}$ hoặc $\{ \text{ngửa} \}$ là một điểm mẫu.
 
 ### Kết quả (outcome)
 
