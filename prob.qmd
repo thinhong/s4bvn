@@ -72,7 +72,7 @@ Ví dụ: tung đồng xu (không biết sẽ ra mặt sấp hay mặt ngửa), 
 
 Là **tập hợp** chứa **tất cả** các kết quả có thể xảy ra của một phép thử ngẫu nhiên, mỗi kết quả liệt kê đúng một lần duy nhất.
 
-Ví dụ: không gian mẫu của tung đồng xu là $\Omega = \text{{sấp, ngửa}}$
+Ví dụ: không gian mẫu của tung đồng xu là $\Omega = \{ \text{sấp}, \text{ngửa} \}$
 
 Không gian mẫu là 1 **tập hợp**, nên có thể sử dụng các phép toán của tập hợp cho không gian mẫu ($\cup$ hay $\cap$).
 
@@ -84,7 +84,7 @@ Ví dụ: không gian mẫu của tung đồng xu là $\Omega = \{ \text{sấp},
 
 ### Kết quả (outcome)
 
-Là điểm mẫu quan sát được, khi chúng ta cho tiến hành phép thử ngẫu nhiên.
+Là điểm mẫu quan sát được, khi chúng ta cho thực hiện phép thử ngẫu nhiên.
 
 ### Biến cố/Sự kiện (event)
 
