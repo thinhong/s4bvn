@@ -1,0 +1,24 @@
+---
+title: "Phân phối rời rạc"
+format: html
+---
+
+## Phép thử Bernoulli (Bernoulli trial, hay binomial trial)
+
+Là một lần thử nghiệm duy nhất, không gian mẫu chỉ có đúng 2 kết quả: Thành công (Success) hoặc Thất bại (Failure)
+
+Ví dụ: tung đồng xu (mặt sấp, mặt ngửa), xét nghiệm một ca nghi ngờ (dương tính, âm tính)
+
+## Chuỗi phép thử Bernoulli (Bernoulli process)
+
+Khi ta thực hiện phép thử Bernoulli nhiều lần liên tiếp (ví dụ: tung một đồng xu nhiều lần, dùng một loại xét nghiệm để test nhiều người). Chuỗi Bernoulli chuẩn cần thỏa mãn 2 điều kiện:
+
+- Độc lập (Independent): Kết quả của lần thử này không ảnh hưởng đến lần thử khác.
+- Xác suất không đổi: Xác suất thành công ($p$) phải giống hệt nhau ở mọi lần thử.
+
+Từ chuỗi Bernoulli có 3 phân phối thống kê sau:
+
+## Phân phối nhị nhức (binomial distribution)
+
+
+

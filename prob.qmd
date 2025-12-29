@@ -1,0 +1,178 @@
+---
+title: "Xác suất"
+format: html
+---
+
+## Nguồn gốc
+
+Lý thuyết xác suất ra đời để giải quyết một vụ tranh chấp trong cờ bạc. Vấn đề cụ thể khai sinh ra lĩnh vực này được gọi là "Bài toán Chia điểm" (Problem of Points).
+
+Năm 1654, nhà văn kiêm tay cờ bạc Antoine Gombaud viết thư cho nhà toán học Blaise Pascal để hỏi cách giải quyết một ván bài dang dở:
+
+> -   Hai người A và B chơi một trò hoàn toàn may rủi (ví dụ tung đồng xu, kéo-búa-bao), ai thắng 3 ván trước sẽ là người chiến thắng cuối cùng
+> -   Mỗi người đặt 50\$, tổng là 100\$, ai thắng sẽ được toàn bộ tiền thưởng 100\$
+> -   Trò chơi phải dừng đột ngột khi A đang dẫn trước 2-1
+
+Câu hỏi: Làm sao chia 100\$ cho công bằng?
+
+Tại sao đây là một bài toán khó?
+
+Vào thời đó, con người chưa biết cách xử lý "tương lai" bằng toán học. Có người đề nghị: "A được 2 điểm, B được 1 điểm. Vậy chia 100\$ làm 3, A được 67\$, B được 33\$." Cách này không công bằng vì chỉ nhìn vào quá khứ mà phớt lờ lợi thế của A: A chỉ cần thắng thêm đúng 1 ván là xong, trong khi B phải thắng liên tiếp 2 ván.
+
+Pascal thấy bài toán này rất thú vị và gửi nó cho nhà toán học Pierre de Fermat. Họ giải quyết vấn đề bằng cách thay đổi góc nhìn. Thay vì nhìn vào quá khứ (những gì đã xảy ra trong ván bài), họ nhìn vào tương lai (các khả năng sẽ xảy ra của trò chơi).
+
+Lời giải:
+
+Fermat tưởng tượng xem trò chơi có thể diễn ra như thế nào nếu tiếp tục chơi cho đến cùng. Trò chơi sẽ kết thúc tối đa trong 2 ván nữa (vì A thắng 1 ván là xong, hoặc B thắng 2 ván là xong). Để cho công bằng, ta cho A và B chơi thêm 2 ván.
+
+Có 4 kịch bản của 2 ván này:
+
++---------+---------+------------+-----------+
+| Ván 1   | Ván 2   | Chung cuộc | Tỉ số A:B |
++=========+=========+============+===========+
+| A thắng | A thắng | A thắng    | 4-1       |
+|         +---------+------------+-----------+
+|         | B thắng | A thắng    | 3-2       |
++---------+---------+------------+-----------+
+| B thắng | A thắng | A thắng    | 3-2       |
+|         +---------+------------+-----------+
+|         | B thắng | B thắng    | 2-3       |
++---------+---------+------------+-----------+
+
+Kết quả:
+
+Nếu tiếp tục chơi, chỉ có 4 kịch bản có thể xảy ra, trong đó A thắng 3 lần, B thắng 1 lần. Vậy khả năng A thắng là 3/4 trường hợp, và B thắng 1/4 trường hợp. Vậy A nên được chia 3/4 của 100\$ là 75\$, và B được chia 25\$.
+
+## Định nghĩa
+
+Trong bài toán trên, khả năng thắng cuộc chính là xác suất.
+
+Xác suất (Probability): là một con số nằm trong khoảng từ 0 đến 1, dùng để đo lường khả năng xảy ra của một sự kiện.
+
+-   0 = chắc chắn không xảy ra
+-   1 = chắc chắn sẽ xảy ra
+
+Có 2 cách tiếp cận xác suất:
+
+1.  Tần suất (frequentist):
+
+$$\text{Xác suất} = \frac{\text{Số lần sự kiện xảy ra}}{\text{Tổng số lần quan sát}}$$
+
+2.  Niềm tin (degree of belief, Bayesian): mức độ tin tưởng của người đánh giá về khả năng xảy ra của sự kiện.
+
+## Các khái niệm cơ bản
+
+### Phép thử ngẫu nhiên (random experiment)
+
+Là một thử nghiệm mà chúng ta không biết trước kết quả cho đến khi nó thực sự diễn ra.
+
+Ví dụ: tung đồng xu (không biết sẽ ra mặt sấp hay mặt ngửa), làm xét nghiệm cho một người (không biết là âm tính hay dương tính)
+
+### Không gian mẫu (sample space $\Omega$)
+
+Là **tập hợp** chứa **tất cả** các kết quả có thể xảy ra của một phép thử ngẫu nhiên, mỗi kết quả liệt kê đúng một lần duy nhất.
+
+Ví dụ: không gian mẫu của tung đồng xu là $\Omega = \text{{sấp, ngửa}}$
+
+Không gian mẫu là 1 **tập hợp**, nên có thể sử dụng các phép toán của tập hợp cho không gian mẫu ($\cup$ hay $\cap$).
+
+### Điểm mẫu (sample point)
+
+Là một phần tử của không gian mẫu.
+
+Ví dụ: không gian mẫu của tung đồng xu là $\Omega = \text{{sấp, ngửa}}$ thì sấp hoặc ngửa là một điểm mẫu.
+
+### Kết quả (outcome)
+
+Là điểm mẫu quan sát được, khi chúng ta cho tiến hành phép thử ngẫu nhiên.
+
+### Biến cố/Sự kiện (event)
+
+Là một **tập hợp con** của không gian mẫu. Bất kỳ tập hợp nào chứa các kết quả đều tạo thành một biến cố.
+
+Ví dụ: Tung một đồng xu hai lần. Không gian mẫu: $\Omega = \{ SS, SN, NS, NN \}$.
+
+Gọi biến cố $A$ là "có đúng một mặt ngửa", $A = \{ SN, NS \}$.
+
+$A$ là một tập con của $\Omega$ ($A \subset \Omega$).
+
+Biến cố $A$ được gọi là xảy ra (occurs) nếu chúng ta quan sát được một kết quả là phần tử của tập hợp $A$.
+
+### Ví dụ
+
+- Phép thử ngẫu nhiên: "Tung một đồng xu hai lần"
+
+- Không gian mẫu: $\Omega = \{ SS, SN, NS, NN \}$
+
+- Biến cố "có đúng một mặt ngửa": $A = \{ SN, NS \}$
+
+- Chúng ta thực sự tiến hành phép thử ngẫu nhiên:
+
+```{r}
+set.seed(27)
+coin <- c("S", "N")
+
+sample(coin, size = 2, replace = TRUE)
+```
+
+- Kết quả thu được là $SN$, là phần tử của $A = \{ SN, NS \}$, vậy ta nói lần thử này biến cố $A$ có xảy ra
+
+- Xác suất là con số thể hiện khả năng xảy ra của từng điểm mẫu hay biến cố trong $\Omega$
+
+Xác suất luôn gắn liền với không gian mẫu. Xác suất sẽ thay đổi trong các không gian mẫu khác nhau.
+
+::: {.callout-note}
+
+## Bài tập
+
+Tìm một ví dụ phép thử ngẫu nhiên khác và mô tả lại các định nghĩa này.
+
+:::
+
+### Rời rạc (discrete)
+
+Là khi có "khoảng trống" giữa các giá trị.
+
+Ví dụ: 1, 2, 3...
+
+![](img/d-space.svg)
+
+### Liên tục (continuous)
+
+Là khi không có khoảng trống giữa các giá trị.
+
+Ví dụ: $[0,1]$
+
+![](img/c-space.svg)
+
+### Xung khắc (mutually exclusive)
+
+Hai biến cố $A$ và $B$ được gọi là xung khắc (mutually exclusive) nếu giao của chúng là tập rỗng:
+
+$$A \cap B = \emptyset$$
+
+Nghĩa là biến cố $A$ và $B$ không thể cùng xảy ra. Nếu $A$ xảy ra thì $B$ không thể xảy ra, và ngược lại.
+
+![](img/mulex.svg)
+
+### Phân phối xác suất (probability distribution)
+
+Là một hàm số (function) thể hiện xác suất của mọi tập hợp con của không gian mẫu $\Omega$.
+
+Phân phối xác suất bắt buộc phải thỏa 3 điều kiện sau:
+
+- $\mathbb{P}(\Omega) = 1$
+
+- $0 \leq \mathbb{P}(A) \leq 1$ với mọi biến cố $A$
+
+- Nếu các biến số $A_1$, $A_2$, ..., $A_n$ xung khắc, thì:
+
+$$\mathbb{P}(A_1 \cup A_2 \cup \cdots \cup A_n) = \mathbb{P}(A_1) + \mathbb{P}(A_2) + \cdots + \mathbb{P}(A_n)$$
+
+### Biến ngẫu nhiên (random variable)
+
+Là một hàm số (function) gán một **số thực** cho mỗi điểm mẫu trong không gian mẫu của một phép thử ngẫu nhiên.
+
+$$X: \Omega \rightarrow \mathbb{R}$$
+
+

@@ -1,0 +1,66 @@
+---
+title: "Hình dạng của phân phối"
+format: html
+---
+
+## Moments
+
+Xác suất của mỗi giá trị trong một phân phối được xác định bằng hàm mật độ xác suất (với biến liên tục) hoặc hàm khối lượng xác suất (với biến rời rạc).
+
+Hình dạng của phân phối là hình dạng của các hàm số này, được xác định bằng những giá trị gọi là mô-men (moment) của hàm. Thuật ngữ này được mượn từ Vật lý: mô-men (hay mô-men lực) còn gọi là lực xoắn, là lực làm quay một vật thể quanh một điểm tựa. Tưởng tượng một cái mỏ lết quay quanh một con ốc.
+
+![](img/moment-physics.svg)
+
+Trong thống kê, moment đo lường vị trí của phân phối so với một điểm mốc. Đối với một biến ngẫu nhiên $X$, moment cấp $n$ quanh điểm $a$ (the $n$-th moment about $a$) là:
+
+$$E[(X - a)^n]$$
+
+Có 2 loại moment:
+
+-   Moment gốc (raw moment, xoay quanh điểm 0): khi $a = 0$, moment là $E[X^n]$.
+-   Moment tập trung (central moment, xoay quanh giá trị trung bình): khi $a = E[X]$, moment là $E[(X - E[X])^n]$.
+
+Cấp của moment có thể từ 0 đến $\infty$. Nếu biết hết toàn bộ các moment sẽ có thể vẽ lại chính xác hình dạng của đồ thị phân phối đó. Chúng ta thường quan tâm tới 4 loại moment sau:
+
+| Loại moment | Kí hiệu | Tên thường gọi | Ý nghĩa |
+|----|----|----|----|
+| Gốc cấp 1 | $E[X]$ | Kỳ vọng (Mean) | Vị trí (tâm của phân phối) |
+| Tập trung cấp 2 | $E[(X - E[X])^2]$ | Phương sai (Variance) | Độ phân tán (dữ liệu biến động thế nào) |
+| Tập trung cấp 3 | $E[(X - E[X])^3]$ | Độ lệch (Skewness)\* | Tính bất đối xứng (bên nào có đuôi dài hơn) |
+| Tập trung cấp 4 | $E[(X - E[X])^4]$ | Độ nhọn (Kurtosis)\* | Độ dày của đuôi |
+
+*Độ lệch và Độ nhọn thường được chuẩn hóa (standardised) bằng cách chia cho độ lệch chuẩn $\sigma$, ý nghĩa là gấp bao nhiêu lần độ lệch chuẩn.
+
+### Moment gốc cấp 1
+
+Cho biết vị trí trọng tâm của phân phối nằm ở đâu so với điểm 0.
+
+$$E[X] = \frac{\sum^N_{i = 1}x_i}{N} = \sum^N_{i = 1}x_i \mathbb{P}(x_i)$$
+
+### Moment tập trung cấp 2
+
+Cho biết khoảng cách của từng giá trị trong phân phối so với giá trị trung bình. Phép bình phương giúp ngăn chặn các độ lệch âm và dương triệt tiêu lẫn nhau.
+
+$$E[(X - E[X])^2] = E[X^2] - (E[X])^2$$
+
+### Moment tập trung cấp 3
+
+Thường được gọi là Độ lệch (Skewness). Nó phản ánh sự không đối xứng.
+
+$$E\left[\left(\frac{X - E[X]}{\sigma}\right)^3\right]$$
+
+Lũy thừa bậc 3 giữ nguyên dấu (số âm mũ 3 vẫn là âm)
+
+### Moment tập trung cấp 4
+
+Thường được gọi là Độ nhọn (Kurtosis). Tên gọi này bắt nguồn từ tiếng Hy Lạp: κυρτός - kyrtos, nghĩa là "cong, vòm".
+
+$$E\left[\left(\frac{X - E[X]}{\sigma}\right)^4\right]$$
+
+Lũy thừa bậc 4 làm cho những giá trị nhỏ (gần trung bình) trở nên siêu nhỏ, và những giá trị lớn (xa trung bình - outliers) trở nên lớn hơn nhiều lần. Moment này càng lớn thì đuôi của phân phối càng dày, nghĩa là xác suất xảy ra các sự kiện cực đoan càng lớn.
+
+Estimate
+
+Estimand
+
+Estimator

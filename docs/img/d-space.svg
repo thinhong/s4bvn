@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="400"
+   height="300"
+   overflow="hidden"
+   version="1.1"
+   id="svg42"
+   sodipodi:docname="Slide1.SVG"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs46" />
+  <sodipodi:namedview
+     id="namedview44"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false" />
+  <g
+     id="g239"
+     transform="translate(-2.54224,-1.35167)">
+    <path
+       d="m 37.04224,151.35167 c 0,-67.103 74.097,-121.5 165.5,-121.5 91.403,0 165.5,54.397 165.5,121.5 0,67.103 -74.097,121.5 -165.5,121.5 -91.403,0 -165.5,-54.397 -165.5,-121.5 z"
+       stroke="#042433"
+       stroke-width="3"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       id="path4" />
+    <path
+       d="m 79.54224,133.85167 c 0,-4.694 4.029,-8.5 9,-8.5 4.971,0 9,3.806 9,8.5 0,4.694 -4.029,8.5 -9,8.5 -4.971,0 -9,-3.806 -9,-8.5 z"
+       fill-rule="evenodd"
+       id="path6" />
+    <path
+       d="m 108.54224,101.35167 c 0,-4.971 3.806,-9 8.5,-9 4.694,0 8.5,4.029 8.5,9 0,4.971 -3.806,9 -8.5,9 -4.694,0 -8.5,-4.029 -8.5,-9 z"
+       fill-rule="evenodd"
+       id="path8" />
+    <path
+       d="m 126.54224,142.35167 c 0,-4.971 3.806,-9 8.5,-9 4.694,0 8.5,4.029 8.5,9 0,4.971 -3.806,9 -8.5,9 -4.694,0 -8.5,-4.029 -8.5,-9 z"
+       fill-rule="evenodd"
+       id="path10" />
+    <path
+       d="m 175.54224,92.35167 c 0,-4.971 4.029,-9 9,-9 4.971,0 9,4.029 9,9 0,4.971 -4.029,9 -9,9 -4.971,0 -9,-4.029 -9,-9 z"
+       fill-rule="evenodd"
+       id="path12" />
+    <path
+       d="m 99.54224,174.85167 c 0,-4.694 4.029,-8.5 9,-8.5 4.971,0 9,3.806 9,8.5 0,4.694 -4.029,8.5 -9,8.5 -4.971,0 -9,-3.806 -9,-8.5 z"
+       fill-rule="evenodd"
+       id="path14" />
+    <path
+       d="m 167.54224,200.35167 c 0,-4.971 4.029,-9 9,-9 4.971,0 9,4.029 9,9 0,4.971 -4.029,9 -9,9 -4.971,0 -9,-4.029 -9,-9 z"
+       fill-rule="evenodd"
+       id="path16" />
+    <path
+       d="m 242.54224,124.85167 c 0,-4.694 4.029,-8.5 9,-8.5 4.971,0 9,3.806 9,8.5 0,4.694 -4.029,8.5 -9,8.5 -4.971,0 -9,-3.806 -9,-8.5 z"
+       fill-rule="evenodd"
+       id="path18" />
+    <path
+       d="m 224.54224,170.35167 c 0,-4.971 4.029,-9 9,-9 4.971,0 9,4.029 9,9 0,4.971 -4.029,9 -9,9 -4.971,0 -9,-4.029 -9,-9 z"
+       fill-rule="evenodd"
+       id="path20" />
+    <path
+       d="m 216.54224,240.35167 c 0,-4.971 3.806,-9 8.5,-9 4.694,0 8.5,4.029 8.5,9 0,4.971 -3.806,9 -8.5,9 -4.694,0 -8.5,-4.029 -8.5,-9 z"
+       fill-rule="evenodd"
+       id="path22" />
+    <path
+       d="m 307.54224,157.35167 c 0,-4.971 4.029,-9 9,-9 4.971,0 9,4.029 9,9 0,4.971 -4.029,9 -9,9 -4.971,0 -9,-4.029 -9,-9 z"
+       fill-rule="evenodd"
+       id="path24" />
+    <path
+       d="m 79.06224,175.38367 c -21.951,-28.157 -12.536,-72.196 21.03,-98.364 33.566,-26.167 78.571,-24.555 100.522,3.602 21.951,28.157 12.536,72.196 -21.03,98.364 -33.566,26.168 -78.571,24.555 -100.522,-3.602 z"
+       stroke="#4e95d9"
+       stroke-width="3"
+       stroke-miterlimit="8"
+       fill="none"
+       fill-rule="evenodd"
+       id="path26" />
+    <text
+       font-family="'Cambria Math', 'Cambria Math_MSFontService', sans-serif"
+       font-weight="400"
+       font-size="48px"
+       id="text28"
+       x="281.18423"
+       y="103.35167">Ω</text>
+    <text
+       fill="#215f9a"
+       font-family="'Cambria Math', 'Cambria Math_MSFontService', sans-serif"
+       font-weight="400"
+       font-size="48px"
+       id="text30"
+       x="156.76523"
+       y="147.35167">𝐴</text>
+  </g>
+</svg>

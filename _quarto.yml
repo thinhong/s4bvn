@@ -1,0 +1,30 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Statistics for babies"
+  author:
+    - name: Thinh Ong
+      url: https://drthinhong.com/
+      orcid: 0000-0001-6772-9291
+  date: "25/12/2025"
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - prob.qmd
+    - distr-shape.qmd
+    - distr-d.qmd
+    - summary.qmd
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+
+
+

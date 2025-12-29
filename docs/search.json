@@ -1,0 +1,132 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Statistics for babies",
+    "section": "",
+    "text": "Preface\nThis is a Quarto book.\nTo learn more about Quarto books visit https://quarto.org/docs/books.\n\n1 + 1\n\n[1] 2",
+    "crumbs": [
+      "Preface"
+    ]
+  },
+  {
+    "objectID": "intro.html",
+    "href": "intro.html",
+    "title": "1  Introduction",
+    "section": "",
+    "text": "This is a book created from markdown and executable code.\nSee Knuth (1984) for additional discussion of literate programming.\n\n1 + 1\n\n[1] 2\n\n\n\n\n\n\nKnuth, Donald E. 1984. “Literate Programming.” Comput. J. 27 (2): 97–111. https://doi.org/10.1093/comjnl/27.2.97.",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
+    ]
+  },
+  {
+    "objectID": "prob.html",
+    "href": "prob.html",
+    "title": "2  Xác suất",
+    "section": "",
+    "text": "2.1 Nguồn gốc\nLý thuyết xác suất ra đời để giải quyết một vụ tranh chấp trong cờ bạc. Vấn đề cụ thể khai sinh ra lĩnh vực này được gọi là “Bài toán Chia điểm” (Problem of Points).\nNăm 1654, nhà văn kiêm tay cờ bạc Antoine Gombaud viết thư cho nhà toán học Blaise Pascal để hỏi cách giải quyết một ván bài dang dở:\nCâu hỏi: Làm sao chia 100$ cho công bằng?\nTại sao đây là một bài toán khó?\nVào thời đó, con người chưa biết cách xử lý “tương lai” bằng toán học. Có người đề nghị: “A được 2 điểm, B được 1 điểm. Vậy chia 100$ làm 3, A được 67$, B được 33$.” Cách này không công bằng vì chỉ nhìn vào quá khứ mà phớt lờ lợi thế của A: A chỉ cần thắng thêm đúng 1 ván là xong, trong khi B phải thắng liên tiếp 2 ván.\nPascal thấy bài toán này rất thú vị và gửi nó cho nhà toán học Pierre de Fermat. Họ giải quyết vấn đề bằng cách thay đổi góc nhìn. Thay vì nhìn vào quá khứ (những gì đã xảy ra trong ván bài), họ nhìn vào tương lai (các khả năng sẽ xảy ra của trò chơi).\nLời giải:\nFermat tưởng tượng xem trò chơi có thể diễn ra như thế nào nếu tiếp tục chơi cho đến cùng. Trò chơi sẽ kết thúc tối đa trong 2 ván nữa (vì A thắng 1 ván là xong, hoặc B thắng 2 ván là xong). Để cho công bằng, ta cho A và B chơi thêm 2 ván.\nCó 4 kịch bản của 2 ván này:\nKết quả:\nNếu tiếp tục chơi, chỉ có 4 kịch bản có thể xảy ra, trong đó A thắng 3 lần, B thắng 1 lần. Vậy khả năng A thắng là 3/4 trường hợp, và B thắng 1/4 trường hợp. Vậy A nên được chia 3/4 của 100$ là 75$, và B được chia 25$.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Xác suất</span>"
+    ]
+  },
+  {
+    "objectID": "prob.html#nguồn-gốc",
+    "href": "prob.html#nguồn-gốc",
+    "title": "2  Xác suất",
+    "section": "",
+    "text": "Hai người A và B chơi một trò hoàn toàn may rủi (ví dụ tung đồng xu, kéo-búa-bao), ai thắng 3 ván trước sẽ là người chiến thắng cuối cùng\nMỗi người đặt 50$, tổng là 100$, ai thắng sẽ được toàn bộ tiền thưởng 100$\nTrò chơi phải dừng đột ngột khi A đang dẫn trước 2-1\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nVán 1\nVán 2\nChung cuộc\nTỉ số A:B\n\n\n\n\nA thắng\nA thắng\nA thắng\n4-1\n\n\nB thắng\nA thắng\n3-2\n\n\nB thắng\nA thắng\nA thắng\n3-2\n\n\nB thắng\nB thắng\n2-3",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Xác suất</span>"
+    ]
+  },
+  {
+    "objectID": "prob.html#định-nghĩa",
+    "href": "prob.html#định-nghĩa",
+    "title": "2  Xác suất",
+    "section": "2.2 Định nghĩa",
+    "text": "2.2 Định nghĩa\nTrong bài toán trên, khả năng thắng cuộc chính là xác suất.\nXác suất (Probability): là một con số nằm trong khoảng từ 0 đến 1, dùng để đo lường khả năng xảy ra của một sự kiện.\n\n0 = chắc chắn không xảy ra\n1 = chắc chắn sẽ xảy ra\n\nCó 2 cách tiếp cận xác suất:\n\nTần suất (frequentist):\n\n\\[\\text{Xác suất} = \\frac{\\text{Số lần sự kiện xảy ra}}{\\text{Tổng số lần quan sát}}\\]\n\nNiềm tin (degree of belief, Bayesian): mức độ tin tưởng của người đánh giá về khả năng xảy ra của sự kiện.",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Xác suất</span>"
+    ]
+  },
+  {
+    "objectID": "prob.html#các-khái-niệm-cơ-bản",
+    "href": "prob.html#các-khái-niệm-cơ-bản",
+    "title": "2  Xác suất",
+    "section": "2.3 Các khái niệm cơ bản",
+    "text": "2.3 Các khái niệm cơ bản\n\n2.3.1 Phép thử ngẫu nhiên (random experiment)\nLà một thử nghiệm mà chúng ta không biết trước kết quả cho đến khi nó thực sự diễn ra.\nVí dụ: tung đồng xu (không biết sẽ ra mặt sấp hay mặt ngửa), làm xét nghiệm cho một người (không biết là âm tính hay dương tính)\n\n\n2.3.2 Không gian mẫu (sample space \\(\\Omega\\))\nLà tập hợp chứa tất cả các kết quả có thể xảy ra của một phép thử ngẫu nhiên, mỗi kết quả liệt kê đúng một lần duy nhất.\nVí dụ: không gian mẫu của tung đồng xu là \\(\\Omega = \\text{{sấp, ngửa}}\\)\nKhông gian mẫu là 1 tập hợp, nên có thể sử dụng các phép toán của tập hợp cho không gian mẫu (\\(\\cup\\) hay \\(\\cap\\)).\n\n\n2.3.3 Điểm mẫu (sample point)\nLà một phần tử của không gian mẫu.\nVí dụ: không gian mẫu của tung đồng xu là \\(\\Omega = \\text{{sấp, ngửa}}\\) thì sấp hoặc ngửa là một điểm mẫu.\n\n\n2.3.4 Kết quả (outcome)\nLà điểm mẫu quan sát được, khi chúng ta cho tiến hành phép thử ngẫu nhiên.\n\n\n2.3.5 Biến cố/Sự kiện (event)\nLà một tập hợp con của không gian mẫu. Bất kỳ tập hợp nào chứa các kết quả đều tạo thành một biến cố.\nVí dụ: Tung một đồng xu hai lần. Không gian mẫu: \\(\\Omega = \\{ SS, SN, NS, NN \\}\\).\nGọi biến cố \\(A\\) là “có đúng một mặt ngửa”, \\(A = \\{ SN, NS \\}\\).\n\\(A\\) là một tập con của \\(\\Omega\\) (\\(A \\subset \\Omega\\)).\nBiến cố \\(A\\) được gọi là xảy ra (occurs) nếu chúng ta quan sát được một kết quả là phần tử của tập hợp \\(A\\).\n\n\n2.3.6 Ví dụ\n\nPhép thử ngẫu nhiên: “Tung một đồng xu hai lần”\nKhông gian mẫu: \\(\\Omega = \\{ SS, SN, NS, NN \\}\\)\nBiến cố “có đúng một mặt ngửa”: \\(A = \\{ SN, NS \\}\\)\nChúng ta thực sự tiến hành phép thử ngẫu nhiên:\n\n\nset.seed(27)\ncoin &lt;- c(\"S\", \"N\")\n\nsample(coin, size = 2, replace = TRUE)\n\n[1] \"S\" \"N\"\n\n\n\nKết quả thu được là \\(SN\\), là phần tử của \\(A = \\{ SN, NS \\}\\), vậy ta nói lần thử này biến cố \\(A\\) có xảy ra\nXác suất là con số thể hiện khả năng xảy ra của từng điểm mẫu hay biến cố trong \\(\\Omega\\)\n\nXác suất luôn gắn liền với không gian mẫu. Xác suất sẽ thay đổi trong các không gian mẫu khác nhau.\n\n\n\n\n\n\nBài tập\n\n\n\nTìm một ví dụ phép thử ngẫu nhiên khác và mô tả lại các định nghĩa này.\n\n\n\n\n2.3.7 Rời rạc (discrete)\nLà khi có “khoảng trống” giữa các giá trị.\nVí dụ: 1, 2, 3…\n\n\n\n2.3.8 Liên tục (continuous)\nLà khi không có khoảng trống giữa các giá trị.\nVí dụ: \\([0,1]\\)\n\n\n\n2.3.9 Xung khắc (mutually exclusive)\nHai biến cố \\(A\\) và \\(B\\) được gọi là xung khắc (mutually exclusive) nếu giao của chúng là tập rỗng:\n\\[A \\cap B = \\emptyset\\]\nNghĩa là biến cố \\(A\\) và \\(B\\) không thể cùng xảy ra. Nếu \\(A\\) xảy ra thì \\(B\\) không thể xảy ra, và ngược lại.\n\n\n\n2.3.10 Phân phối xác suất (probability distribution)\nLà một hàm số (function) thể hiện xác suất của mọi tập hợp con của không gian mẫu \\(\\Omega\\).\nPhân phối xác suất bắt buộc phải thỏa 3 điều kiện sau:\n\n\\(\\mathbb{P}(\\Omega) = 1\\)\n\\(0 \\leq \\mathbb{P}(A) \\leq 1\\) với mọi biến cố \\(A\\)\nNếu các biến số \\(A_1\\), \\(A_2\\), …, \\(A_n\\) xung khắc, thì:\n\n\\[\\mathbb{P}(A_1 \\cup A_2 \\cup \\cdots \\cup A_n) = \\mathbb{P}(A_1) + \\mathbb{P}(A_2) + \\cdots + \\mathbb{P}(A_n)\\]\n\n\n2.3.11 Biến ngẫu nhiên (random variable)\nLà một hàm số (function) gán một số thực cho mỗi điểm mẫu trong không gian mẫu của một phép thử ngẫu nhiên.\n\\[X: \\Omega \\rightarrow \\mathbb{R}\\]",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Xác suất</span>"
+    ]
+  },
+  {
+    "objectID": "distr-shape.html",
+    "href": "distr-shape.html",
+    "title": "3  Hình dạng của phân phối",
+    "section": "",
+    "text": "3.1 Moments\nXác suất của mỗi giá trị trong một phân phối được xác định bằng hàm mật độ xác suất (với biến liên tục) hoặc hàm khối lượng xác suất (với biến rời rạc).\nHình dạng của phân phối là hình dạng của các hàm số này, được xác định bằng những giá trị gọi là mô-men (moment) của hàm. Thuật ngữ này được mượn từ Vật lý: mô-men (hay mô-men lực) còn gọi là lực xoắn, là lực làm quay một vật thể quanh một điểm tựa. Tưởng tượng một cái mỏ lết quay quanh một con ốc.\nTrong thống kê, moment đo lường vị trí của phân phối so với một điểm mốc. Đối với một biến ngẫu nhiên \\(X\\), moment cấp \\(n\\) quanh điểm \\(a\\) (the \\(n\\)-th moment about \\(a\\)) là:\n\\[E[(X - a)^n]\\]\nCó 2 loại moment:\nCấp của moment có thể từ 0 đến \\(\\infty\\). Nếu biết hết toàn bộ các moment sẽ có thể vẽ lại chính xác hình dạng của đồ thị phân phối đó. Chúng ta thường quan tâm tới 4 loại moment sau:\n*Độ lệch và Độ nhọn thường được chuẩn hóa (standardised) bằng cách chia cho độ lệch chuẩn \\(\\sigma\\), ý nghĩa là gấp bao nhiêu lần độ lệch chuẩn.",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Hình dạng của phân phối</span>"
+    ]
+  },
+  {
+    "objectID": "distr-shape.html#moments",
+    "href": "distr-shape.html#moments",
+    "title": "3  Hình dạng của phân phối",
+    "section": "",
+    "text": "Moment gốc (raw moment, xoay quanh điểm 0): khi \\(a = 0\\), moment là \\(E[X^n]\\).\nMoment tập trung (central moment, xoay quanh giá trị trung bình): khi \\(a = E[X]\\), moment là \\(E[(X - E[X])^n]\\).\n\n\n\n\n\n\n\n\n\n\n\nLoại moment\nKí hiệu\nTên thường gọi\nÝ nghĩa\n\n\n\n\nGốc cấp 1\n\\(E[X]\\)\nKỳ vọng (Mean)\nVị trí (tâm của phân phối)\n\n\nTập trung cấp 2\n\\(E[(X - E[X])^2]\\)\nPhương sai (Variance)\nĐộ phân tán (dữ liệu biến động thế nào)\n\n\nTập trung cấp 3\n\\(E[(X - E[X])^3]\\)\nĐộ lệch (Skewness)*\nTính bất đối xứng (bên nào có đuôi dài hơn)\n\n\nTập trung cấp 4\n\\(E[(X - E[X])^4]\\)\nĐộ nhọn (Kurtosis)*\nĐộ dày của đuôi\n\n\n\n\n\n3.1.1 Moment gốc cấp 1\nCho biết vị trí trọng tâm của phân phối nằm ở đâu so với điểm 0.\n\\[E[X] = \\frac{\\sum^N_{i = 1}x_i}{N} = \\sum^N_{i = 1}x_i \\mathbb{P}(x_i)\\]\n\n\n3.1.2 Moment tập trung cấp 2\nCho biết khoảng cách của từng giá trị trong phân phối so với giá trị trung bình. Phép bình phương giúp ngăn chặn các độ lệch âm và dương triệt tiêu lẫn nhau.\n\\[E[(X - E[X])^2] = E[X^2] - (E[X])^2\\]\n\n\n3.1.3 Moment tập trung cấp 3\nThường được gọi là Độ lệch (Skewness). Nó phản ánh sự không đối xứng.\n\\[E\\left[\\left(\\frac{X - E[X]}{\\sigma}\\right)^3\\right]\\]\nLũy thừa bậc 3 giữ nguyên dấu (số âm mũ 3 vẫn là âm)\n\n\n3.1.4 Moment tập trung cấp 4\nThường được gọi là Độ nhọn (Kurtosis). Tên gọi này bắt nguồn từ tiếng Hy Lạp: κυρτός - kyrtos, nghĩa là “cong, vòm”.\n\\[E\\left[\\left(\\frac{X - E[X]}{\\sigma}\\right)^4\\right]\\]\nLũy thừa bậc 4 làm cho những giá trị nhỏ (gần trung bình) trở nên siêu nhỏ, và những giá trị lớn (xa trung bình - outliers) trở nên lớn hơn nhiều lần. Moment này càng lớn thì đuôi của phân phối càng dày, nghĩa là xác suất xảy ra các sự kiện cực đoan càng lớn.\nEstimate\nEstimand\nEstimator",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Hình dạng của phân phối</span>"
+    ]
+  },
+  {
+    "objectID": "distr-d.html",
+    "href": "distr-d.html",
+    "title": "4  Phân phối rời rạc",
+    "section": "",
+    "text": "4.1 Phép thử Bernoulli (Bernoulli trial, hay binomial trial)\nLà một lần thử nghiệm duy nhất, không gian mẫu chỉ có đúng 2 kết quả: Thành công (Success) hoặc Thất bại (Failure)\nVí dụ: tung đồng xu (mặt sấp, mặt ngửa), xét nghiệm một ca nghi ngờ (dương tính, âm tính)",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Phân phối rời rạc</span>"
+    ]
+  },
+  {
+    "objectID": "distr-d.html#chuỗi-phép-thử-bernoulli-bernoulli-process",
+    "href": "distr-d.html#chuỗi-phép-thử-bernoulli-bernoulli-process",
+    "title": "4  Phân phối rời rạc",
+    "section": "4.2 Chuỗi phép thử Bernoulli (Bernoulli process)",
+    "text": "4.2 Chuỗi phép thử Bernoulli (Bernoulli process)\nKhi ta thực hiện phép thử Bernoulli nhiều lần liên tiếp (ví dụ: tung một đồng xu nhiều lần, dùng một loại xét nghiệm để test nhiều người). Chuỗi Bernoulli chuẩn cần thỏa mãn 2 điều kiện:\n\nĐộc lập (Independent): Kết quả của lần thử này không ảnh hưởng đến lần thử khác.\nXác suất không đổi: Xác suất thành công (\\(p\\)) phải giống hệt nhau ở mọi lần thử.\n\nTừ chuỗi Bernoulli có 3 phân phối thống kê sau:",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Phân phối rời rạc</span>"
+    ]
+  },
+  {
+    "objectID": "distr-d.html#phân-phối-nhị-nhức-binomial-distribution",
+    "href": "distr-d.html#phân-phối-nhị-nhức-binomial-distribution",
+    "title": "4  Phân phối rời rạc",
+    "section": "4.3 Phân phối nhị nhức (binomial distribution)",
+    "text": "4.3 Phân phối nhị nhức (binomial distribution)",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Phân phối rời rạc</span>"
+    ]
+  },
+  {
+    "objectID": "summary.html",
+    "href": "summary.html",
+    "title": "5  Summary",
+    "section": "",
+    "text": "In summary, this book has no content whatsoever.\n\n1 + 1\n\n[1] 2",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Summary</span>"
+    ]
+  },
+  {
+    "objectID": "references.html",
+    "href": "references.html",
+    "title": "References",
+    "section": "",
+    "text": "Knuth, Donald E. 1984. “Literate Programming.” Comput.\nJ. 27 (2): 97–111. https://doi.org/10.1093/comjnl/27.2.97.",
+    "crumbs": [
+      "References"
+    ]
+  }
+]
