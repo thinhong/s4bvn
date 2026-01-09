@@ -16,8 +16,6 @@ Bạn quyết định đi date với từng người để thu thập dữ liệ
 - Phần được tô màu là điểm buổi date của từng người, trong thống kê Bayesian gọi là Hàm khả năng (Likelihood), bạn dùng Likelihood để quyết định chọn hay không chọn người này.
 - Tư duy Bayes: Chúng ta so sánh **Diện tích tô màu** của A so với B. Đây là Xác suất hậu nghiệm (Posterior).
 
-::: {layout-ncol=2}
-
 ```{ojs}
 //| echo: false
 
@@ -159,5 +157,3 @@ Plot.plot({
   ]
 })
 ```
-
-:::
