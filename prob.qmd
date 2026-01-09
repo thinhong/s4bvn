@@ -138,79 +138,94 @@ Ví dụ: 1, 2, 3...
 ```{ojs}
 //| echo: false
 
-viewof prob = Inputs.range([0, 1], {
+viewof prob_radial_flood = Inputs.range([0, 1], {
   label: "Xác suất", 
   step: 0.01, 
-  value: 0
+  value: 0.3
 })
 
-// 1. Generate static positions for 100 people ONCE. 
-// We use a fixed seed (or just generate them outside the reactive block) 
-// so the people don't move when the slider changes.
-people = {
-  const n = 100;
-  const rng = d3.randomLcg(42); // Fixed seed for reproducibility
-  return Array.from({length: n}, (_, i) => ({
+// 1. CONFIGURATION
+radial_config_flood = ({
+  center: {x: 0.5, y: 0.2}, 
+  n: 100
+})
+
+// 2. GENERATE STATIC PEOPLE
+people_radial_flood = {
+  const rng = d3.randomLcg(42); 
+  return Array.from({length: radial_config_flood.n}, (_, i) => ({
     id: i,
-    x: rng(),
-    y: rng() * 0.4 // Scale Y down to ensure width > height (spreads points out horizontally)
+    x: rng(), 
+    y: rng() * 0.4 
   }));
 }
 
-// 2. Reactive Data: Update the status when 'prob' changes
-currentData = people.map(p => ({
-  ...p,
-  status: p.id < (prob * 100) ? "Selected" : "Not selected"
-}))
+// 3. REACTIVE SELECTION
+currentData_radial_flood = {
+  const cutoff = Math.round(prob_radial_flood * 100);
+  
+  const cx = radial_config_flood.center.x;
+  const cy = radial_config_flood.center.y;
+  
+  const withDist = people_radial_flood.map(p => {
+    const dx = p.x - cx;
+    const dy = p.y - cy;
+    return { ...p, dist: dx*dx + dy*dy }; 
+  });
+  
+  const sorted = withDist.slice().sort((a, b) => a.dist - b.dist);
+  const selectedSet = new Set(sorted.slice(0, cutoff).map(d => d.id));
 
-// 3. Plot
+  return people_radial_flood.map(p => ({
+    ...p,
+    status: selectedSet.has(p.id) ? "Selected" : "Not selected"
+  }));
+}
+
+// 4. PLOT
 Plot.plot({
   width: 800,
-  height: 320, // Maintains the wide aspect ratio
+  height: 320,
   x: { axis: null },
   y: { axis: null },
-  color: {
-    domain: ["Selected", "Not selected"],
-    range: ["#4e79a7", "white"]
-  },
+  
   marks: [
-    // The Voronoi layer (the colored territories)
-    Plot.voronoi(currentData, {
+    Plot.frame({stroke: "#ccc"}),
+
+    // --- DENSITY (The Flood) ---
+    Plot.density(currentData_radial_flood, {
+      filter: d => d.status === "Selected",
       x: "x",
       y: "y",
-      fill: "status",
-      stroke: "white", // White borders between cells
-      strokeWidth: 1
+      fill: "#4e79a7",
+      fillOpacity: 0.3,
+      
+      // KEY CHANGES HERE:
+      bandwidth: 50,    // High bandwidth = Very smooth, merging clusters
+      thresholds: [0.005] // Low threshold = Draws even faint outer edges
     }),
-    
-    // The Dots (the individuals)
-    Plot.dot(currentData, {
+
+    // --- DOTS ---
+    Plot.dot(currentData_radial_flood, {
       x: "x",
       y: "y",
-      fill: "black",
-      r: 5, // Small dots to mark the center
+      fill: d => d.status === "Selected" ? "#4e79a7" : "#e0e0e0",
+      r: 4,
+      fillOpacity: 0.9
     }),
     
-    // Text Label
-    Plot.text([prob], {
+    // --- LABELS ---
+    Plot.text([prob_radial_flood], {
       frameAnchor: "bottom-left",
-      dx: 10,
-      dy: -10,
+      dx: 10, dy: -10,
       text: d => `Số người: ${Math.round(d * 100)}/100`, 
-      fill: "black",
-      stroke: "white",
-      strokeWidth: 3,
-      fontSize: 16, 
-      fontWeight: "bold"
+      fill: "black", stroke: "white", strokeWidth: 3,
+      fontSize: 16, fontWeight: "bold"
     }),
+
     Plot.text(["Ω"], {
-      frameAnchor: "top-right",
-      dx: -15, // Move slightly left from the edge
-      dy: 15,  // Move slightly down from the top
-      fontSize: 30,
-      fontWeight: "bold",
-      fill: "black",
-      stroke: "white", strokeWidth: 3
+      frameAnchor: "top-right", dx: -15, dy: 15, 
+      fontSize: 30, fontWeight: "bold", fill: "#999"
     })
   ]
 })
@@ -235,228 +250,73 @@ Nghĩa là biến cố $A$ và $B$ không thể cùng xảy ra. Nếu $A$ xảy 
 ```{ojs}
 //| echo: false
 
-// Slider for P(A)
-prob_a_v = 0.15
+// 1. INPUTS (Allow full range 0-1 to prevent resetting)
+viewof input_a_me = Inputs.range([0, 1], {
+  value: 0.20,
+  step: 0.01,
+  label: "P(A)"
+})
 
-// Slider for P(B). Max is constrained so A+B <= 1
-viewof prob_b_v = Inputs.range([0, 1 - prob_a_v], {
-  value: Math.min(0.15, 1 - prob_a_v),
+viewof input_b_me = Inputs.range([0, 1], {
+  value: 0.20,
   step: 0.01,
   label: "P(B)"
 })
 
-// 1. CONFIGURATION (Grouped to fix Syntax Error)
-sim_config = ({
-  N: 1500,                    // Total points
-  centerA: {x: 0.25, y: 0.5}, // Center of Shape A
-  centerB: {x: 0.75, y: 0.5}  // Center of Shape B
-})
-
-// 2. GENERATE SUBSTRATE POINTS (Static)
-substratePoints = {
-  const rng = d3.randomLcg(42); 
-  const points = [];
-  
-  for(let i = 0; i < sim_config.N; i++) {
-    const px = rng();
-    const py = rng();
-    
-    // Calculate squared distances (Simple math to avoid syntax errors)
-    const dxA = px - sim_config.centerA.x;
-    const dyA = py - sim_config.centerA.y;
-    const dA = (dxA * dxA) + (dyA * dyA);
-    
-    const dxB = px - sim_config.centerB.x;
-    const dyB = py - sim_config.centerB.y;
-    const dB = (dxB * dxB) + (dyB * dyB);
-    
-    points.push({
-      id: i,
-      x: px,
-      y: py,
-      distA: dA,
-      distB: dB
-    });
-  }
-  
-  return points;
-}
-
-// 3. ASSIGN POINTS TO EVENTS (Reactive)
-classifiedPoints = {
-  const targetCountA = Math.round(sim_config.N * prob_a_v);
-  const targetCountB = Math.round(sim_config.N * prob_b_v);
-
-  // Create a clean copy of points
-  let points = substratePoints.map(p => ({
-    id: p.id,
-    x: p.x,
-    y: p.y,
-    distA: p.distA,
-    distB: p.distB,
-    status: "Ω"
-  }));
-
-  // --- Assign A ---
-  // Sort by distance to A
-  const sortedByA = points.slice().sort((a, b) => a.distA - b.distA);
-  
-  // Mark the top A candidates using a Set for speed
-  const setA = new Set(sortedByA.slice(0, targetCountA).map(d => d.id));
-  
-  for(let i = 0; i < points.length; i++) {
-    if (setA.has(points[i].id)) points[i].status = "A";
-  }
-
-  // --- Assign B (Mutual Exclusivity Logic) ---
-  // Only look at points still marked "Ω"
-  let availableForB = points.filter(p => p.status === "Ω");
-  
-  // Sort available points by distance to B
-  availableForB.sort((a, b) => a.distB - b.distB);
-  
-  // Pick top N points
-  const actualCountB = Math.min(targetCountB, availableForB.length);
-  const setB = new Set(availableForB.slice(0, actualCountB).map(d => d.id));
-  
-  for(let i = 0; i < points.length; i++) {
-    if (setB.has(points[i].id)) points[i].status = "B";
-  }
-
-  return points;
-}
-
-// 4. THE PLOT
-Plot.plot({
-  width: 450,
-  height: 450,
-  x: {axis: null, domain: [0,1]},
-  y: {axis: null, domain: [0,1]},
-  color: {
-    domain: ["A", "B", "Ω"],
-    range: ["#6ecae1", "#f7941d", "#f0f0f0"]
-  },
-
-  marks: [
-    // Frame
-    Plot.frame({stroke: "#ccc"}),
-
-    // The Voronoi Shapes
-    Plot.voronoi(classifiedPoints, {
-      x: "x",
-      y: "y",
-      fill: "status",
-      stroke: "status",
-      strokeWidth: 0.5,
-      tip: true,
-      title: d => `Region: ${d.status}`
-    }),
-
-    // The Centers (Seeds)
-    Plot.dot([sim_config.centerA], {x: "x", y: "y", fill: "white", stroke: "#6ecae1", strokeWidth: 3, r: 6}),
-    Plot.dot([sim_config.centerB], {x: "x", y: "y", fill: "white", stroke: "#f7941d", strokeWidth: 3, r: 6}),
-    
-    // Labels
-    Plot.text([sim_config.centerA], {x: "x", y: "y", text: ["P(A) = 0.15"], fill: "black", fontSize: 16, fontWeight: "bold", dy: 18, stroke: "white", strokeWidth: 3}),
-    Plot.text([sim_config.centerB], {x: "x", y: "y", text: [`P(B) = ${prob_b_v.toFixed(2)}`], fill: "black", fontSize: 16, fontWeight: "bold", dy: 18, stroke: "white", strokeWidth: 3}),
-
-    // Omega label
-    Plot.text(["Ω"], {frameAnchor: "top-right", dx: -10, dy: 10, fill: "black", fontSize: 20, fontWeight: "bold", stroke: "white", strokeWidth: 3}),
-
-    // Total Probability Label
-    Plot.text([prob_a_v + prob_b_v], {
-       frameAnchor: "bottom", dy: -10,
-       text: d => `P(A ∪ B) = ${d.toFixed(2)}`,
-       fontSize: 16, fontWeight: "bold", fill: "black", stroke: "white", strokeWidth: 3
-    })
-  ]
-})
-```
-
-```{ojs}
-//| echo: false
-
-viewof prob_a_ov = Inputs.range([0, 1], {
-  value: 0.40,
-  step: 0.01,
-  label: "P(A) - Blue Area"
-})
-
-viewof prob_b_ov = Inputs.range([0, 1], {
-  value: 0.40,
-  step: 0.01,
-  label: "P(B) - Orange Area"
-})
+// 2. LOGIC (Clamp the values here)
+// This calculates the "Actual" probability used in the plot.
+// If A+B > 1, we squeeze B to fit the remaining space.
+prob_a_safe = input_a_me
+prob_b_safe = Math.min(input_b_me, 1 - input_a_me)
 
 // 1. CONFIGURATION
-sim_config_ov = ({
+sim_config_me2 = ({
   N: 1500,                    
   centerA: {x: 0.3, y: 0.5}, 
   centerB: {x: 0.7, y: 0.5}  
 })
 
-// 2. GENERATE POINTS (Static background)
-substratePoints_ov = {
+// 2. GENERATE POINTS (Static)
+substratePoints_me2 = {
   const rng = d3.randomLcg(42); 
   const points = [];
-  
-  for(let i = 0; i < sim_config_ov.N; i++) {
+  for(let i = 0; i < sim_config_me2.N; i++) {
     const px = rng();
     const py = rng();
-    
-    // Distances
-    const dxA = px - sim_config_ov.centerA.x;
-    const dyA = py - sim_config_ov.centerA.y;
-    const dA = (dxA * dxA) + (dyA * dyA);
-    
-    const dxB = px - sim_config_ov.centerB.x;
-    const dyB = py - sim_config_ov.centerB.y;
-    const dB = (dxB * dxB) + (dyB * dyB);
-    
+    const dA = (px - sim_config_me2.centerA.x)**2 + (py - sim_config_me2.centerA.y)**2;
+    const dB = (px - sim_config_me2.centerB.x)**2 + (py - sim_config_me2.centerB.y)**2;
     points.push({id: i, x: px, y: py, distA: dA, distB: dB});
   }
   return points;
 }
 
-// 3. CLASSIFY LOGIC (Allow Overlap)
-classifiedPoints_ov = {
-  const targetCountA = Math.round(sim_config_ov.N * prob_a_ov);
-  const targetCountB = Math.round(sim_config_ov.N * prob_b_ov);
+// 3. CLASSIFY LOGIC (Uses Safe/Clamped Probabilities)
+classifiedPoints_me2 = {
+  const targetCountA = Math.round(sim_config_me2.N * prob_a_safe);
+  const targetCountB = Math.round(sim_config_me2.N * prob_b_safe);
 
-  // Copy points
-  let points = substratePoints_ov.map(p => ({...p, isA: false, isB: false, status: "Ω"}));
-
-  // --- SELECT A (Top P(A) closest to Center A) ---
-  const sortedByA = points.slice().sort((a, b) => a.distA - b.distA);
+  // --- SELECT A ---
+  const sortedByA = substratePoints_me2.slice().sort((a, b) => a.distA - b.distA);
   const idsA = new Set(sortedByA.slice(0, targetCountA).map(d => d.id));
 
-  // --- SELECT B (Top P(B) closest to Center B) ---
-  const sortedByB = points.slice().sort((a, b) => a.distB - b.distB);
-  const idsB = new Set(sortedByB.slice(0, targetCountB).map(d => d.id));
+  // --- SELECT B (Mutually Exclusive) ---
+  const availableForB = substratePoints_me2.filter(p => !idsA.has(p.id));
+  availableForB.sort((a, b) => a.distB - b.distB);
+  const idsB = new Set(availableForB.slice(0, targetCountB).map(d => d.id));
 
-  // --- COMBINE STATUS ---
-  let countOverlap = 0;
-  
-  for(let i = 0; i < points.length; i++) {
-    const p = points[i];
-    const inA = idsA.has(p.id);
-    const inB = idsB.has(p.id);
+  // --- ASSIGN STATUS ---
+  return substratePoints_me2.map(p => {
+    let status = "Ω";
+    if (idsA.has(p.id)) status = "A";
+    else if (idsB.has(p.id)) status = "B";
 
-    if (inA && inB) {
-      p.status = "A & B"; // The Intersection
-      countOverlap++;
-    } else if (inA) {
-      p.status = "A Only";
-    } else if (inB) {
-      p.status = "B Only";
-    } else {
-      p.status = "Ω";
-    }
-  }
-
-  // Calculate actual overlap probability for the label
-  points.overlapProb = countOverlap / sim_config_ov.N;
-  return points;
+    return { 
+      ...p, 
+      status,
+      isA: status === "A",
+      isB: status === "B"
+    };
+  });
 }
 
 // 4. THE PLOT
@@ -466,59 +326,199 @@ Plot.plot({
   x: {axis: null, domain: [0,1]},
   y: {axis: null, domain: [0,1]},
   
-  // COLOR PALETTE
-  color: {
-    domain: ["A Only", "B Only", "A & B", "Ω"],
-    // Blue, Orange, Dark Purple (Blend), Light Grey
-    range: ["#6ecae1", "#f7941d", "#5D4037", "#f5f5f5"]
-  },
-
   marks: [
     Plot.frame({stroke: "#ccc"}),
 
-    // The Voronoi Layer
-    Plot.voronoi(classifiedPoints_ov, {
-      x: "x",
-      y: "y",
-      fill: "status",
-      stroke: "none",
-      strokeWidth: 0.2, // Thin strokes for smoother blend look
-      
-      // OPACITY TRICK: Make the "Only" regions transparent, 
-      // but keep the overlap (A & B) darker/solid to emphasize it.
-      fillOpacity: d => d.status === "A & B" ? 0.9 : 0.6,
-      
-      tip: true
+    // --- DENSITY LAYER A ---
+    Plot.density(classifiedPoints_me2, {
+      x: "x", y: "y",
+      fill: "#6ecae1",
+      fillOpacity: 0.3,
+      thresholds: [0.1],
+      bandwidth: 15,
+      weight: d => d.isA ? 1 : (d.isB ? -1 : 0)
     }),
 
-    // Centers
-    Plot.dot([sim_config_ov.centerA], {x: "x", y: "y", fill: "black", r: 3}),
-    Plot.dot([sim_config_ov.centerB], {x: "x", y: "y", fill: "black", r: 3}),
-
-    // Labels
-    Plot.text([sim_config_ov.centerA], {
-      x: "x", y: "y", 
-      text: [`P(A)=${prob_a_ov.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
-    }),
-    Plot.text([sim_config_ov.centerB], {
-      x: "x", y: "y", 
-      text: [`P(B)=${prob_b_ov.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+    // --- DENSITY LAYER B ---
+    Plot.density(classifiedPoints_me2, {
+      x: "x", y: "y",
+      fill: "#f7941d",
+      fillOpacity: 0.3,
+      thresholds: [0.1],
+      bandwidth: 15,
+      weight: d => d.isB ? 1 : (d.isA ? -1 : 0)
     }),
 
-    // Overlap Stat (The new math)
-    Plot.text([0.5], {
-       frameAnchor: "bottom", dy: -10,
-       text: d => `Intersection P(A ∩ B): ${classifiedPoints_ov.overlapProb.toFixed(3)}`,
-       fontSize: 16, fontWeight: "bold", fill: "#5D4037", stroke: "white", strokeWidth: 4
-    }),
+    // --- LABELS ---
+    Plot.dot([sim_config_me2.centerA], {x: "x", y: "y", fill: "black", r: 3}),
+    Plot.dot([sim_config_me2.centerB], {x: "x", y: "y", fill: "black", r: 3}),
     
-    // Omega Label
-    Plot.text(["Ω"], {frameAnchor: "top-right", dx: -10, dy: 10, fill: "#999", fontSize: 20, fontWeight: "bold"})
+    // Use 'prob_a_safe' for the label so it matches the plot
+    Plot.text([sim_config_me2.centerA], {
+      x: "x", y: "y", text: [`P(A)=${prob_a_safe.toFixed(2)}`], 
+      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+    }),
+    Plot.text([sim_config_me2.centerB], {
+      x: "x", y: "y", text: [`P(B)=${prob_b_safe.toFixed(2)}`], 
+      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+    }),
+
+    Plot.text(["Ω"], {frameAnchor: "top-right", dx: -10, dy: 10, fill: "#999", fontSize: 20, fontWeight: "bold"}),
+    
+    // Total & Warning Label
+    Plot.text([prob_a_safe + prob_b_safe], {
+       frameAnchor: "bottom", dy: -10,
+       text: d => {
+         const isCapped = (input_a_me + input_b_me > 1.001);
+         return `P(A ⋃ B) = ${d.toFixed(2)} ${isCapped ? "(Capped!)" : ""}`
+       },
+       fontSize: 16, 
+       fontWeight: "bold", 
+       fill: (input_a_me + input_b_me > 1.001) ? "#d32f2f" : "#555", // Red if capped
+       stroke: "white", 
+       strokeWidth: 4
+    })
   ]
 })
 ```
+
+
+
+```{ojs}
+//| echo: false
+
+viewof prob_a_ov = Inputs.range([0, 1], {
+  value: 0.30,
+  step: 0.01,
+  label: "P(A)"
+})
+
+viewof prob_b_ov = Inputs.range([0, 1], {
+  value: 0.20,
+  step: 0.01,
+  label: "P(B)"
+})
+
+// 1. CONFIGURATION (Same as before)
+sim_config_dens = ({
+  N: 5000,                    
+  centerA: {x: 0.3, y: 0.5}, 
+  centerB: {x: 0.7, y: 0.5}  
+})
+
+// 2. GENERATE POINTS (Same as before)
+substratePoints_dens = {
+  const rng = d3.randomLcg(42); 
+  const points = [];
+  for(let i = 0; i < sim_config_dens.N; i++) {
+    const px = rng();
+    const py = rng();
+    const dA = (px - sim_config_dens.centerA.x)**2 + (py - sim_config_dens.centerA.y)**2;
+    const dB = (px - sim_config_dens.centerB.x)**2 + (py - sim_config_dens.centerB.y)**2;
+    points.push({id: i, x: px, y: py, distA: dA, distB: dB});
+  }
+  return points;
+}
+
+// 3. CLASSIFY LOGIC (Same "Overlap" Logic)
+classifiedPoints_dens = {
+  const targetCountA = Math.round(sim_config_dens.N * prob_a_ov);
+  const targetCountB = Math.round(sim_config_dens.N * prob_b_ov);
+
+  // A Selection
+  const sortedByA = substratePoints_dens.slice().sort((a, b) => a.distA - b.distA);
+  const idsA = new Set(sortedByA.slice(0, targetCountA).map(d => d.id));
+
+  // B Selection
+  const sortedByB = substratePoints_dens.slice().sort((a, b) => a.distB - b.distB);
+  const idsB = new Set(sortedByB.slice(0, targetCountB).map(d => d.id));
+
+  // --- FIX: Count Total Overlap FIRST ---
+  let totalOverlapCount = 0;
+  substratePoints_dens.forEach(p => {
+    if (idsA.has(p.id) && idsB.has(p.id)) totalOverlapCount++;
+  });
+  
+  // Calculate the probability once
+  const finalOverlapProb = totalOverlapCount / sim_config_dens.N;
+
+  // Now create the array for the plot
+  const finalPoints = substratePoints_dens.map(p => {
+    const inA = idsA.has(p.id);
+    const inB = idsB.has(p.id);
+    
+    let status = "Ω";
+    if (inA && inB) status = "A & B";
+    else if (inA) status = "A Only";
+    else if (inB) status = "B Only";
+    
+    return { ...p, inA, inB, status };
+  });
+
+  // Attach the calculated probability to the array itself so the Plot can read it
+  finalPoints.overlapProb = finalOverlapProb;
+  
+  return finalPoints;
+}
+
+// 4. THE PLOT (New Density Style)
+Plot.plot({
+  width: 500,
+  height: 500,
+  x: {axis: null, domain: [0,1]},
+  y: {axis: null, domain: [0,1]},
+  
+  marks: [
+    Plot.frame({stroke: "#ccc"}),
+
+    // --- DENSITY LAYER A (Blue) ---
+    Plot.density(classifiedPoints_dens, {
+      x: "x", y: "y",
+      fill: "#6ecae1",
+      fillOpacity: 0.3, 
+      thresholds: [0.1], 
+      bandwidth: 15,      
+      // Points in A are +1, Points ONLY in B are -1 (Repulsive)
+      weight: d => d.inA ? 1 : (d.inB ? -1 : 0)
+    }),
+
+    // --- DENSITY LAYER B (Orange) ---
+    Plot.density(classifiedPoints_dens, {
+      x: "x", y: "y",
+      fill: "#f7941d",
+      fillOpacity: 0.3,
+      thresholds: [0.1],
+      bandwidth: 15,
+      // Points in B are +1, Points ONLY in A are -1
+      weight: d => d.inB ? 1 : (d.inA ? -1 : 0)
+    }),
+
+    // --- LABELS & CENTERS ---
+    Plot.dot([sim_config_dens.centerA], {x: "x", y: "y", fill: "black", r: 3}),
+    Plot.dot([sim_config_dens.centerB], {x: "x", y: "y", fill: "black", r: 3}),
+    
+    Plot.text([sim_config_dens.centerA], {
+      x: "x", y: "y", text: [`P(A)=${prob_a_ov.toFixed(2)}`], 
+      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+    }),
+    Plot.text([sim_config_dens.centerB], {
+      x: "x", y: "y", text: [`P(B)=${prob_b_ov.toFixed(2)}`], 
+      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+    }),
+
+    Plot.text(["Ω"], {frameAnchor: "top-right", dx: -10, dy: 10, fill: "#999", fontSize: 20, fontWeight: "bold"}),
+    
+    // --- FIX: Read the attached property from the data array ---
+    Plot.text([0.5], {
+       frameAnchor: "bottom", dy: -10,
+       text: [`P(A ⋂ B) = ${classifiedPoints_dens.overlapProb.toFixed(3)}`],
+       fontSize: 16, fontWeight: "bold", fill: "#5D4037", stroke: "white", strokeWidth: 4
+    })
+  ]
+})
+```
+
+
 
 
 ### Phân phối xác suất (probability distribution)
