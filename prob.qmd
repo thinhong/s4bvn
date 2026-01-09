@@ -5,7 +5,7 @@ format: html
 
 ## Nguồn gốc
 
-Lý thuyết xác suất ra đời để giải quyết một vụ tranh chấp trong cờ bạc. Vấn đề cụ thể khai sinh ra lĩnh vực này được gọi là "Bài toán Chia điểm" (Problem of Points).
+Lý thuyết xác suất ra đời để giải quyết một vấn đề trong cờ bạc. Vấn đề cụ thể khai sinh ra lĩnh vực này được gọi là "Bài toán Chia điểm" (Problem of Points).
 
 Năm 1654, nhà văn kiêm tay cờ bạc Antoine Gombaud viết thư cho nhà toán học Blaise Pascal để hỏi cách giải quyết một ván bài dang dở:
 
@@ -170,6 +170,8 @@ Phân phối xác suất bắt buộc phải thỏa 3 điều kiện sau:
 $$\mathbb{P}(A_1 \cup A_2 \cup \cdots \cup A_n) = \mathbb{P}(A_1) + \mathbb{P}(A_2) + \cdots + \mathbb{P}(A_n)$$
 
 ### Biến ngẫu nhiên (random variable)
+
+một biến thực có thể nhận các giá trị khác nhau với các xác suất khác nhau
 
 Là một hàm số (function) gán một **số thực** cho mỗi điểm mẫu trong không gian mẫu của một phép thử ngẫu nhiên.
 

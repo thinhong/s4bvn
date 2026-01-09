@@ -1,0 +1,163 @@
+---
+title: "Bayesian"
+format: html
+---
+
+Bạn đang muốn tìm một đối tượng để hẹn hò nghiêm túc. Bạn có 2 ứng viên mập mờ tiềm năng: A và B. Bạn cần quyết định chọn ai trong 2 người để thực sự nghiêm túc.
+
+Trước khi đi hẹn hò, bạn đã có sẵn một thiên kiến ban đầu. Có thể bạn hơi nghiêng về A vì cả hai có nhiều sở thích chung hơn, hoặc có thể bạn hoàn toàn trung lập.
+
+- Hãy hình dung một hình vuông lớn đại diện cho 100% niềm tin của bạn.
+- Hình vuông này được chia làm 2 phần, bên trái dành cho A bên phải dành cho B.
+- Chiều rộng của mỗi ô là thiên kiến ban đầu, trong thống kê Bayesian gọi là Xác suất tiên nghiệm (Prior) của bạn đối với mỗi người.
+
+Bạn quyết định đi date với từng người để thu thập dữ liệu thực tế. Sau khi đi date, bạn chấm điểm buổi date đó.
+
+- Phần được tô màu là điểm buổi date của từng người, trong thống kê Bayesian gọi là Hàm khả năng (Likelihood), bạn dùng Likelihood để quyết định chọn hay không chọn người này.
+- Tư duy Bayes: Chúng ta so sánh **Diện tích tô màu** của A so với B. Đây là Xác suất hậu nghiệm (Posterior).
+
+::: {layout-ncol=2}
+
+```{ojs}
+//| echo: false
+
+// 1. THE CONTROLS
+// These sliders let the user act as the "Decision Maker"
+viewof prior = Inputs.range([0, 1], {
+  label: "Prior", 
+  value: 0.5, 
+  step: 0.05
+})
+
+viewof like_alex = Inputs.range([0, 1], {
+  label: "Likelihood A", 
+  value: 0.8, 
+  step: 0.05
+})
+
+viewof like_ben = Inputs.range([0, 1], {
+  label: "Likelihood B", 
+  value: 0.15, 
+  step: 0.05
+})
+
+// 2. THE CALCULATIONS (Reactive Data)
+// This array automatically updates whenever the sliders above move.
+// We define the 4 quadrants of the mosaic.
+
+rect_data = [
+  // --- COLUMN 1: ALEX (Left Side) ---
+  // The Width is determined by the 'prior'
+  
+  // 1. The "Evidence" Box (The bottom colored part)
+  {
+    label: "Thích A",
+    x1: 0, 
+    x2: prior, 
+    y1: 0, 
+    y2: like_alex, 
+    color: "#6ecae1" // Light Blue (Strong Evidence)
+  },
+  
+  // 2. The "Void" Box (The top dark part)
+  {
+    label: "Không thích A",
+    x1: 0, 
+    x2: prior, 
+    y1: like_alex, 
+    y2: 1, 
+    color: "#1a1a1a" // Dark Grey
+  },
+
+  // --- COLUMN 2: BEN (Right Side) ---
+  // The Width starts where Alex ends ('prior') and goes to 1
+  
+  // 3. The "Evidence" Box (The bottom colored part)
+  {
+    label: "Thích B",
+    x1: prior, 
+    x2: 1, 
+    y1: 0, 
+    y2: like_ben, 
+    color: "#2f7e9b" // Teal (Competing Evidence)
+  },
+  
+  // 4. The "Void" Box (The top dark part)
+  {
+    label: "Không thích B",
+    x1: prior, 
+    x2: 1, 
+    y1: like_ben, 
+    y2: 1, 
+    color: "#0f0f0f" // Black
+  }
+]
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  // 1. GLOBAL STYLE
+  style: {
+    background: "black",
+    color: "white",
+    fontFamily: "sans-serif",
+    fontSize: "14px"
+  },
+  aspectRatio: 1,
+  
+  // Hide axes
+  x: { axis: null },
+  y: { axis: null },
+
+  marks: [
+    // 2. THE COLORED RECTANGLES
+    Plot.rect(rect_data, {
+      x1: "x1", 
+      x2: "x2", 
+      y1: "y1", 
+      y2: "y2", 
+      fill: "color",
+      stroke: "white", 
+      strokeWidth: 1
+    }),
+    
+    // 3. THE PERMANENT TEXT LABELS
+    Plot.text(rect_data, {
+      x: d => (d.x1 + d.x2) / 2, 
+      y: d => (d.y1 + d.y2) / 2, 
+      text: d => (d.y2 - d.y1) > 0.1 && (d.x2 - d.x1) > 0.1 ? d.label : "", 
+      fill: "white",
+      fontWeight: "bold",
+      pointerEvents: "none" 
+    }),
+
+    // 4. THE INTERACTIVE TOOLTIP (Calculations)
+    Plot.tip(rect_data, Plot.pointer({
+      x1: "x1", 
+      x2: "x2", 
+      y1: "y1", 
+      y2: "y2",
+      
+      // Force dark background so white text is visible
+      fill: "#222", 
+      stroke: "white",
+      
+      // DEFINING THE DATA TO SHOW
+      // Note: We REMOVED the 'title' option so Plot displays this list instead.
+      channels: {
+        "Diện tích": d => ((d.x2 - d.x1) * (d.y2 - d.y1)).toFixed(3)
+      },
+      
+      // Hide the raw X/Y coordinates, show only our custom channels
+      format: {
+        x: false,    
+        y: false,
+        fill: false 
+      }
+    }))
+  ]
+})
+```
+
+:::

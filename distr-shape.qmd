@@ -59,6 +59,71 @@ $$E\left[\left(\frac{X - E[X]}{\sigma}\right)^4\right]$$
 
 Lũy thừa bậc 4 làm cho những giá trị nhỏ (gần trung bình) trở nên siêu nhỏ, và những giá trị lớn (xa trung bình - outliers) trở nên lớn hơn nhiều lần. Moment này càng lớn thì đuôi của phân phối càng dày, nghĩa là xác suất xảy ra các sự kiện cực đoan càng lớn.
 
+```{r}
+library(tidyverse)
+library(patchwork) # Great for combining plots
+
+# --- DATA GENERATION ---
+# We create a sequence of X values
+x_seq <- seq(-6, 6, length.out = 2000)
+
+# Create a data frame with three different densities
+df_kurtosis <- data.frame(x = x_seq) |>
+  mutate(
+    # Reference: Standard Normal (Mesokurtic)
+    Normal = dnorm(x, mean = 0, sd = 1),
+
+    # High Kurtosis (Leptokurtic): Using a t-distribution with low df
+    # t-dist has heavier tails than normal.
+    High_Kurtosis = dt(x, df = 3),
+
+    # Low Kurtosis (Platykurtic): Using a bounded distribution approach
+    # A uniform distribution is the extreme version of low kurtosis.
+    # To make it look comparable, we use a wider normal and truncate it,
+    # or simply use a uniform density scaled to match roughly.
+    # A simpler visual proxy for platykurtic is a low-variance uniform:
+    Low_Kurtosis = dunif(x, min = -sqrt(3), max = sqrt(3))
+  ) |>
+  # Reshape for ggplot
+  pivot_longer(cols = -x, names_to = "Type", values_to = "Density") |>
+  mutate(Type = factor(Type, levels = c("High_Kurtosis", "Normal", "Low_Kurtosis")))
+
+# --- PLOT 1: THE BIG PICTURE ---
+p1 <- ggplot(df_kurtosis, aes(x = x, y = Density, color = Type, size = Type)) +
+  geom_line() +
+  scale_color_manual(values = c("red", "black", "blue")) +
+  scale_size_manual(values = c(1.2, 0.8, 1.2)) +
+  theme_minimal() +
+  labs(title = "1. The Big Picture (Peak vs Shoulders)",
+       subtitle = "Notice the red peak is highest, but its 'shoulders' are lower than normal.",
+       y = "Probability Density") +
+  theme(legend.position = "bottom") +
+  coord_cartesian(xlim = c(-5, 5), ylim = c(0, 0.45))
+
+
+# --- PLOT 2: THE TAIL ZOOM ---
+# We use the exact same data, just zoom the coordinates
+p2 <- ggplot(df_kurtosis, aes(x = x, y = Density, color = Type, size = Type)) +
+  geom_line() +
+  scale_color_manual(values = c("red", "black", "blue")) +
+  scale_size_manual(values = c(1.5, 0.8, 1.5)) + # Thicker lines for emphasis
+  theme_minimal() +
+  # IMPORTANT: The zoom focus areas
+  coord_cartesian(xlim = c(2.5, 6), ylim = c(0, 0.025)) +
+  labs(title = "2. The Tail Zoom (Where outliers live)",
+       subtitle = "Crucial: The red line is now HIGHER than the others.",
+       y = "", x = "X (Extreme Values)") +
+  theme(legend.position = "none",
+        axis.text.y = element_blank(),
+        panel.grid.minor = element_blank())
+
+# --- COMBINE WITH PATCHWORK ---
+final_plot <- p1 + p2 + plot_layout(widths = c(2, 1))
+
+print(final_plot)
+```
+
+
 Estimate
 
 Estimand

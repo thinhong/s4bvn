@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.32">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>3&nbsp; Hình dạng của phân phối – Statistics for babies</title>
+<title>4&nbsp; Hình dạng của phân phối – Statistics for babies</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -31,17 +66,18 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./distr-d.html" rel="next">
-<link href="./prob.html" rel="prev">
+<link href="./bayes.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-29410152e5a6e3b258a64b24c20229d6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-832c273f0af7a47d06e59912ec7b3523.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -84,7 +120,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -111,7 +147,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-shape.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Hình dạng của phân phối</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-shape.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hình dạng của phân phối</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -124,7 +160,9 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
-    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Statistics for babies</a> 
     </div>
@@ -156,20 +194,26 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./bayes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./distr-shape.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Hình dạng của phân phối</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hình dạng của phân phối</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./distr-d.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./summary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -188,12 +232,12 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#moments" id="toc-moments" class="nav-link active" data-scroll-target="#moments"><span class="header-section-number">3.1</span> Moments</a>
+  <li><a href="#moments" id="toc-moments" class="nav-link active" data-scroll-target="#moments"><span class="header-section-number">4.1</span> Moments</a>
   <ul class="collapse">
-  <li><a href="#moment-gốc-cấp-1" id="toc-moment-gốc-cấp-1" class="nav-link" data-scroll-target="#moment-gốc-cấp-1"><span class="header-section-number">3.1.1</span> Moment gốc cấp 1</a></li>
-  <li><a href="#moment-tập-trung-cấp-2" id="toc-moment-tập-trung-cấp-2" class="nav-link" data-scroll-target="#moment-tập-trung-cấp-2"><span class="header-section-number">3.1.2</span> Moment tập trung cấp 2</a></li>
-  <li><a href="#moment-tập-trung-cấp-3" id="toc-moment-tập-trung-cấp-3" class="nav-link" data-scroll-target="#moment-tập-trung-cấp-3"><span class="header-section-number">3.1.3</span> Moment tập trung cấp 3</a></li>
-  <li><a href="#moment-tập-trung-cấp-4" id="toc-moment-tập-trung-cấp-4" class="nav-link" data-scroll-target="#moment-tập-trung-cấp-4"><span class="header-section-number">3.1.4</span> Moment tập trung cấp 4</a></li>
+  <li><a href="#moment-gốc-cấp-1" id="toc-moment-gốc-cấp-1" class="nav-link" data-scroll-target="#moment-gốc-cấp-1"><span class="header-section-number">4.1.1</span> Moment gốc cấp 1</a></li>
+  <li><a href="#moment-tập-trung-cấp-2" id="toc-moment-tập-trung-cấp-2" class="nav-link" data-scroll-target="#moment-tập-trung-cấp-2"><span class="header-section-number">4.1.2</span> Moment tập trung cấp 2</a></li>
+  <li><a href="#moment-tập-trung-cấp-3" id="toc-moment-tập-trung-cấp-3" class="nav-link" data-scroll-target="#moment-tập-trung-cấp-3"><span class="header-section-number">4.1.3</span> Moment tập trung cấp 3</a></li>
+  <li><a href="#moment-tập-trung-cấp-4" id="toc-moment-tập-trung-cấp-4" class="nav-link" data-scroll-target="#moment-tập-trung-cấp-4"><span class="header-section-number">4.1.4</span> Moment tập trung cấp 4</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -203,7 +247,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Hình dạng của phân phối</span></h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hình dạng của phân phối</span></h1>
 </div>
 
 
@@ -220,8 +264,8 @@ window.Quarto = {
 </header>
 
 
-<section id="moments" class="level2" data-number="3.1">
-<h2 data-number="3.1" class="anchored" data-anchor-id="moments"><span class="header-section-number">3.1</span> Moments</h2>
+<section id="moments" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="moments"><span class="header-section-number">4.1</span> Moments</h2>
 <p>Xác suất của mỗi giá trị trong một phân phối được xác định bằng hàm mật độ xác suất (với biến liên tục) hoặc hàm khối lượng xác suất (với biến rời rạc).</p>
 <p>Hình dạng của phân phối là hình dạng của các hàm số này, được xác định bằng những giá trị gọi là mô-men (moment) của hàm. Thuật ngữ này được mượn từ Vật lý: mô-men (hay mô-men lực) còn gọi là lực xoắn, là lực làm quay một vật thể quanh một điểm tựa. Tưởng tượng một cái mỏ lết quay quanh một con ốc.</p>
 <p><img src="img/moment-physics.svg" class="img-fluid"></p>
@@ -276,27 +320,113 @@ window.Quarto = {
 </tbody>
 </table>
 <p>*Độ lệch và Độ nhọn thường được chuẩn hóa (standardised) bằng cách chia cho độ lệch chuẩn <span class="math inline">\(\sigma\)</span>, ý nghĩa là gấp bao nhiêu lần độ lệch chuẩn.</p>
-<section id="moment-gốc-cấp-1" class="level3" data-number="3.1.1">
-<h3 data-number="3.1.1" class="anchored" data-anchor-id="moment-gốc-cấp-1"><span class="header-section-number">3.1.1</span> Moment gốc cấp 1</h3>
+<section id="moment-gốc-cấp-1" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="moment-gốc-cấp-1"><span class="header-section-number">4.1.1</span> Moment gốc cấp 1</h3>
 <p>Cho biết vị trí trọng tâm của phân phối nằm ở đâu so với điểm 0.</p>
 <p><span class="math display">\[E[X] = \frac{\sum^N_{i = 1}x_i}{N} = \sum^N_{i = 1}x_i \mathbb{P}(x_i)\]</span></p>
 </section>
-<section id="moment-tập-trung-cấp-2" class="level3" data-number="3.1.2">
-<h3 data-number="3.1.2" class="anchored" data-anchor-id="moment-tập-trung-cấp-2"><span class="header-section-number">3.1.2</span> Moment tập trung cấp 2</h3>
+<section id="moment-tập-trung-cấp-2" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="moment-tập-trung-cấp-2"><span class="header-section-number">4.1.2</span> Moment tập trung cấp 2</h3>
 <p>Cho biết khoảng cách của từng giá trị trong phân phối so với giá trị trung bình. Phép bình phương giúp ngăn chặn các độ lệch âm và dương triệt tiêu lẫn nhau.</p>
 <p><span class="math display">\[E[(X - E[X])^2] = E[X^2] - (E[X])^2\]</span></p>
 </section>
-<section id="moment-tập-trung-cấp-3" class="level3" data-number="3.1.3">
-<h3 data-number="3.1.3" class="anchored" data-anchor-id="moment-tập-trung-cấp-3"><span class="header-section-number">3.1.3</span> Moment tập trung cấp 3</h3>
+<section id="moment-tập-trung-cấp-3" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="moment-tập-trung-cấp-3"><span class="header-section-number">4.1.3</span> Moment tập trung cấp 3</h3>
 <p>Thường được gọi là Độ lệch (Skewness). Nó phản ánh sự không đối xứng.</p>
 <p><span class="math display">\[E\left[\left(\frac{X - E[X]}{\sigma}\right)^3\right]\]</span></p>
 <p>Lũy thừa bậc 3 giữ nguyên dấu (số âm mũ 3 vẫn là âm)</p>
 </section>
-<section id="moment-tập-trung-cấp-4" class="level3" data-number="3.1.4">
-<h3 data-number="3.1.4" class="anchored" data-anchor-id="moment-tập-trung-cấp-4"><span class="header-section-number">3.1.4</span> Moment tập trung cấp 4</h3>
+<section id="moment-tập-trung-cấp-4" class="level3" data-number="4.1.4">
+<h3 data-number="4.1.4" class="anchored" data-anchor-id="moment-tập-trung-cấp-4"><span class="header-section-number">4.1.4</span> Moment tập trung cấp 4</h3>
 <p>Thường được gọi là Độ nhọn (Kurtosis). Tên gọi này bắt nguồn từ tiếng Hy Lạp: κυρτός - kyrtos, nghĩa là “cong, vòm”.</p>
 <p><span class="math display">\[E\left[\left(\frac{X - E[X]}{\sigma}\right)^4\right]\]</span></p>
 <p>Lũy thừa bậc 4 làm cho những giá trị nhỏ (gần trung bình) trở nên siêu nhỏ, và những giá trị lớn (xa trung bình - outliers) trở nên lớn hơn nhiều lần. Moment này càng lớn thì đuôi của phân phối càng dày, nghĩa là xác suất xảy ra các sự kiện cực đoan càng lớn.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.6
+✔ forcats   1.0.1     ✔ stringr   1.6.0
+✔ ggplot2   4.0.1     ✔ tibble    3.3.0
+✔ lubridate 1.9.4     ✔ tidyr     1.3.2
+✔ purrr     1.2.0     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(patchwork) <span class="co"># Great for combining plots</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># --- DATA GENERATION ---</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># We create a sequence of X values</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>x_seq <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">6</span>, <span class="dv">6</span>, <span class="at">length.out =</span> <span class="dv">2000</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a data frame with three different densities</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>df_kurtosis <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">x =</span> x_seq) <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reference: Standard Normal (Mesokurtic)</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Normal =</span> <span class="fu">dnorm</span>(x, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>),</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># High Kurtosis (Leptokurtic): Using a t-distribution with low df</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="co"># t-dist has heavier tails than normal.</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">High_Kurtosis =</span> <span class="fu">dt</span>(x, <span class="at">df =</span> <span class="dv">3</span>),</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Low Kurtosis (Platykurtic): Using a bounded distribution approach</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># A uniform distribution is the extreme version of low kurtosis.</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># To make it look comparable, we use a wider normal and truncate it,</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>    <span class="co"># or simply use a uniform density scaled to match roughly.</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># A simpler visual proxy for platykurtic is a low-variance uniform:</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">Low_Kurtosis =</span> <span class="fu">dunif</span>(x, <span class="at">min =</span> <span class="sc">-</span><span class="fu">sqrt</span>(<span class="dv">3</span>), <span class="at">max =</span> <span class="fu">sqrt</span>(<span class="dv">3</span>))</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Reshape for ggplot</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="sc">-</span>x, <span class="at">names_to =</span> <span class="st">"Type"</span>, <span class="at">values_to =</span> <span class="st">"Density"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Type =</span> <span class="fu">factor</span>(Type, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"High_Kurtosis"</span>, <span class="st">"Normal"</span>, <span class="st">"Low_Kurtosis"</span>)))</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co"># --- PLOT 1: THE BIG PICTURE ---</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df_kurtosis, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> Density, <span class="at">color =</span> Type, <span class="at">size =</span> Type)) <span class="sc">+</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"black"</span>, <span class="st">"blue"</span>)) <span class="sc">+</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">1.2</span>, <span class="fl">0.8</span>, <span class="fl">1.2</span>)) <span class="sc">+</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"1. The Big Picture (Peak vs Shoulders)"</span>,</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Notice the red peak is highest, but its 'shoulders' are lower than normal."</span>,</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Probability Density"</span>) <span class="sc">+</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>) <span class="sc">+</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">5</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.45</span>))</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co"># --- PLOT 2: THE TAIL ZOOM ---</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="co"># We use the exact same data, just zoom the coordinates</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(df_kurtosis, <span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> Density, <span class="at">color =</span> Type, <span class="at">size =</span> Type)) <span class="sc">+</span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"red"</span>, <span class="st">"black"</span>, <span class="st">"blue"</span>)) <span class="sc">+</span></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_size_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="fl">1.5</span>, <span class="fl">0.8</span>, <span class="fl">1.5</span>)) <span class="sc">+</span> <span class="co"># Thicker lines for emphasis</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>  <span class="co"># IMPORTANT: The zoom focus areas</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="fl">2.5</span>, <span class="dv">6</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.025</span>)) <span class="sc">+</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"2. The Tail Zoom (Where outliers live)"</span>,</span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Crucial: The red line is now HIGHER than the others."</span>,</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">""</span>, <span class="at">x =</span> <span class="st">"X (Extreme Values)"</span>) <span class="sc">+</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>,</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>        <span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>        <span class="at">panel.grid.minor =</span> <span class="fu">element_blank</span>())</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co"># --- COMBINE WITH PATCHWORK ---</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a>final_plot <span class="ot">&lt;-</span> p1 <span class="sc">+</span> p2 <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">widths =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(final_plot)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="distr-shape_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 <p>Estimate</p>
 <p>Estimand</p>
 <p>Estimator</p>
@@ -357,13 +487,14 @@ window.Quarto = {
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
@@ -707,13 +838,13 @@ window.Quarto = {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./prob.html" class="pagination-link" aria-label="Xác suất">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Xác suất</span></span>
+      <a href="./bayes.html" class="pagination-link" aria-label="Bayesian">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Bayesian</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./distr-d.html" class="pagination-link" aria-label="Phân phối rời rạc">
-        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -13,6 +13,7 @@ book:
     - index.qmd
     - intro.qmd
     - prob.qmd
+    - bayes.qmd
     - distr-shape.qmd
     - distr-d.qmd
     - summary.qmd
