@@ -22,7 +22,7 @@ Bạn quyết định đi date với từng người để thu thập dữ liệ
 // 1. THE CONTROLS
 // These sliders let the user act as the "Decision Maker"
 viewof prior = Inputs.range([0, 1], {
-  label: "Prior", 
+  label: "Prior A", 
   value: 0.5, 
   step: 0.05
 })
@@ -92,9 +92,12 @@ rect_data = [
 ]
 ```
 
+
+
 ```{ojs}
 //| echo: false
 Plot.plot({
+  width: 400, height: 400,
   // 1. GLOBAL STYLE
   style: {
     background: "black",
@@ -156,4 +159,41 @@ Plot.plot({
     }))
   ]
 })
+```
+
+```{ojs}
+//| echo: false
+
+area_alex = prior * like_alex
+area_ben  = (1 - prior) * like_ben
+total_area = area_alex + area_ben
+posterior_alex = area_alex / total_area
+
+html`
+<div style="font-family: sans-serif; background: #222; padding: 20px; border-radius: 8px; color: white; max-width: 600px; margin-top: 20px;">
+  
+  <div style="display: flex; align-items: center; font-size: 1.2em; flex-wrap: wrap;">
+    <div style="font-weight: bold; margin-right: 15px;">
+      P(A | Date) = 
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
+      
+      <div style="border-bottom: 2px solid white; padding-bottom: 5px; text-align: center; width: 100%;">
+        <span style="color: #6ecae1;">${area_alex.toFixed(3)}</span>
+      </div>
+      
+      <div style="padding-top: 5px; text-align: center;">
+        <span style="color: #6ecae1;">${area_alex.toFixed(3)}</span> + 
+        <span style="color: #2f7e9b;">${area_ben.toFixed(3)}</span>
+      </div>
+      
+    </div>
+
+    <div style="font-weight: bold; font-size: 1.2em; color: #6ecae1; margin-left: 15px;">
+      = ${(posterior_alex * 100).toFixed(1)}%
+    </div>
+  </div>
+</div>
+`
 ```
