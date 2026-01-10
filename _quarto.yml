@@ -11,12 +11,10 @@ book:
   date: 12/25/2025
   chapters:
     - index.qmd
-    - intro.qmd
     - prob.qmd
     - bayes.qmd
     - distr-shape.qmd
     - distr-d.qmd
-    - summary.qmd
     - references.qmd
 
 bibliography: references.bib

@@ -1,9 +1,7 @@
 # Preface {.unnumbered}
 
-This is a Quarto book.
+Sách được biên soạn dựa trên các tài liệu:
 
-To learn more about Quarto books visit <https://quarto.org/docs/books>.
+- Giáo trình "STATS 210: Statistical Theory" của Bộ môn Thống kê, Đại học Auckland
 
-```{r}
-1 + 1
-```
+- Sách "Ecological Models and Data in R" của Benjamin M. Bolker (2008)

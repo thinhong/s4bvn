@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>5&nbsp; Phân phối rời rạc – Statistics for babies</title>
+<title>4&nbsp; Phân phối rời rạc – Statistics for babies</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,7 +30,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./summary.html" rel="next">
+<link href="./references.html" rel="next">
 <link href="./distr-shape.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -112,7 +112,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-d.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-d.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -147,44 +147,32 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./intro.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./prob.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Xác suất</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Xác suất</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./bayes.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./distr-shape.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hình dạng của phân phối</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Hình dạng phân phối</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./distr-d.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./summary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./references.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">References</span></a>
+ <span class="menu-text">Tài liệu tham khảo</span></a>
   </div>
 </li>
     </ul>
@@ -197,9 +185,9 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial" id="toc-phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial" class="nav-link active" data-scroll-target="#phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial"><span class="header-section-number">5.1</span> Phép thử Bernoulli (Bernoulli trial, hay binomial trial)</a></li>
-  <li><a href="#chuỗi-phép-thử-bernoulli-bernoulli-process" id="toc-chuỗi-phép-thử-bernoulli-bernoulli-process" class="nav-link" data-scroll-target="#chuỗi-phép-thử-bernoulli-bernoulli-process"><span class="header-section-number">5.2</span> Chuỗi phép thử Bernoulli (Bernoulli process)</a></li>
-  <li><a href="#phân-phối-nhị-nhức-binomial-distribution" id="toc-phân-phối-nhị-nhức-binomial-distribution" class="nav-link" data-scroll-target="#phân-phối-nhị-nhức-binomial-distribution"><span class="header-section-number">5.3</span> Phân phối nhị nhức (binomial distribution)</a></li>
+  <li><a href="#phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial" id="toc-phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial" class="nav-link active" data-scroll-target="#phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial"><span class="header-section-number">4.1</span> Phép thử Bernoulli (Bernoulli trial, hay binomial trial)</a></li>
+  <li><a href="#chuỗi-phép-thử-bernoulli-bernoulli-process" id="toc-chuỗi-phép-thử-bernoulli-bernoulli-process" class="nav-link" data-scroll-target="#chuỗi-phép-thử-bernoulli-bernoulli-process"><span class="header-section-number">4.2</span> Chuỗi phép thử Bernoulli (Bernoulli process)</a></li>
+  <li><a href="#phân-phối-nhị-nhức-binomial-distribution" id="toc-phân-phối-nhị-nhức-binomial-distribution" class="nav-link" data-scroll-target="#phân-phối-nhị-nhức-binomial-distribution"><span class="header-section-number">4.3</span> Phân phối nhị nhức (binomial distribution)</a></li>
   </ul>
 </nav>
     </div>
@@ -208,7 +196,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></h1>
 </div>
 
 
@@ -225,13 +213,13 @@ window.Quarto = {
 </header>
 
 
-<section id="phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial"><span class="header-section-number">5.1</span> Phép thử Bernoulli (Bernoulli trial, hay binomial trial)</h2>
+<section id="phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="phép-thử-bernoulli-bernoulli-trial-hay-binomial-trial"><span class="header-section-number">4.1</span> Phép thử Bernoulli (Bernoulli trial, hay binomial trial)</h2>
 <p>Là một lần thử nghiệm duy nhất, không gian mẫu chỉ có đúng 2 kết quả: Thành công (Success) hoặc Thất bại (Failure)</p>
 <p>Ví dụ: tung đồng xu (mặt sấp, mặt ngửa), xét nghiệm một ca nghi ngờ (dương tính, âm tính)</p>
 </section>
-<section id="chuỗi-phép-thử-bernoulli-bernoulli-process" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="chuỗi-phép-thử-bernoulli-bernoulli-process"><span class="header-section-number">5.2</span> Chuỗi phép thử Bernoulli (Bernoulli process)</h2>
+<section id="chuỗi-phép-thử-bernoulli-bernoulli-process" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="chuỗi-phép-thử-bernoulli-bernoulli-process"><span class="header-section-number">4.2</span> Chuỗi phép thử Bernoulli (Bernoulli process)</h2>
 <p>Khi ta thực hiện phép thử Bernoulli nhiều lần liên tiếp (ví dụ: tung một đồng xu nhiều lần, dùng một loại xét nghiệm để test nhiều người). Chuỗi Bernoulli chuẩn cần thỏa mãn 2 điều kiện:</p>
 <ul>
 <li>Độc lập (Independent): Kết quả của lần thử này không ảnh hưởng đến lần thử khác.</li>
@@ -239,8 +227,8 @@ window.Quarto = {
 </ul>
 <p>Từ chuỗi Bernoulli có 3 phân phối thống kê sau:</p>
 </section>
-<section id="phân-phối-nhị-nhức-binomial-distribution" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="phân-phối-nhị-nhức-binomial-distribution"><span class="header-section-number">5.3</span> Phân phối nhị nhức (binomial distribution)</h2>
+<section id="phân-phối-nhị-nhức-binomial-distribution" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="phân-phối-nhị-nhức-binomial-distribution"><span class="header-section-number">4.3</span> Phân phối nhị nhức (binomial distribution)</h2>
 
 
 </section>
@@ -648,13 +636,13 @@ window.Quarto = {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./distr-shape.html" class="pagination-link" aria-label="Hình dạng của phân phối">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hình dạng của phân phối</span></span>
+      <a href="./distr-shape.html" class="pagination-link" aria-label="Hình dạng phân phối">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Hình dạng phân phối</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./summary.html" class="pagination-link" aria-label="Summary">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Summary</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./references.html" class="pagination-link" aria-label="Tài liệu tham khảo">
+        <span class="nav-page-text">Tài liệu tham khảo</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

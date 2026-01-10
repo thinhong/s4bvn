@@ -1,5 +1,5 @@
 ---
-title: "Hình dạng của phân phối"
+title: "Hình dạng phân phối"
 format: html
 ---
 
