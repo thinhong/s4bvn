@@ -119,6 +119,9 @@ Sau khi đã đi date với từng người, bạn muốn tính xác suất mìn
 
 - Tư duy Bayes: Chúng ta so sánh **Diện tích tô màu** của A so với B. Đây là Xác suất hậu nghiệm (Posterior).
 
+Biểu đồ này được tạo theo phương pháp trong video [
+Bayes theorem, the geometry of changing beliefs](https://www.youtube.com/watch?v=HZGCoVF3YvM) của kênh 3Blue1Brown.
+
 ```{ojs}
 //| echo: false
 
