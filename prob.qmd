@@ -252,13 +252,13 @@ Nghĩa là biến cố $A$ và $B$ không thể cùng xảy ra. Nếu $A$ xảy 
 
 // 1. INPUTS (Allow full range 0-1 to prevent resetting)
 viewof input_a_me = Inputs.range([0, 1], {
-  value: 0.20,
+  value: 0.05,
   step: 0.01,
   label: "P(A)"
 })
 
 viewof input_b_me = Inputs.range([0, 1], {
-  value: 0.20,
+  value: 0.05,
   step: 0.01,
   label: "P(B)"
 })

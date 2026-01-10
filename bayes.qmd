@@ -3,24 +3,125 @@ title: "Bayesian"
 format: html
 ---
 
+## Xác suất có điều kiện
+
+```{ojs}
+//| echo: false
+viewof condition_waffle = Inputs.radio(
+  ["Tất cả sinh viên", "Sinh viên nữ"], 
+  { label: "Xem", value: "Tất cả sinh viên" }
+)
+
+// 1. RAW DATA (The counts)
+counts = [
+  { group: "Lớp A", boys: 70, girls: 30 },
+  { group: "Lớp B", boys: 30, girls: 40 },
+  { group: "Lớp C", boys: 10, girls: 40 }
+]
+
+// 2. GRID GENERATION (The magic part)
+// We create a dot for every student and assign it a specific x/y coordinate.
+waffle_data = counts.flatMap((d, class_idx) => {
+  const students = [];
+  
+  // We put Girls first so they fill the bottom rows (y=0, y=1...)
+  for (let i = 0; i < d.girls; i++) students.push("Girl");
+  for (let i = 0; i < d.boys; i++) students.push("Boy");
+  
+  // Now map each student to a grid position
+  return students.map((gender, i) => ({
+    group: d.group,
+    gender: gender,
+    // X Logic: Offset by Class (class_idx * 14) + Column (i % 10)
+    // * 14 gives us 10 columns for the class + 4 empty columns gap
+    x: (class_idx * 14) + (i % 10), 
+    // Y Logic: Row is integer division of index
+    y: Math.floor(i / 10)
+  }));
+})
+
+// 3. LOGIC & ANNOTATIONS
+is_cond_waffle = condition_waffle === "Sinh viên nữ"
+// Helper to calculate probability dynamically
+total_girls_w = counts.reduce((sum, d) => sum + d.girls, 0)
+target_girls_w = counts.find(d => d.group === "Lớp C").girls
+prob_w = is_cond_waffle 
+  ? (target_girls_w / total_girls_w * 100).toFixed(1)
+  : (100 / 300 * 100).toFixed(1)
+
+// 4. STYLING FUNCTIONS
+color_waffle = (d) => {
+  if (is_cond_waffle) return d.gender === "Boy" ? "#e0e0e0" : "#ff006e";
+  return d.gender === "Boy" ? "#4cc9f0" : "#f72585";
+}
+
+opacity_waffle = (d) => {
+  if (is_cond_waffle && d.gender === "Boy") return 0.2;
+  return 1;
+}
+
+Plot.plot({
+  width: 700,
+  height: 300,
+  marginTop: 60,
+  marginLeft: 20,
+  marginRight: 20,
+  marginBottom: 50,
+  style: {
+    fontSize: "16px",
+    background: "white"
+  },
+  // Hide axes because the grid implies the count
+  x: { axis: null },
+  y: { axis: null },
+  
+  marks: [
+    // THE DOTS (Using explicit x and y)
+    Plot.dot(waffle_data, {
+      x: "x",
+      y: "y",
+      r: 6, // Slightly larger dots
+      fill: d => color_waffle(d),
+      fillOpacity: d => opacity_waffle(d),
+      stroke: "white",
+      strokeWidth: 0.5,
+      title: d => `${d.gender} (${d.group})`
+    }),
+
+    // LABELS FOR CLASSES (Below the grids)
+    Plot.text(["Lớp A", "Lớp B", "Lớp C"], {
+      x: (d, i) => (i * 14) + 4.5, // Center text: 0 offset + 4.5 (middle of 10)
+      y: -1.5, // Below the bottom row (0)
+      text: d => d,
+      fontWeight: "bold",
+      fontSize: 20,
+      clip: false
+    })
+  ]
+})
+```
+
+## Ví dụ
+
 Bạn đang muốn tìm một đối tượng để hẹn hò nghiêm túc. Bạn có 2 ứng viên mập mờ tiềm năng: A và B. Bạn cần quyết định chọn ai trong 2 người để thực sự nghiêm túc.
 
 Trước khi đi hẹn hò, bạn đã có sẵn một thiên kiến ban đầu. Có thể bạn hơi nghiêng về A vì cả hai có nhiều sở thích chung hơn, hoặc có thể bạn hoàn toàn trung lập.
 
-- Hãy hình dung một hình vuông lớn đại diện cho 100% niềm tin của bạn.
-- Hình vuông này được chia làm 2 phần, bên trái dành cho A bên phải dành cho B.
-- Chiều rộng của mỗi ô là thiên kiến ban đầu, trong thống kê Bayesian gọi là Xác suất tiên nghiệm (Prior) của bạn đối với mỗi người.
+- Hãy hình dung một hình vuông lớn đại diện cho 100% niềm tin của bạn
+- Hình vuông này được chia làm 2 phần, bên trái dành cho A bên phải dành cho B
+- Chiều rộng của mỗi ô là thiên kiến ban đầu, trong thống kê Bayesian gọi là Xác suất tiên nghiệm (Prior) của bạn đối với mỗi người
 
 Bạn quyết định đi date với từng người để thu thập dữ liệu thực tế. Sau khi đi date, bạn chấm điểm buổi date đó.
 
-- Phần được tô màu là điểm buổi date của từng người, trong thống kê Bayesian gọi là Hàm khả năng (Likelihood), bạn dùng Likelihood để quyết định chọn hay không chọn người này.
+- Phần được tô màu là điểm buổi date của từng người, trong thống kê Bayesian gọi là Hàm khả năng (Likelihood)
+
+Sau khi đã đi date với từng người, bạn muốn tính xác suất mình nên chọn A $\mathbb{P}(A|Date)$
+
 - Tư duy Bayes: Chúng ta so sánh **Diện tích tô màu** của A so với B. Đây là Xác suất hậu nghiệm (Posterior).
 
 ```{ojs}
 //| echo: false
 
-// 1. THE CONTROLS
-// These sliders let the user act as the "Decision Maker"
 viewof prior = Inputs.range([0, 1], {
   label: "Prior A", 
   value: 0.5, 
@@ -39,124 +140,126 @@ viewof like_ben = Inputs.range([0, 1], {
   step: 0.05
 })
 
-// 2. THE CALCULATIONS (Reactive Data)
-// This array automatically updates whenever the sliders above move.
-// We define the 4 quadrants of the mosaic.
-
+// 2. THE CALCULATIONS
 rect_data = [
   // --- COLUMN 1: ALEX (Left Side) ---
-  // The Width is determined by the 'prior'
-  
-  // 1. The "Evidence" Box (The bottom colored part)
   {
     label: "Thích A",
-    x1: 0, 
-    x2: prior, 
-    y1: 0, 
-    y2: like_alex, 
-    color: "#6ecae1" // Light Blue (Strong Evidence)
+    x1: 0, x2: prior, y1: 0, y2: like_alex,
+    color: "#6ecae1" 
   },
-  
-  // 2. The "Void" Box (The top dark part)
   {
     label: "Không thích A",
-    x1: 0, 
-    x2: prior, 
-    y1: like_alex, 
-    y2: 1, 
-    color: "#1a1a1a" // Dark Grey
+    x1: 0, x2: prior, y1: like_alex, y2: 1,
+    color: "#1a1a1a" 
   },
-
   // --- COLUMN 2: BEN (Right Side) ---
-  // The Width starts where Alex ends ('prior') and goes to 1
-  
-  // 3. The "Evidence" Box (The bottom colored part)
   {
     label: "Thích B",
-    x1: prior, 
-    x2: 1, 
-    y1: 0, 
-    y2: like_ben, 
-    color: "#2f7e9b" // Teal (Competing Evidence)
+    x1: prior, x2: 1, y1: 0, y2: like_ben,
+    color: "#2f7e9b" 
   },
-  
-  // 4. The "Void" Box (The top dark part)
   {
     label: "Không thích B",
-    x1: prior, 
-    x2: 1, 
-    y1: like_ben, 
-    y2: 1, 
-    color: "#0f0f0f" // Black
+    x1: prior, x2: 1, y1: like_ben, y2: 1,
+    color: "#0f0f0f" 
   }
 ]
-```
 
-
-
-```{ojs}
-//| echo: false
 Plot.plot({
-  width: 400, height: 400,
-  // 1. GLOBAL STYLE
+  width: 550, height: 450,
+  marginTop: 50,
+  marginLeft: 60,
+  marginRight: 60,
+  marginBottom: 20,
+
   style: {
     background: "black",
     color: "white",
-    fontFamily: "sans-serif",
-    fontSize: "14px"
+    fontSize: "16px" 
   },
-  aspectRatio: 1,
   
-  // Hide axes
-  x: { axis: null },
-  y: { axis: null },
+  x: { axis: null, domain: [0, 1] },
+  y: { axis: null, domain: [0, 1] },
 
   marks: [
-    // 2. THE COLORED RECTANGLES
+    // --- PART 1: THE ANNOTATIONS ---
+    // Fix: Use [1] as dummy data, and arrow functions `() =>` for text strings.
+
+    // A. TOP ANNOTATION: Prior P(H)
+    Plot.ruleY([1], { 
+      y: 1.03,           
+      x1: 0, x2: prior,  
+      stroke: "#000", strokeWidth: 2,
+      clip: false
+    }),
+    Plot.text([1], {
+      x: prior / 2,      
+      y: 1.03, dy: -10,
+      text: () => `P(A) = ${prior.toFixed(2)}`, // <--- Arrow function required
+      fill: "#000", fontWeight: "bold", fontSize: 16,
+      clip: false
+    }),
+
+    // B. LEFT ANNOTATION: P(E|H)
+    Plot.ruleX([1], {
+      x: -0.03,          
+      y1: 0, y2: like_alex, 
+      stroke: "#6ecae1", strokeWidth: 2,
+      clip: false
+    }),
+    Plot.text([1], {
+      x: -0.03,          
+      y: like_alex / 2, 
+      dx: -15, // Push slightly left away from the line
+      rotate: -90, // <--- Rotates text vertically
+      text: () => `P(D|A) = ${like_alex.toFixed(2)}`, // Removed \n for cleaner vertical look
+      fill: "#6ecae1", 
+      textAnchor: "middle", // Centers text on the bar height
+      fontWeight: "bold", fontSize: 16, clip: false
+    }),
+
+    // C. RIGHT ANNOTATION: P(E|¬H)
+    Plot.ruleX([1], {
+      x: 1.03,           
+      y1: 0, y2: like_ben, 
+      stroke: "#2f7e9b", strokeWidth: 2, clip: false
+    }),
+    Plot.text([1], {
+      x: 1.03,           
+      y: like_ben / 2, 
+      dx: 15, // Push slightly right away from the line
+      rotate: -90, // <--- Rotates text vertically
+      text: () => `P(D|B) = ${like_ben.toFixed(2)}`, 
+      fill: "#2f7e9b", 
+      textAnchor: "middle", 
+      fontWeight: "bold", fontSize: 16, clip: false
+    }),
+
+    // --- PART 2: THE MOSAIC ---
     Plot.rect(rect_data, {
-      x1: "x1", 
-      x2: "x2", 
-      y1: "y1", 
-      y2: "y2", 
-      fill: "color",
-      stroke: "white", 
-      strokeWidth: 1
+      x1: "x1", x2: "x2", y1: "y1", y2: "y2", 
+      fill: "color", stroke: "white", strokeWidth: 1,
+      tip: {
+        fill: "#222", stroke: "white",
+        maxRadius: 100,
+        title: "label",
+        channels: {
+          "Diện tích": d => ((d.x2 - d.x1) * (d.y2 - d.y1)).toFixed(3)
+        },
+        format: {
+          "Diện tích": true, x: false, y: false, fill: false, stroke: false, x1: false, y1: false, x2: false, y2: false
+        }
+      }
     }),
     
-    // 3. THE PERMANENT TEXT LABELS
+    // Labels inside boxes
     Plot.text(rect_data, {
       x: d => (d.x1 + d.x2) / 2, 
       y: d => (d.y1 + d.y2) / 2, 
       text: d => (d.y2 - d.y1) > 0.1 && (d.x2 - d.x1) > 0.1 ? d.label : "", 
-      fill: "white",
-      fontWeight: "bold",
-      pointerEvents: "none" 
-    }),
-
-    // 4. THE INTERACTIVE TOOLTIP (Calculations)
-    Plot.tip(rect_data, Plot.pointer({
-      x1: "x1", 
-      x2: "x2", 
-      y1: "y1", 
-      y2: "y2",
-      
-      // Force dark background so white text is visible
-      fill: "#222", 
-      stroke: "white",
-      
-      // DEFINING THE DATA TO SHOW
-      // Note: We REMOVED the 'title' option so Plot displays this list instead.
-      channels: {
-        "Diện tích": d => ((d.x2 - d.x1) * (d.y2 - d.y1)).toFixed(3)
-      },
-      
-      // Hide the raw X/Y coordinates, show only our custom channels
-      format: {
-        x: false,    
-        y: false,
-        fill: false 
-      }
-    }))
+      fill: "white", fontWeight: "bold", pointerEvents: "none" 
+    })
   ]
 })
 ```
@@ -170,8 +273,6 @@ total_area = area_alex + area_ben
 posterior_alex = area_alex / total_area
 
 html`
-<div style="font-family: sans-serif; background: #222; padding: 20px; border-radius: 8px; color: white; max-width: 600px; margin-top: 20px;">
-  
   <div style="display: flex; align-items: center; font-size: 1.2em; flex-wrap: wrap;">
     <div style="font-weight: bold; margin-right: 15px;">
       P(A | Date) = 
@@ -179,7 +280,7 @@ html`
 
     <div style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
       
-      <div style="border-bottom: 2px solid white; padding-bottom: 5px; text-align: center; width: 100%;">
+      <div style="border-bottom: 2px solid; padding-bottom: 5px; text-align: center; width: 100%;">
         <span style="color: #6ecae1;">${area_alex.toFixed(3)}</span>
       </div>
       
@@ -194,6 +295,187 @@ html`
       = ${(posterior_alex * 100).toFixed(1)}%
     </div>
   </div>
-</div>
 `
 ```
+
+## Ứng dụng
+
+Một bệnh nhân vừa nhận được kết quả xét nghiệm dương tính với một căn bệnh. Xét nghiệm này có độ nhạy 95% và độ đặc hiệu 90%. Hỏi xác suất người đó bị bệnh khi xét nghiệm là dương tính $\mathbb{P}(B|D)$. Chúng ta sẽ áp dụng hình vuông như trên để tính xác suất này.
+
+- Hãy hình dung một hình vuông lớn đại diện cho 100% dân số
+- Hình vuông này được chia làm 2 phần, bên trái dành là tỉ lệ người bệnh trong dân số, bên phải là tỉ lệ người không bệnh
+- Chiều rộng của mỗi ô là xác suất tiên nghiệm trong Bayesian, giả sử bệnh này chiếm 10% dân số
+
+Độ nhạy của 1 xét nghiệm là xác suất dương tính trong những người bệnh $\mathbb{P}(D|B)$. Độ đặc hiệu là xác suất âm tính trong những người không bệnh $\mathbb{P}(D|B)$.
+
+```{ojs}
+//| echo: false
+
+viewof prev = Inputs.range([0, 1], {
+  label: "Tỉ lệ bệnh", 
+  value: 0.1, 
+  step: 0.01
+})
+
+viewof sens = Inputs.range([0, 1], {
+  label: "Độ nhạy", 
+  value: 0.95, 
+  step: 0.01
+})
+
+viewof spec = Inputs.range([0, 1], {
+  label: "Độ đặc hiệu", 
+  value: 0.9, 
+  step: 0.01
+})
+
+// 2. THE CALCULATIONS (Reactive Data)
+// This array automatically updates whenever the sliders above move.
+// We define the 4 quadrants of the mosaic.
+
+rect_data2 = [
+  // --- COLUMN 1: ALEX (Left Side) ---
+  // The Width is determined by the 'prior'
+  
+  // 1. The "Evidence" Box (The bottom colored part)
+  {
+    label: "Dương thật",
+    x1: 0, 
+    x2: prev, 
+    y1: 0, 
+    y2: sens, 
+    color: "#6ecae1" // Light Blue (Strong Evidence)
+  },
+  
+  // 2. The "Void" Box (The top dark part)
+  {
+    label: "Âm giả",
+    x1: 0, 
+    x2: prev, 
+    y1: sens, 
+    y2: 1, 
+    color: "#1a1a1a" // Dark Grey
+  },
+
+  // --- COLUMN 2: BEN (Right Side) ---
+  // The Width starts where Alex ends ('prior') and goes to 1
+  
+  // 3. The "Evidence" Box (The bottom colored part)
+  {
+    label: "Dương giả",
+    x1: prev, 
+    x2: 1, 
+    y1: 0, 
+    y2: 1 - spec, 
+    color: "#2f7e9b" // Teal (Competing Evidence)
+  },
+  
+  // 4. The "Void" Box (The top dark part)
+  {
+    label: "Âm thật",
+    x1: prev, 
+    x2: 1, 
+    y1: 1 - spec, 
+    y2: 1, 
+    color: "#0f0f0f" // Black
+  }
+]
+
+Plot.plot({
+  width: 550, height: 450,
+  marginTop: 50,
+  marginLeft: 60,
+  marginRight: 60,
+  marginBottom: 20,
+
+  style: {
+    background: "black",
+    color: "white",
+    fontSize: "16px" 
+  },
+  
+  x: { axis: null, domain: [0, 1] },
+  y: { axis: null, domain: [0, 1] },
+
+  marks: [
+    // --- PART 1: THE ANNOTATIONS ---
+    // Fix: Use [1] as dummy data, and arrow functions `() =>` for text strings.
+
+    // A. TOP ANNOTATION: Prior P(H)
+    Plot.ruleY([1], { 
+      y: 1.03,           
+      x1: 0, x2: prev,  
+      stroke: "#000", strokeWidth: 2,
+      clip: false
+    }),
+    Plot.text([1], {
+      x: prev / 2,      
+      y: 1.03, dy: -10,
+      text: () => `Tỉ lệ bệnh = ${prev.toFixed(2)}`, // <--- Arrow function required
+      fill: "#000", fontWeight: "bold", fontSize: 16,
+      clip: false
+    }),
+
+    // B. LEFT ANNOTATION: P(E|H)
+    Plot.ruleX([1], {
+      x: -0.03,          
+      y1: 0, y2: sens, 
+      stroke: "#6ecae1", strokeWidth: 2,
+      clip: false
+    }),
+    Plot.text([1], {
+      x: -0.03,          
+      y: sens / 2, 
+      dx: -15, // Push slightly left away from the line
+      rotate: -90, // <--- Rotates text vertically
+      text: () => `Độ nhạy = ${sens.toFixed(2)}`, // Removed \n for cleaner vertical look
+      fill: "#6ecae1", 
+      textAnchor: "middle", // Centers text on the bar height
+      fontWeight: "bold", fontSize: 16, clip: false
+    }),
+
+    // C. RIGHT ANNOTATION: P(E|¬H)
+    Plot.ruleX([1], {
+      x: 1.03,           
+      y1: 1 - spec, y2: 1, 
+      stroke: "#000", strokeWidth: 2, clip: false
+    }),
+    Plot.text([1], {
+      x: 1.03,           
+      y: 1 - spec / 2, 
+      dx: 15, // Push slightly right away from the line
+      rotate: -90, // <--- Rotates text vertically
+      text: () => `Độ đặc hiệu = ${spec.toFixed(2)}`, 
+      fill: "#000", 
+      textAnchor: "middle", 
+      fontWeight: "bold", fontSize: 16, clip: false
+    }),
+
+    // --- PART 2: THE MOSAIC ---
+    Plot.rect(rect_data2, {
+      x1: "x1", x2: "x2", y1: "y1", y2: "y2", 
+      fill: "color", stroke: "white", strokeWidth: 1,
+      tip: {
+        fill: "#222", stroke: "white",
+        maxRadius: 100,
+        title: "label",
+        channels: {
+          "Diện tích": d => ((d.x2 - d.x1) * (d.y2 - d.y1)).toFixed(3)
+        },
+        format: {
+          "Diện tích": true, x: false, y: false, fill: false, stroke: false, x1: false, y1: false, x2: false, y2: false
+        }
+      }
+    }),
+    
+    // Labels inside boxes
+    Plot.text(rect_data2, {
+      x: d => (d.x1 + d.x2) / 2, 
+      y: d => (d.y1 + d.y2) / 2, 
+      text: d => (d.y2 - d.y1) > 0.1 && (d.x2 - d.x1) > 0.1 ? d.label : "", 
+      fill: "white", fontWeight: "bold", pointerEvents: "none" 
+    })
+  ]
+})
+```
+
