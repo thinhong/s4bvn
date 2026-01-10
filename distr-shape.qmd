@@ -31,6 +31,70 @@ Cấp của moment có thể từ 0 đến $\infty$. Nếu biết hết toàn b�
 
 *Độ lệch và Độ nhọn thường được chuẩn hóa (standardised) bằng cách chia cho độ lệch chuẩn $\sigma$, ý nghĩa là gấp bao nhiêu lần độ lệch chuẩn.
 
+```{r}
+#| echo: false
+#| message: false
+library(plotly)
+
+# 1. SETTINGS
+mu <- 2  # The new mean
+sigma <- 1
+
+# 2. Define the grid (Shifted to center around the new mean)
+# Range is now roughly [mu - 3, mu + 3]
+x <- seq(mu - 3, mu + 3, length.out = 100)
+y <- seq(mu - 3, mu + 3, length.out = 100)
+
+# 3. Calculate density
+# We subtract 'mu' from x and y in the formula
+z <- outer(x, y, function(x, y) {
+  (1 / (2 * pi * sigma^2)) * exp(-0.5 * ((x - mu)^2 + (y - mu)^2) / sigma^2)
+})
+
+# Peak height (constant for standard normal, but good to keep dynamic)
+z_peak <- (1 / (2 * pi * sigma^2))
+
+# 4. Create the Plot
+plot_ly() |>
+  add_surface(x = ~x, y = ~y, z = ~z, 
+              colorscale = "Viridis",
+              opacity = 0.5,
+              showscale = FALSE) |>
+  
+  # Update the Vertical Line to sit at (2, 2)
+  add_trace(
+    type = "scatter3d",
+    mode = "lines",
+    x = c(0, 0),  # Position X = 2
+    y = c(0, 0),  # Position Y = 2
+    z = c(0, z_peak),
+    line = list(color = "blue", width = 5),
+    name = "(0, 0)"
+  ) |>
+  
+  add_trace(
+    type = "scatter3d",
+    mode = "lines",
+    x = c(mu, mu),  # Position X = 2
+    y = c(mu, mu),  # Position Y = 2
+    z = c(0, z_peak),
+    line = list(color = "black", width = 5),
+    name = "Mean"
+  ) |>
+  
+  layout(
+    scene = list(
+      xaxis = list(title = "X"),
+      yaxis = list(title = "Y"),
+      zaxis = list(title = "Density"),
+      camera = list(
+        eye = list(x = 1.5, y = -1.5, z = 1.2)
+      )
+    )
+  )
+```
+
+
 ### Moment gốc cấp 1
 
 Cho biết vị trí trọng tâm của phân phối nằm ở đâu so với điểm 0.
