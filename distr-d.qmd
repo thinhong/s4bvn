@@ -9,16 +9,240 @@ Là một lần thử nghiệm duy nhất, không gian mẫu chỉ có đúng 2 
 
 Ví dụ: tung đồng xu (mặt sấp, mặt ngửa), xét nghiệm một ca nghi ngờ (dương tính, âm tính)
 
-## Chuỗi phép thử Bernoulli (Bernoulli process)
+Khi ta thực hiện phép thử Bernoulli nhiều lần liên tiếp (ví dụ: tung một đồng xu nhiều lần, dùng một loại xét nghiệm để test nhiều người), ta đang thực hiện 1 chuỗi Bernoulli. Chuỗi Bernoulli chuẩn cần thỏa 2 điều kiện:
 
-Khi ta thực hiện phép thử Bernoulli nhiều lần liên tiếp (ví dụ: tung một đồng xu nhiều lần, dùng một loại xét nghiệm để test nhiều người). Chuỗi Bernoulli chuẩn cần thỏa mãn 2 điều kiện:
+-   Độc lập (Independent): Kết quả của lần thử này không ảnh hưởng đến lần thử khác.
+-   Xác suất không đổi: Xác suất thành công ($p$) phải giống hệt nhau ở mọi lần thử.
 
-- Độc lập (Independent): Kết quả của lần thử này không ảnh hưởng đến lần thử khác.
-- Xác suất không đổi: Xác suất thành công ($p$) phải giống hệt nhau ở mọi lần thử.
+Hầu hết các phân phối rời rạc đều xuất phát từ chuỗi Bernoulli với các mục tiêu khác nhau.
 
-Từ chuỗi Bernoulli có 3 phân phối thống kê sau:
+## Đếm số lần thành công
 
-## Phân phối nhị nhức (binomial distribution)
+Chúng ta quyết định trước sẽ bỏ ra bao nhiêu công sức ($n$ lần thử), và đếm xem thu được bao nhiêu phần thưởng ($k$ thành công).
 
+### Phân phối nhị nhức (binomial distribution)
+
+Tình huống: Bạn mua 10 tờ vé số.
+
+Luật chơi:
+
+-   Số lần thử cố định ($n$)
+-   Các lần thử độc lập với nhau
+-   Lấy mẫu có hoàn lại (hoặc từ một quần thể vô hạn)
+
+Câu hỏi: "Tôi trúng được bao nhiêu tờ?"
+
+```{ojs}
+//| echo: false
+
+viewof n_coins = Inputs.range([1, 20], {label: "Coins per Flip (n)", value: 10, step: 1})
+viewof p_head = Inputs.range([0.01, 0.99], {label: "Prob. of Heads (p)", value: 0.5, step: 0.01})
+viewof speed = Inputs.range([10, 1000], {label: "Speed (ms)", value: 200, transform: x => 1010 - x})
+
+viewof flipBtn = Inputs.button("Flip Once")
+viewof autoBtn = Inputs.button("Start/Stop Auto-Flip")
+viewof resetCoinBtn = Inputs.button("Reset Data")
+
+// A. STATE CONTAINER
+// Holds the data history.
+coin_state = {
+  // We define it once. It persists until you reload the page.
+  return {
+    history: [], 
+    currentToss: [],
+    totalHeads: 0,
+    count: 0,
+    lastReset: 0
+  };
+}
+
+// B. GAME LOGIC
+// This cell runs whenever you click a button.
+coin_logic = {
+  // 1. LISTEN TO TRIGGERS
+  flipBtn;
+  autoBtn;
+  resetCoinBtn;
+  
+  // 2. HANDLE RESET
+  // We check if the reset button counter has increased
+  if (resetCoinBtn > coin_state.lastReset) {
+      coin_state.history = [];
+      coin_state.currentToss = [];
+      coin_state.totalHeads = 0;
+      coin_state.count = 0;
+      coin_state.lastReset = resetCoinBtn;
+      // Return immediately to clear the plot
+      return coin_state.count; 
+  }
+
+  // 3. DEFINE THE FLIP FUNCTION
+  const doFlip = () => {
+    let heads = 0;
+    const outcome = [];
+    for(let i=0; i<n_coins; i++) {
+      const isHead = Math.random() < p_head;
+      outcome.push(isHead ? 1 : 0);
+      if(isHead) heads++;
+    }
+    coin_state.currentToss = outcome;
+    coin_state.history.push(heads);
+    coin_state.totalHeads = heads;
+    coin_state.count++;
+  };
+
+  // 4. EXECUTION MODE
+  // If Auto Button is ODD (1, 3, 5...), we are in Auto Mode
+  const isAuto = (autoBtn % 2) !== 0;
+
+  if (isAuto) {
+    // --- AUTO MODE (Loop) ---
+    while (true) {
+      doFlip();
+      yield coin_state.count; // Yield updates the plot!
+      await new Promise(r => setTimeout(r, 1010 - speed));
+    }
+  } else {
+    // --- MANUAL MODE (Single Shot) ---
+    // If we aren't in auto, and this cell ran, it means 'flipBtn' was clicked
+    // (or a slider changed). We flip once.
+    if (coin_state.count > 0 || flipBtn > 0) {
+       doFlip();
+    }
+    return coin_state.count;
+  }
+}
+
+// 3. THE VISUALIZATION (Fixed: Split into two plots)
+{
+  // DEPENDENCY: Listen to the logic!
+  coin_logic; 
+  
+  // Plot A: The Coins (Top Strip)
+  const coinPlot = Plot.plot({
+    width: 600,
+    height: 80, // Fixed height for just the coins
+    title: `Toss #${coin_state.count}: Result`,
+    x: {axis: null, domain: [0, n_coins]},
+    y: {axis: null},
+    marks: [
+      Plot.dot(coin_state.currentToss.map((d, i) => ({x: i, val: d})), {
+        x: (d, i) => mapRange(i, 0, n_coins-1, 0.5, n_coins-0.5), 
+        y: 0, 
+        r: 12,
+        fill: d => d.val === 1 ? "#f7941d" : "#ccc", 
+        stroke: "black",
+        strokeWidth: 2
+      }),
+      Plot.text(coin_state.currentToss.map((d, i) => ({x: i, val: d})), {
+        x: (d, i) => mapRange(i, 0, n_coins-1, 0.5, n_coins-0.5), 
+        y: 0, 
+        text: d => d.val === 1 ? "H" : "T",
+        fill: "black", fontWeight: "bold", dy: 1
+      })
+    ]
+  });
+
+  // Plot B: The Histogram (Bottom Chart)
+  const histPlot = Plot.plot({
+    width: 600,
+    height: 350,
+    title: `Distribution of Heads (Total: ${coin_state.history.length} experiments)`,
+    x: {label: "Number of Heads", domain: [0, n_coins]},
+    y: {label: "Frequency", grid: true}, // Standard quantitative axis (Bottom-Up)
+    marks: [
+      // 1. The Blue Histogram
+      Plot.rectY(coin_state.history, Plot.binX(
+        {y: "count"}, 
+        {x: d => d, domain: [0, n_coins], thresholds: d3.range(0, n_coins + 2), fill: "#4e79a7", opacity: 0.6}
+      )),
+      
+      // 2. The Theoretical Red Line
+      Plot.line(d3.range(0, n_coins + 1), {
+        x: d => d + 0.5, 
+        y: d => binomialPMF(d, n_coins, p_head) * coin_state.history.length,
+        stroke: "red", strokeWidth: 2, curve: "natural"
+      }),
+      
+      Plot.ruleY([0])
+    ]
+  });
+
+  // Return both stacked together
+  return htl.html`<div>${coinPlot}${histPlot}</div>`;
+}
+
+// Helper Functions
+function mapRange(value, low1, high1, low2, high2) {
+    if (high1 === low1) return low2;
+    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
+}
+
+function factorial(n) {
+  if (n === 0 || n === 1) return 1;
+  let result = 1; 
+  for (let i = 2; i <= n; i++) result *= i; 
+  return result; 
+}
+
+function combination(n, k) {
+  return factorial(n) / (factorial(k) * factorial(n - k));
+}
+
+function binomialPMF(k, n, p) {
+  return combination(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+}
+```
+
+
+### Phân phối siêu bội (hypergeometric distribution)
+
+Tình huống: Bạn có bộ bài 52 lá, trong đó có 4 lá hậu. Bạn rút 5 lá.
+
+Luật chơi:
+
+-   Số lần thử cố định ($n$)
+-   Các lần thử phụ thuộc nhau
+-   Lấy mẫu không hoàn lại từ một quần thể hữu hạn ($N$)
+
+Câu hỏi: "Tôi rút được bao nhiêu lá hậu?"
+
+## Đếm số lần thử
+
+Chúng ta quyết định trước phần thưởng mình muốn đạt được ($k$ thành công), và đếm xem phải tốn bao nhiêu công sức ($n$ lần thử) để đạt được nó. Nhánh này mô hình hóa sự "kiên trì" hoặc "sức chịu đựng".
+
+### Phân phối hình học (geometric distribution)
+
+Tình huống: Một gia đình phong kiến trọng nam khinh nữ muốn có một đứa con trai, họ cứ sinh con cho đến khi có con trai thì thôi
+
+Câu hỏi: Họ phải sinh bao nhiêu con cho đến khi có con trai?
+
+Đặc tính: Không có bộ nhớ (Memoryless). Dù đã sinh 10 con gái liên tiếp, xác suất đứa tiếp theo là trai vẫn y như lúc bắt đầu.
+
+### Phân phối nhị thức âm (negative binomial distribution)
+
+Tình huống: Gia đình phong kiến đã sinh được con trai nhưng vẫn muốn có con trai nữa, thầy bói nói nhà phải có 3 đứa con trai mới giàu được
+
+Câu hỏi: Họ sẽ sinh bao nhiêu con trước khi có được đứa con trai thứ 3?
+
+Về lý thuyết, đây là tổng của $k$ biến thuộc phân phối hình học.
+
+Trong sinh học thực tế (ví dụ: đếm số ký sinh trùng, ấu trùng muỗi), phương sai thường lớn hơn trung bình rất nhiều (do hiện tượng tụ đám/clumping). Phân phối Nhị thức Âm khớp với kiểu dữ liệu này tốt hơn nhiều so với Poisson hay Nhị thức.
+
+## Đếm sự kiện khi biết tốc độ trung bình
+
+### Phân phối Poisson
+
+Poisson là giới hạn của nhị thức khi $n \to \infty$ và $p \to 0$, sao cho $np = \lambda$
+
+Các phân phối phức tạp có thể được tạo ra bằng cách cộng các phân phối đơn giản:
+
+| Nếu cộng | Sẽ có | Điều kiện |
+|----|----|----|
+| Nhiều Bernoulli | Nhị thức | Cùng $p$. |
+| Nhiều Nhị thức | Nhị thức | $X+Y \sim \text{Bin}(n+m, p)$ |
+| Nhiều Hình học | Nhị thức âm | Chờ $k$ thành công thực chất là chờ 1 thành công, lặp lại $k$ lần |
+| Nhiều Nhị thức âm | Nhị thức âm | $X+Y \sim \text{NB}(r_1+r_2, p)$ |
+| Nhiều Poisson | Poisson | $X+Y \sim \text{Pois}(\lambda_1 + \lambda_2)$ |
 
 
