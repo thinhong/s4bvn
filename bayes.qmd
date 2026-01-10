@@ -318,7 +318,7 @@ Chúng ta sẽ áp dụng phương pháp "Hình vuông niềm tin" để giải 
 - Hãy hình dung một hình vuông lớn đại diện cho 100% dân số
 - Hình vuông này được chia làm 2 phần, bên trái là tỉ lệ người bệnh trong dân số, bên phải là tỉ lệ người không bệnh
 - Trong cột người bệnh, độ nhạy là 95%, tô màu 95% chiều cao của cột này, đây là phần dương tính thật, diện tích là $0.10 \times 0.95 = 0.095$
-- Trong cột người bệnh, độ đặc hiệu là 90%, tô màu 10% chiều cao của cột này, đây là phần dương tính giả, diện tích là $0.90 \times 0.10 = 0.09$
+- Trong cột người không bệnh, độ đặc hiệu là 90%, tô màu 10% chiều cao của cột này, đây là phần dương tính giả, diện tích là $0.90 \times 0.10 = 0.09$
 
 Bây giờ, hãy nhìn vào toàn bộ phần được tô màu trên hình vuông.
 
