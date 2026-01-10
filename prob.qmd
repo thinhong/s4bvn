@@ -348,19 +348,15 @@ Plot.plot({
       bandwidth: 15,
       weight: d => d.isB ? 1 : (d.isA ? -1 : 0)
     }),
-
-    // --- LABELS ---
-    Plot.dot([sim_config_me2.centerA], {x: "x", y: "y", fill: "black", r: 3}),
-    Plot.dot([sim_config_me2.centerB], {x: "x", y: "y", fill: "black", r: 3}),
     
     // Use 'prob_a_safe' for the label so it matches the plot
     Plot.text([sim_config_me2.centerA], {
-      x: "x", y: "y", text: [`P(A)=${prob_a_safe.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+      x: "x", y: "y", text: [`P(A) = ${prob_a_safe.toFixed(2)}`], 
+      fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
     }),
     Plot.text([sim_config_me2.centerB], {
-      x: "x", y: "y", text: [`P(B)=${prob_b_safe.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+      x: "x", y: "y", text: [`P(B) = ${prob_b_safe.toFixed(2)}`], 
+      fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
     }),
 
     Plot.text(["Ω"], {frameAnchor: "top-right", dx: -10, dy: 10, fill: "#999", fontSize: 20, fontWeight: "bold"}),
@@ -492,18 +488,14 @@ Plot.plot({
       // Points in B are +1, Points ONLY in A are -1
       weight: d => d.inB ? 1 : (d.inA ? -1 : 0)
     }),
-
-    // --- LABELS & CENTERS ---
-    Plot.dot([sim_config_dens.centerA], {x: "x", y: "y", fill: "black", r: 3}),
-    Plot.dot([sim_config_dens.centerB], {x: "x", y: "y", fill: "black", r: 3}),
     
     Plot.text([sim_config_dens.centerA], {
-      x: "x", y: "y", text: [`P(A)=${prob_a_ov.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+      x: "x", y: "y", text: [`P(A) = ${prob_a_ov.toFixed(2)}`], 
+      fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
     }),
     Plot.text([sim_config_dens.centerB], {
-      x: "x", y: "y", text: [`P(B)=${prob_b_ov.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", dy: -15, stroke: "white", strokeWidth: 3
+      x: "x", y: "y", text: [`P(B) = ${prob_b_ov.toFixed(2)}`], 
+      fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
     }),
 
     Plot.text(["Ω"], {frameAnchor: "top-right", dx: -10, dy: 10, fill: "#999", fontSize: 20, fontWeight: "bold"}),
