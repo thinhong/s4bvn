@@ -216,7 +216,7 @@ Plot.plot({
       y: like_alex / 2, 
       dx: -15, // Push slightly left away from the line
       rotate: -90, // <--- Rotates text vertically
-      text: () => `P(D|A) = ${like_alex.toFixed(2)}`, // Removed \n for cleaner vertical look
+      text: () => `P(Date|A) = ${like_alex.toFixed(2)}`, // Removed \n for cleaner vertical look
       fill: "#6ecae1", 
       textAnchor: "middle", // Centers text on the bar height
       fontWeight: "bold", fontSize: 16, clip: false
@@ -233,7 +233,7 @@ Plot.plot({
       y: like_ben / 2, 
       dx: 15, // Push slightly right away from the line
       rotate: -90, // <--- Rotates text vertically
-      text: () => `P(D|B) = ${like_ben.toFixed(2)}`, 
+      text: () => `P(Date|B) = ${like_ben.toFixed(2)}`, 
       fill: "#2f7e9b", 
       textAnchor: "middle", 
       fontWeight: "bold", fontSize: 16, clip: false
@@ -276,12 +276,12 @@ total_area = area_alex + area_ben
 posterior_alex = area_alex / total_area
 
 html`
-  <div style="display: flex; align-items: center; font-size: 1.2em; flex-wrap: wrap;">
-    <div style="font-weight: bold; margin-right: 15px;">
+  <div style="display: flex; align-items: center; flex-wrap: wrap;">
+    <div style="font-weight: bold; margin-right: 5px;">
       P(A | Date) = 
     </div>
 
-    <div style="display: flex; flex-direction: column; align-items: center; margin: 0 15px;">
+    <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
       
       <div style="border-bottom: 2px solid; padding-bottom: 5px; text-align: center; width: 100%;">
         <span style="color: #6ecae1;">${area_alex.toFixed(3)}</span>
@@ -294,7 +294,7 @@ html`
       
     </div>
 
-    <div style="font-weight: bold; font-size: 1.2em; color: #6ecae1; margin-left: 15px;">
+    <div style="font-weight: bold; color: #6ecae1; margin-left: 5px;">
       = ${(posterior_alex * 100).toFixed(1)}%
     </div>
   </div>
@@ -303,13 +303,27 @@ html`
 
 ## Ứng dụng
 
-Một bệnh nhân vừa nhận được kết quả xét nghiệm dương tính với một căn bệnh. Xét nghiệm này có độ nhạy 95% và độ đặc hiệu 90%. Hỏi xác suất người đó bị bệnh khi xét nghiệm là dương tính $\mathbb{P}(B|D)$. Chúng ta sẽ áp dụng hình vuông như trên để tính xác suất này.
+Giả sử một bệnh nhân nhận kết quả xét nghiệm dương tính với một căn bệnh. Các thông số của xét nghiệm như sau:
+
+- Độ nhạy (Sensitivity): 95%
+- Độ đặc hiệu (Specificity): 90%
+- Tỷ lệ hiện mắc: Căn bệnh này chiếm 10% dân số
+
+Xác suất thực sự người đó bị bệnh khi cầm kết quả dương tính $\mathbb{P}(B|D)$ là bao nhiêu?
+
+Cách khác để đặt câu hỏi này là: Trong số những người cầm tờ giấy xét nghiệm Dương tính, có bao nhiêu phần trăm là Dương tính thật? Để trả lời, ta cần tìm Tổng diện tích Dương tính, rồi lấy Diện tích Dương tính thật chia cho tổng số đó.
+
+Chúng ta sẽ áp dụng phương pháp "Hình vuông niềm tin" để giải quyết:
 
 - Hãy hình dung một hình vuông lớn đại diện cho 100% dân số
-- Hình vuông này được chia làm 2 phần, bên trái dành là tỉ lệ người bệnh trong dân số, bên phải là tỉ lệ người không bệnh
-- Chiều rộng của mỗi ô là xác suất tiên nghiệm trong Bayesian, giả sử bệnh này chiếm 10% dân số
+- Hình vuông này được chia làm 2 phần, bên trái là tỉ lệ người bệnh trong dân số, bên phải là tỉ lệ người không bệnh
+- Trong cột người bệnh, độ nhạy là 95%, tô màu 95% chiều cao của cột này, đây là phần dương tính thật, diện tích là $0.10 \times 0.95 = 0.095$
+- Trong cột người bệnh, độ đặc hiệu là 90%, tô màu 10% chiều cao của cột này, đây là phần dương tính giả, diện tích là $0.90 \times 0.10 = 0.09$
 
-Độ nhạy của 1 xét nghiệm là xác suất dương tính trong những người bệnh $\mathbb{P}(D|B)$. Độ đặc hiệu là xác suất âm tính trong những người không bệnh $\mathbb{P}(D|B)$.
+Bây giờ, hãy nhìn vào toàn bộ phần được tô màu trên hình vuông.
+
+- Tổng diện tích màu (tổng dương tính) là $0.095 \text{ (Thật)} + 0.09 \text{ (Giả)} = 0.185$
+- Phần bị chiếm bởi dương tính thật chính là xác suất thực sự mắc bệnh khi có kết quả dương tính
 
 ```{ojs}
 //| echo: false
@@ -482,3 +496,36 @@ Plot.plot({
 })
 ```
 
+```{ojs}
+//| echo: false
+
+area_tpr = prev * sens
+area_fpr  = (1 - prev) * (1 - spec)
+total_area_risk = area_tpr + area_fpr
+posterior_risk = area_tpr / total_area_risk
+
+html`
+  <div style="display: flex; align-items: center; flex-wrap: wrap;">
+    <div style="font-weight: bold; margin-right: 5px;">
+      P(B | D) = 
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
+      
+      <div style="border-bottom: 2px solid; padding-bottom: 5px; text-align: center; width: 100%;">
+        <span style="color: #6ecae1;">${area_tpr.toFixed(3)}</span>
+      </div>
+      
+      <div style="padding-top: 5px; text-align: center;">
+        <span style="color: #6ecae1;">${area_tpr.toFixed(3)}</span> + 
+        <span style="color: #2f7e9b;">${area_fpr.toFixed(3)}</span>
+      </div>
+      
+    </div>
+
+    <div style="font-weight: bold; color: #6ecae1; margin-left: 5px;">
+      = ${(posterior_risk * 100).toFixed(1)}%
+    </div>
+  </div>
+`
+```
