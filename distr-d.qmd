@@ -42,20 +42,81 @@ Tung 1 đồng xu 10 lần, sau 10 lần tung, khả năng đếm được 1, 2,
 
 ```{ojs}
 //| echo: false
-viewof coin_sim_simple = Inputs.form({
-  flip: Inputs.button("Tung 10 đồng xu"),
-  auto: Inputs.toggle({label: "Tự động chạy", value: false}),
-  reset: Inputs.button("Làm lại")
-})
+viewof coin_sim_optimized = (() => {
+  // --- 1. UI DEFINITION ---
+  const form = Inputs.form({
+    flip: Inputs.button("Tung 10 đồng xu"),
+    auto: Inputs.toggle({label: "Tự động chạy", value: false}),
+    reset: Inputs.button("Làm lại")
+  });
 
-{
-  // 1. SETUP & DIMENSIONS
+  const ui = html`
+    <style>
+      .coin-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 450px;       /* Match Canvas Width */
+        margin: 0 auto;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+
+      /* CONTROLS ROW */
+      .coin-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 8px; /* Reduced margin */
+        width: 100%;
+        justify-content: center;
+      }
+      
+      .coin-controls form, .coin-controls form > div {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 !important;
+      }
+
+      /* BUTTON STYLES */
+      .coin-controls button {
+        padding: 6px 14px; /* Slightly more compact */
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        background-color: white;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.1s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      }
+      .coin-controls button:hover { background-color: #f3f4f6; }
+      
+      /* Primary Button (Blue) */
+      .coin-controls form > div:nth-child(1) button {
+        background-color: #3b82f6; 
+        color: white; 
+        border-color: #2563eb;
+      }
+      .coin-controls form > div:nth-child(1) button:hover { background-color: #2563eb; }
+
+      /* TOGGLE */
+      .coin-controls input[type="checkbox"] { width: 16px; height: 16px; accent-color: #10b981; }
+      .coin-controls label { font-size: 14px; font-weight: 500; color: #4b5563; }
+    </style>
+    
+    <div class="coin-wrapper">
+      <div class="coin-controls">${form}</div>
+      <div id="canvas-container"></div> 
+    </div>
+  `;
+
+  // --- 2. CANVAS SETUP ---
   const width = 450;
-  const height = 400;
+  const height = 300; // REDUCED HEIGHT (was 400)
   const canvas = document.createElement("canvas");
-  
-  // OPTIMIZATION: High-DPI support + Alpha false for speed
   const dpr = window.devicePixelRatio || 1;
+  
   canvas.width = width * dpr;
   canvas.height = height * dpr;
   canvas.style.width = `${width}px`;
@@ -63,23 +124,19 @@ viewof coin_sim_simple = Inputs.form({
   
   const ctx = canvas.getContext("2d", { alpha: false });
   ctx.scale(dpr, dpr);
-
-  // CONSTANTS
-  const N = 10; 
-  const P = 0.5; // FIXED PROBABILITY
   
-  // COLORS
-  const BG_COLOR = "#f8f9fa"; 
-  const TEXT_COLOR = "#2c3e50";
-  const HEAD_COLOR = "#f1c40f"; 
-  const HEAD_BORDER = "#d4ac0d";
-  const TAIL_COLOR = "#bdc3c7"; 
-  const TAIL_BORDER = "#95a5a6";
-  const CHART_BAR = "#3498db"; 
-  const CHART_ACTIVE = "#2980b9";
-  const CHART_THEO = "rgba(44, 62, 80, 0.1)"; 
+  ui.querySelector("#canvas-container").appendChild(canvas);
 
-  // MATH HELPER: Binomial PMF
+  // --- 3. SIMULATION CONSTANTS ---
+  const N = 10; 
+  const P = 0.5;
+  const BG_COLOR = "#f8f9fa";
+  const TEXT_COLOR = "#2c3e50";
+  const HEAD_COLOR = "#f1c40f"; const HEAD_BORDER = "#d4ac0d";
+  const TAIL_COLOR = "#bdc3c7"; const TAIL_BORDER = "#95a5a6";
+  const CHART_BAR = "#3498db";  const CHART_ACTIVE = "#2980b9";
+  const CHART_THEO = "rgba(44, 62, 80, 0.1)";
+
   function binomial(k, n, p) {
     function nCr(n, r) {
         if (r < 0 || r > n) return 0;
@@ -90,89 +147,85 @@ viewof coin_sim_simple = Inputs.form({
     return nCr(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
   }
 
-  // 2. STATE MANAGEMENT
-  if (!this.stateCoinSimple) {
-    this.stateCoinSimple = {
-       history: [], 
-       counts: {},  
-       totalFlips: 0,
-       currentResult: [], 
-       animation: 0, 
-       cooldown: 0,
-       lastFlipVal: coin_sim_simple.flip,
-       lastResetVal: coin_sim_simple.reset
-    };
-    for(let i=0; i<=N; i++) this.stateCoinSimple.counts[i] = 0;
-  }
-  const S = this.stateCoinSimple;
+  // State
+  const S = {
+     history: [], 
+     counts: {},  
+     totalFlips: 0,
+     currentResult: [], 
+     animation: 0, 
+     cooldown: 0,
+     lastFlipVal: 0, 
+     lastResetVal: 0
+  };
+  for(let i=0; i<=N; i++) S.counts[i] = 0;
 
-  // 3. LOGIC
-  
-  // Helper to clear data
-  function doReset() {
-     S.history = [];
-     for(let i=0; i<=N; i++) S.counts[i] = 0;
-     S.totalFlips = 0;
-     S.currentResult = [];
-     S.animation = 0;
-  }
-
-  // Handle Reset Button
-  if (coin_sim_simple.reset > S.lastResetVal) {
-     doReset();
-     S.lastResetVal = coin_sim_simple.reset;
-  }
-
-  // Main Logic: Run a single experiment (flip 10 coins)
-  function runFlip() {
-     let heads = 0;
-     const res = [];
-     for(let i=0; i<N; i++) {
-        const isHead = Math.random() < P;
-        res.push(isHead ? 1 : 0);
-        if (isHead) heads++;
-     }
-     
-     // Animation Setup
-     const coinSize = 28;
-     const gap = 6;
-     const totalW = N * coinSize + (N-1)*gap;
-     const startX = (width - totalW) / 2 + coinSize/2;
-
-     S.currentResult = res.map((val, i) => ({
-        val: val,
-        x: width/2, 
-        y: 50,
-        targetX: startX + i * (coinSize + gap), 
-        targetY: 60,
-        r: coinSize / 2,
-        t: 0
-     }));
-
-     S.history.push(heads);
-     S.counts[heads] = (S.counts[heads] || 0) + 1;
-     S.totalFlips++;
-     S.animation = 1;
-     S.cooldown = 0;
-  }
-
-  // Handle Flip Button
-  if (coin_sim_simple.flip > S.lastFlipVal) {
-     runFlip();
-     S.lastFlipVal = coin_sim_simple.flip;
-  }
-
-  // 4. RENDER LOOP
+  // --- 4. UPDATE LOOP ---
   function update() {
-    const form = viewof coin_sim_simple;
-    const checkbox = form.querySelector("input[type=checkbox]");
-    const isAuto = checkbox ? checkbox.checked : false;
+    const currentFlip = form.value.flip;
+    const currentReset = form.value.reset;
+    const isAuto = form.value.auto;
+
+    // Reset
+    if (currentReset > S.lastResetVal) {
+       S.history = [];
+       for(let i=0; i<=N; i++) S.counts[i] = 0;
+       S.totalFlips = 0;
+       S.currentResult = [];
+       S.animation = 0;
+       S.lastResetVal = currentReset;
+    }
+
+    // Flip
+    let shouldFlip = false;
+    if (currentFlip > S.lastFlipVal) {
+        shouldFlip = true;
+        S.lastFlipVal = currentFlip;
+    } 
+    else if (isAuto && S.animation === 0) {
+        S.cooldown++;
+        // FASTER SPEED: 20 frames = ~0.3 seconds delay (was 90)
+        if (S.cooldown > 20) { 
+            shouldFlip = true;
+        }
+    }
+
+    if (shouldFlip) {
+         let heads = 0;
+         const res = [];
+         for(let i=0; i<N; i++) {
+            const isHead = Math.random() < P;
+            res.push(isHead ? 1 : 0);
+            if (isHead) heads++;
+         }
+         
+         const coinSize = 28;
+         const gap = 6;
+         const totalW = N * coinSize + (N-1)*gap;
+         const startX = (width - totalW) / 2 + coinSize/2;
+
+         S.currentResult = res.map((val, i) => ({
+            val: val,
+            x: width/2, 
+            y: 50,
+            targetX: startX + i * (coinSize + gap), 
+            targetY: 85, // LOWERED COINS (was 60, now 85)
+            r: coinSize / 2,
+            t: 0
+         }));
+
+         S.history.push(heads);
+         S.counts[heads] = (S.counts[heads] || 0) + 1;
+         S.totalFlips++;
+         S.animation = 1;
+         S.cooldown = 0;
+    }
 
     if (S.animation === 1) {
        let done = true;
        for (let c of S.currentResult) {
           if (c.t < 1) {
-             c.t += 0.15; 
+             c.t += 0.2; // Faster pop animation (was 0.15)
              if (c.t > 1) c.t = 1;
              const ease = 1 - Math.pow(1 - c.t, 3); 
              c.x = width/2 + (c.targetX - width/2) * ease;
@@ -181,42 +234,40 @@ viewof coin_sim_simple = Inputs.form({
           }
        }
        if (done) S.animation = 0;
-    } 
-    else if (isAuto) {
-       S.cooldown++;
-       // 90 frames = ~1.5 seconds delay
-       if (S.cooldown > 90) runFlip();
     }
   }
 
+  // --- 5. DRAW LOOP ---
   function draw() {
-    const form = viewof coin_sim_simple;
-    const checkbox = form.querySelector("input[type=checkbox]");
-    const isAuto = checkbox ? checkbox.checked : false;
-
-    // Clear Screen
     ctx.fillStyle = BG_COLOR;
     ctx.fillRect(0, 0, width, height);
 
-    // Text info
+    ctx.save();
+    ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fontVariantNumeric = "tabular-nums";
+    
+    // Left: Count
     ctx.textAlign = "left";
     ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "bold 14px sans-serif";
+    // CHANGED TEXT: "Lần chạy"
     ctx.fillText(`Lần chạy: ${S.totalFlips}`, 20, 30);
     
-    if (isAuto) {
+    // Center: Status
+    if (form.value.auto) {
        ctx.fillStyle = "#27ae60";
        ctx.fillText("● Đang chạy...", 160, 30);
     }
     
+    // Right: Result
     if (S.currentResult.length > 0) {
        const hCount = S.currentResult.filter(c => c.val===1).length;
        ctx.textAlign = "right";
        ctx.fillStyle = TEXT_COLOR;
-       ctx.fillText(`Số mặt Ngửa: ${hCount} / ${N}`, width - 20, 30);
+       ctx.fillText(`Mặt Ngửa: ${hCount} / ${N}`, width - 20, 30);
     }
+    ctx.restore();
 
-    // Draw Coins
+    // COINS
     for (let c of S.currentResult) {
        ctx.beginPath();
        ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
@@ -232,9 +283,10 @@ viewof coin_sim_simple = Inputs.form({
        ctx.fillText(c.val === 1 ? "N" : "S", c.x, c.y + 1);
     }
 
-    // Chart Setup
-    const chartY = 360;
-    const chartH = 200;
+    // CHART
+    // MOVED CHART UP: Bottom Y=280 (was 360), Height=140 (was 200)
+    const chartY = 280; 
+    const chartH = 140; 
     const chartX = 40;
     const chartW = width - 60;
     
@@ -246,44 +298,36 @@ viewof coin_sim_simple = Inputs.form({
     ctx.stroke();
 
     const barW = chartW / (N + 1);
-    
-    // Scale Y-axis based on P=0.5 constant
-    // Max prob for N=10, P=0.5 is at k=5 (~0.246)
-    // We hardcode scale max to keep chart stable
-    const MAX_PROB = 0.246;
+    const MAX_PROB = 0.246; 
     const Y_SCALE_MAX = MAX_PROB * 1.2; 
-    
     const activeHeads = S.currentResult.filter(c => c.val===1).length;
 
     for (let k = 0; k <= N; k++) {
        const cx = chartX + k * barW + barW/2;
        
-       // Theoretical Bar (Gray)
+       // Theoretical
        const prob = binomial(k, N, P);
        const theoH = (prob / Y_SCALE_MAX) * chartH;
-       
        ctx.fillStyle = CHART_THEO;
        ctx.fillRect(cx - barW*0.3, chartY - theoH, barW*0.6, theoH);
        
-       // Actual Bar (Blue)
+       // Actual
        let observedProb = 0;
        if (S.totalFlips > 0) observedProb = S.counts[k] / S.totalFlips;
-       
        let barH = (observedProb / Y_SCALE_MAX) * chartH;
-       if (barH > chartH + 20) barH = chartH + 20;
+       if (barH > chartH + 10) barH = chartH + 10;
 
        const isActive = (S.animation === 0 && k === activeHeads && S.totalFlips > 0);
        ctx.fillStyle = isActive ? CHART_ACTIVE : CHART_BAR;
        ctx.fillRect(cx - barW*0.3, chartY - barH, barW*0.6, barH);
        
-       // X-Axis Labels
+       // Labels
        ctx.fillStyle = TEXT_COLOR;
        ctx.font = "10px sans-serif";
        ctx.textAlign = "center";
        ctx.fillText(k, cx, chartY + 15);
     }
     
-    // Y-Axis Label
     ctx.save();
     ctx.translate(12, chartY - chartH/2);
     ctx.rotate(-Math.PI/2);
@@ -293,7 +337,6 @@ viewof coin_sim_simple = Inputs.form({
     ctx.restore();
   }
 
-  // Animation Loop
   let frameId;
   function tick() {
     update();
@@ -301,11 +344,17 @@ viewof coin_sim_simple = Inputs.form({
     frameId = requestAnimationFrame(tick);
   }
   tick();
-  
-  return Object.assign(canvas, {
-    remove: () => cancelAnimationFrame(frameId)
+
+  ui.value = form.value;
+  form.addEventListener("input", () => {
+      ui.value = form.value;
+      ui.dispatchEvent(new Event("input"));
   });
-}
+  
+  invalidation.then(() => cancelAnimationFrame(frameId));
+
+  return ui;
+})();
 ```
 
 #### Bảng Galton
