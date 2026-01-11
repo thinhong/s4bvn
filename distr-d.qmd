@@ -204,7 +204,7 @@ function binomialPMF(k, n, p) {
 
 #### Bảng Galton
 
-Bảng Galton là một tấm bảng dựng đứng, được đóng các hàng đinh so le nhau theo hình tam giác. Ta thả những viên bi nhỏ từ đỉnh tháp. Khi một viên bi chạm vào một chiếc đinh, nó sẽ nảy sang trái hoặc sang phải. Sau khi đi hết các hàng đinh, viên bi sẽ rơi vào các ô chứa để hứng bi. Số lượng bi trong các ô chứa này tuân theo phân phối nhị thức.
+Bảng Galton (Galton board) là một tấm bảng dựng đứng, được đóng các hàng đinh so le nhau theo hình tam giác. Ta thả những viên bi nhỏ từ đỉnh tháp. Khi một viên bi chạm vào một chiếc đinh, nó sẽ nảy sang trái hoặc sang phải. Sau khi đi hết các hàng đinh, viên bi sẽ rơi vào các ô chứa để hứng bi. Số lượng bi trong các ô chứa này tuân theo phân phối nhị thức.
 
 ```{ojs}
 //| echo: false
@@ -416,12 +416,8 @@ viewof control_sharp = Inputs.form({
     
     // Status Text
     ctx.fillStyle = "#444";
-    ctx.font = "bold 14px sans-serif"; // Slightly bigger font
-    let status = isRunning ? "Đang chạy..." : "Dừng";
-    if (spawnedCount >= maxBalls) status = "Kết thúc";
-    
-    ctx.fillText(`Trạng thái: ${status}`, 10, 25);
-    ctx.fillText(`Số viên bi: ${spawnedCount} / ${maxBalls}`, 10, 45);
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText(`Số viên bi: ${spawnedCount} / ${maxBalls}`, 10, 25);
   }
 
   let lastTime = performance.now();
@@ -448,6 +444,28 @@ viewof control_sharp = Inputs.form({
 - Mỗi lần viên bi chạm vào chiếc đinh, có hai trường hợp xảy ra: viên bi sẽ nảy sang trái hoặc sang phải, xác suất nảy sang mỗi bên là $p = 0.5$, giống như tung đồng xu. Đây là một phép thử Bernoulli.
 - Nếu bảng có 10 hàng đinh, viên bi sẽ thực hiện 10 lần tung đồng xu liên tiếp.
 - Các ô chứa tương ứng với số lần viên bi nảy về bên phải. Để vào ô giữa, viên bi phải nảy sang bên phải 5 lần, để vào ô cuối cùng, viên bi phải nảy sang bên phải 10 lần.
+
+#### Hồi quy logistic
+
+```{r}
+#| eval: false
+glm(formula, data, family = binomial(link = "logit"))
+glm(formula, data, family = "binomial")
+```
+
+**Tại sao trong hồi quy logistic lại ghi `family = "binomial"`?**
+
+Ví dụ: Hút thuốc lá có làm tăng nguy cơ ung thư phổi không?
+
+- Biến độc lập: Số điếu thuốc hút mỗi ngày
+- Biến phụ thuộc: Tình trạng ung thư phổi (1 = Có bệnh, 0 = Không bệnh)
+
+Khi xây dựng mô hình, chúng ta xem xét từng cá nhân trong dữ liệu như một phép thử ngẫu nhiên:
+
+- Với một người cụ thể (ví dụ: anh A, hút 1 gói/ngày), việc anh ta có bị ung thư hay không giống như việc tung một đồng xu: mặt ngửa (1) là bị ung thư, mặt sấp (0) là không bị ung thư. **Nhưng** xác suất tung ra mặt ngửa của đồng xu này không phải là 0.5, mà phụ thuộc vào việc anh ta hút bao nhiêu thuốc.
+- Khi chúng ta tiến hành nghiên cứu trên $n$ người, đây là 1 chuỗi Bernoulli, vì vậy có thể chọn phân phối Binomial để mô hình nó.
+
+Khai báo `family = "binomial"` nghĩa là: "Biến kết quả ($Y$) là đếm số lần thành công (hoặc thất bại) từ các phép thử nhị phân, hãy dùng công thức xác suất của phân phối nhị thức để ước lượng."
 
 ### Phân phối siêu bội (hypergeometric distribution)
 
