@@ -360,26 +360,45 @@ viewof galton_sharp = Inputs.form({
   total: Inputs.range([50, 800], {value: 200, step: 10, label: "Số viên bi"})
 })
 
-viewof control_sharp = (() => {
-  // --- 1. SETUP CONTAINER ---
+viewof galton_sim_dense = (() => {
+  // --- 1. CONFIGURATION ---
+  const config = {
+      rows: galton_sharp.rows,
+      speed: galton_sharp.speed,
+      maxBalls: galton_sharp.total
+  };
+
+  // --- 2. SETUP CONTAINER (Centered) ---
+  const outerWrapper = document.createElement("div");
+  outerWrapper.style.cssText = `
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  `;
+
   const container = document.createElement("div");
   container.style.cssText = `
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    width: 380px; 
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    margin: 10px 0;
   `;
+  outerWrapper.appendChild(container);
 
-  // --- 2. INJECT HTML & CSS ---
+  // --- 3. INJECT UI ---
   container.innerHTML = `
     <style>
-      .ctrl-row {
+      .galton-ctrl-row {
+        width: 100%;
         display: flex;
-        align-items: center;
+        justify-content: center;
         gap: 12px;
+        margin-bottom: 10px;
       }
-      .ctrl-btn {
-        padding: 6px 14px;
+      .galton-btn {
+        padding: 6px 16px;
         border-radius: 6px;
         border: 1px solid #d1d5db;
         background-color: white;
@@ -387,96 +406,67 @@ viewof control_sharp = (() => {
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        line-height: 1.2;
         transition: all 0.1s ease;
       }
-      .ctrl-btn:hover { background-color: #f3f4f6; }
+      .galton-btn:hover { background-color: #f3f4f6; }
       
-      /* Primary Button (Blue) for Start */
-      .ctrl-btn-primary {
+      .galton-btn-primary {
         background-color: #3b82f6; 
         color: white; 
         border-color: #2563eb;
       }
-      .ctrl-btn-primary:hover { background-color: #2563eb; color: white; }
+      .galton-btn-primary:hover { background-color: #2563eb; }
+
+      canvas {
+        border-radius: 4px;
+      }
     </style>
 
-    <div class="ctrl-row">
-      <button id="btn-start" class="ctrl-btn ctrl-btn-primary">Bắt đầu</button>
-      <button id="btn-stop" class="ctrl-btn">Dừng</button>
+    <div class="galton-ctrl-row">
+      <button id="btn-start" class="galton-btn galton-btn-primary">Bắt đầu</button>
+      <button id="btn-stop" class="galton-btn">Dừng</button>
     </div>
   `;
 
-  // --- 3. BIND EVENTS ---
-  const btnStart = container.querySelector("#btn-start");
-  const btnStop = container.querySelector("#btn-stop");
-
-  // Default Value
-  container.value = null;
-
-  btnStart.onclick = () => {
-    container.value = "START";
-    container.dispatchEvent(new Event("input", {bubbles: true}));
-  };
-
-  btnStop.onclick = () => {
-    container.value = "STOP";
-    container.dispatchEvent(new Event("input", {bubbles: true}));
-  };
-
-  return container;
-})();
-
-{
-  const rows = galton_sharp.rows;
-  const speed = galton_sharp.speed;
-  const maxBalls = galton_sharp.total;
-  
-  // 1. CENTERED CONTAINER FOR CANVAS
-  // We wrap the canvas in a flex div to center it on the page
-  const wrapper = document.createElement("div");
-  wrapper.style.cssText = `
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    margin-top: 10px;
-  `;
-
-  // 2. DIMENSIONS
-  const logicalWidth = 360;
-  const logicalHeight = 600;
-
-  // 3. HIGH-DPI SCALING
+  // --- 4. CANVAS SETUP ---
+  // INCREASED HEIGHT from 500 -> 600
+  const logicalWidth = 380;
+  const logicalHeight = 600; 
   const dpr = window.devicePixelRatio || 1;
-  
+
   const canvas = document.createElement("canvas");
   canvas.width = logicalWidth * dpr;
   canvas.height = logicalHeight * dpr;
   canvas.style.width = `${logicalWidth}px`;
   canvas.style.height = `${logicalHeight}px`;
   
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { alpha: false });
   ctx.scale(dpr, dpr);
-  
-  // Add canvas to the centered wrapper
-  wrapper.appendChild(canvas);
+  container.appendChild(canvas);
 
-  // --- GEOMETRY ---
-  const pegSpacing = logicalWidth / (rows + 2);
-  const rowHeight = pegSpacing * 0.85; 
+  // --- 5. GEOMETRY & STATE ---
+  const pegSpacing = logicalWidth / (config.rows + 3);
   const startY = 60;
   const pegRadius = pegSpacing * 0.12; 
   const ballRadius = pegSpacing * 0.23; 
+  const rowHeight = pegSpacing * 0.85;
 
+  // Bin Geometry
   const floorY = logicalHeight - 10;
   const binWidth = pegSpacing;
-  const totalBinWidth = (rows + 1) * binWidth;
+  const totalBinWidth = (config.rows + 1) * binWidth;
   const binsStartX = (logicalWidth - totalBinWidth) / 2;
-  const wallsTopY = startY + (rows) * rowHeight + 10;
+  const wallsTopY = startY + (config.rows) * rowHeight + 15;
 
-  // PRE-COMPUTE BOARD
+  // DENSE PACKING FACTOR
+  // 70% Overlap means the vertical step is small.
+  // Normal Diameter = 2*r.
+  // We use step = 0.6 * r. This is very dense.
+  const stackStep = ballRadius * 0.6; 
+
+  // Pre-calculate Peg Positions
   const pegGrid = []; 
-  for (let r = 0; r < rows; r++) {
+  for (let r = 0; r < config.rows; r++) {
     const rowPegs = [];
     const pegsInThisRow = r + 1;
     const rowWidth = (pegsInThisRow - 1) * pegSpacing;
@@ -490,38 +480,21 @@ viewof control_sharp = (() => {
     pegGrid.push(rowPegs);
   }
 
-  // STATE
-  let balls = [];
-  let bins = new Array(rows + 1).fill(0);
-  let spawnedCount = 0;
-  let isRunning = false;
+  // Simulation State
+  const S = {
+    balls: [],
+    bins: new Array(config.rows + 1).fill(0),
+    spawned: 0,
+    running: false
+  };
 
-  // CONTROLS
-  const startBtn = viewof control_sharp.querySelector("button"); 
-  const stopBtn = viewof control_sharp.querySelectorAll("button")[1];
-
-  // We need to re-bind these because the cell re-runs when inputs change
-  // Note: ideally controls and canvas would be in one cell to avoid re-binding issues,
-  // but following your requested structure, we hook into the DOM elements.
-  if (startBtn) {
-      startBtn.onclick = () => {
-        balls = [];
-        bins = new Array(rows + 1).fill(0);
-        spawnedCount = 0;
-        isRunning = true;
-      };
-  }
-  if (stopBtn) {
-      stopBtn.onclick = () => { isRunning = false; };
-  }
-
-  // PATH LOGIC
+  // --- 6. LOGIC ---
   function createBall() {
     let currentInd = 0; 
     let path = [];
-    path.push({ x: logicalWidth / 2, y: startY - 20 });
+    path.push({ x: logicalWidth / 2, y: startY - 20 }); 
 
-    for (let r = 0; r < rows; r++) {
+    for (let r = 0; r < config.rows; r++) {
        const peg = pegGrid[r][currentInd];
        path.push({ x: peg.x, y: peg.y - pegRadius - ballRadius });
        if (Math.random() > 0.5) currentInd++; 
@@ -529,7 +502,7 @@ viewof control_sharp = (() => {
 
     const binX = binsStartX + currentInd * binWidth + binWidth/2;
     path.push({ x: binX, y: wallsTopY });
-    path.push({ x: binX, y: floorY - ballRadius, isFloor: true, binIndex: currentInd });
+    path.push({ x: binX, y: floorY, isFloor: true, binIndex: currentInd });
 
     return {
       path: path,
@@ -538,129 +511,172 @@ viewof control_sharp = (() => {
     };
   }
 
-  function spawnBall() {
-    if (!isRunning) return;
-    if (spawnedCount >= maxBalls) return;
-    
-    const centerBinIdx = Math.floor(rows / 2);
-    const maxCapacity = (floorY - wallsTopY) / (ballRadius * 0.6); 
-    if (bins[centerBinIdx] >= maxCapacity) return;
-
-    balls.push(createBall());
-    spawnedCount++;
+  function spawn() {
+     if (S.spawned >= config.maxBalls) return;
+     
+     // Check capacity using new DENSE packing logic
+     // Available height = floorY - wallsTopY
+     // Height consumed = count * stackStep
+     const centerBin = Math.floor(config.rows/2);
+     const currentHeight = S.bins[centerBin] * stackStep;
+     
+     if (currentHeight > (floorY - wallsTopY - 20)) return; // -20 buffer
+     
+     S.balls.push(createBall());
+     S.spawned++;
   }
 
   function update(dt) {
-    const spawnRate = 0.15 / speed; 
-    if (isRunning && Math.random() < dt / spawnRate) spawnBall();
-
-    for (let b of balls) {
-      if (!b.active) continue;
-      if (!isRunning) continue; 
-
-      const moveSpeed = 3.5 * speed * dt; 
-      b.t += moveSpeed;
-
-      if (b.t >= 1) {
-        b.t = 0;
-        b.segment++;
-        if (b.segment >= b.path.length - 1) {
-           b.active = false;
-           const finalPt = b.path[b.path.length - 1];
-           bins[finalPt.binIndex]++;
-           continue;
-        }
-      }
-
-      const p0 = b.path[b.segment];
-      const p1 = b.path[b.segment + 1];
-      
-      b.x = p0.x + (p1.x - p0.x) * b.t;
-      if (p1.isFloor) {
-         b.y = p0.y + (p1.y - p0.y) * (b.t * b.t); 
-      } else {
-         b.y = p0.y + (p1.y - p0.y) * (b.t * b.t); 
-      }
+    if (S.running) {
+        const spawnChance = 0.25 * config.speed; 
+        if (Math.random() < spawnChance) spawn();
     }
-    balls = balls.filter(b => b.active);
+
+    for (let i = 0; i < S.balls.length; i++) {
+        const b = S.balls[i];
+        if (!b.active) continue;
+        if (!S.running) continue;
+
+        const moveSpeed = 3.0 * config.speed * dt;
+        b.t += moveSpeed;
+
+        if (b.t >= 1) {
+            b.t = 0;
+            b.segment++;
+            if (b.segment >= b.path.length - 1) {
+                b.active = false;
+                const finalPt = b.path[b.path.length - 1];
+                S.bins[finalPt.binIndex]++;
+                continue;
+            }
+        }
+
+        const p0 = b.path[b.segment];
+        const p1 = b.path[b.segment + 1];
+        const t = b.t;
+        const ease = t * t; 
+        
+        b.x = p0.x + (p1.x - p0.x) * t;
+        b.y = p0.y + (p1.y - p0.y) * (p1.isFloor ? ease : ease);
+    }
+    
+    if (S.balls.length > config.maxBalls + 50) {
+        S.balls = S.balls.filter(b => b.active);
+    }
   }
 
+  // --- 7. DRAW LOOP ---
   function draw() {
     // Clear
-    ctx.fillStyle = "#E8E0C5";
+    ctx.fillStyle = "#f8f9fa";
     ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
     // Pegs
-    ctx.fillStyle = "#666";
-    for (let row of pegGrid) {
-      for (let p of row) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, pegRadius, 0, Math.PI*2);
-        ctx.fill();
+    ctx.fillStyle = "#9ca3af";
+    ctx.beginPath();
+    for (let r = 0; r < pegGrid.length; r++) {
+      for (let p = 0; p < pegGrid[r].length; p++) {
+         const peg = pegGrid[r][p];
+         ctx.moveTo(peg.x + pegRadius, peg.y);
+         ctx.arc(peg.x, peg.y, pegRadius, 0, Math.PI*2);
       }
     }
-
-    // Walls
-    ctx.strokeStyle = "#998866";
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= rows + 1; i++) {
-      const x = binsStartX + i * binWidth;
-      ctx.beginPath();
-      ctx.moveTo(x, wallsTopY);
-      ctx.lineTo(x, logicalHeight);
-      ctx.stroke();
-    }
+    ctx.fill(); 
 
     // Active Balls
-    ctx.fillStyle = "#0033CC";
-    for (let b of balls) {
-      ctx.beginPath();
-      ctx.arc(b.x, b.y, ballRadius, 0, Math.PI*2);
-      ctx.fill();
+    ctx.fillStyle = "#3b82f6";
+    ctx.beginPath();
+    for (let i = 0; i < S.balls.length; i++) {
+       const b = S.balls[i];
+       if (b.active) {
+         ctx.moveTo(b.x + ballRadius, b.y);
+         ctx.arc(b.x, b.y, ballRadius, 0, Math.PI*2);
+       }
     }
+    ctx.fill(); 
 
-    // Stacked Balls
-    for (let i = 0; i < bins.length; i++) {
-      const count = bins[i];
-      const cx = binsStartX + i * binWidth + binWidth/2;
-      ctx.strokeStyle = "#4d79ff";
-      ctx.lineWidth = 0.5;
-
-      for (let j = 0; j < count; j++) {
-        const cy = floorY - j * (ballRadius * 0.6); 
-        if (cy < wallsTopY) break;
-        ctx.beginPath();
-        ctx.arc(cx, cy, ballRadius, 0, Math.PI*2);
-        ctx.fillStyle = "#0033CC";
-        ctx.fill();
-        ctx.stroke();
-      }
-    }
+    // BINS (Dense Stacking)
+    ctx.fillStyle = "#3b82f6";
+    ctx.strokeStyle = "#1d4ed8"; // Darker border for definition
+    ctx.lineWidth = 1;
     
-    // Status Text
-    ctx.fillStyle = "#444";
+    for (let i = 0; i < S.bins.length; i++) {
+       const count = S.bins[i];
+       if (count === 0) continue;
+       
+       const cx = binsStartX + i * binWidth + binWidth/2;
+       
+       ctx.beginPath();
+       for (let j = 0; j < count; j++) {
+          // DENSE LOGIC: stackStep = 0.6 * r
+          const cy = floorY - ballRadius - (j * stackStep);
+          
+          if (cy < wallsTopY) break; 
+          ctx.moveTo(cx + ballRadius, cy);
+          ctx.arc(cx, cy, ballRadius, 0, Math.PI*2);
+       }
+       ctx.fill();
+       ctx.stroke();
+    }
+
+    // Walls/Floor
+    ctx.strokeStyle = "#d1d5db";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(binsStartX, floorY);
+    ctx.lineTo(binsStartX + totalBinWidth, floorY);
+    for (let i = 0; i <= config.rows + 1; i++) {
+       const x = binsStartX + i * binWidth;
+       ctx.moveTo(x, wallsTopY);
+       ctx.lineTo(x, floorY);
+    }
+    ctx.stroke();
+
+    // Text
+    ctx.fillStyle = "#374151";
     ctx.font = "bold 14px sans-serif";
-    ctx.fillText(`Số viên bi: ${spawnedCount} / ${maxBalls}`, 10, 25);
+    ctx.fillText(`Số bi: ${S.spawned} / ${config.maxBalls}`, 10, 25);
   }
 
+  // --- 8. RUNTIME ---
   let lastTime = performance.now();
   let frameId;
+  
   function tick(now) {
-    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    const dt = Math.min((now - lastTime) / 1000, 0.1); 
     lastTime = now;
+    
     update(dt);
     draw();
     frameId = requestAnimationFrame(tick);
   }
+
+  // Bind Buttons
+  const btnStart = container.querySelector("#btn-start");
+  const btnStop = container.querySelector("#btn-stop");
+
+  btnStart.onclick = () => {
+     if (!S.running && S.spawned === 0) {
+         S.running = true;
+     } else {
+         S.running = true;
+         if (S.spawned >= config.maxBalls) {
+             S.balls = [];
+             S.bins.fill(0);
+             S.spawned = 0;
+         }
+     }
+  };
   
-  draw();
-  tick(lastTime);
-  
-  // Return the wrapper (div), not just the canvas
-  return Object.assign(wrapper, {
-    remove: () => cancelAnimationFrame(frameId)
-  });
-}
+  btnStop.onclick = () => {
+      S.running = false;
+  };
+
+  tick(performance.now());
+  invalidation.then(() => cancelAnimationFrame(frameId));
+
+  return outerWrapper;
+})();
 ```
 
 **Tại sao lại là phân phối Nhị thức?**
