@@ -42,163 +42,271 @@ Tung 1 đồng xu 10 lần, sau 10 lần tung, khả năng đếm được 1, 2,
 
 ```{ojs}
 //| echo: false
+viewof coin_sim_reset_p = Inputs.form({
+  p: Inputs.range([0.01, 0.99], {value: 0.5, step: 0.01, label: "Xác suất mặt ngửa (p)"}),
+  flip: Inputs.button("Tung 10 lần"),
+  auto: Inputs.toggle({label: "Tự động", value: false}),
+  reset: Inputs.button("Lại từ đầu")
+})
 
-viewof n_coins = Inputs.range([1, 20], {label: "Coins per Flip (n)", value: 10, step: 1})
-viewof p_head = Inputs.range([0.01, 0.99], {label: "Prob. of Heads (p)", value: 0.5, step: 0.01})
-viewof speed = Inputs.range([10, 1000], {label: "Speed (ms)", value: 200, transform: x => 1010 - x})
-
-viewof flipBtn = Inputs.button("Flip Once")
-viewof autoBtn = Inputs.button("Start/Stop Auto-Flip")
-viewof resetCoinBtn = Inputs.button("Reset Data")
-
-// A. STATE CONTAINER
-// Holds the data history.
-coin_state = {
-  // We define it once. It persists until you reload the page.
-  return {
-    history: [], 
-    currentToss: [],
-    totalHeads: 0,
-    count: 0,
-    lastReset: 0
-  };
-}
-
-// B. GAME LOGIC
-// This cell runs whenever you click a button.
-coin_logic = {
-  // 1. LISTEN TO TRIGGERS
-  flipBtn;
-  autoBtn;
-  resetCoinBtn;
-  
-  // 2. HANDLE RESET
-  // We check if the reset button counter has increased
-  if (resetCoinBtn > coin_state.lastReset) {
-      coin_state.history = [];
-      coin_state.currentToss = [];
-      coin_state.totalHeads = 0;
-      coin_state.count = 0;
-      coin_state.lastReset = resetCoinBtn;
-      // Return immediately to clear the plot
-      return coin_state.count; 
-  }
-
-  // 3. DEFINE THE FLIP FUNCTION
-  const doFlip = () => {
-    let heads = 0;
-    const outcome = [];
-    for(let i=0; i<n_coins; i++) {
-      const isHead = Math.random() < p_head;
-      outcome.push(isHead ? 1 : 0);
-      if(isHead) heads++;
-    }
-    coin_state.currentToss = outcome;
-    coin_state.history.push(heads);
-    coin_state.totalHeads = heads;
-    coin_state.count++;
-  };
-
-  // 4. EXECUTION MODE
-  // If Auto Button is ODD (1, 3, 5...), we are in Auto Mode
-  const isAuto = (autoBtn % 2) !== 0;
-
-  if (isAuto) {
-    // --- AUTO MODE (Loop) ---
-    while (true) {
-      doFlip();
-      yield coin_state.count; // Yield updates the plot!
-      await new Promise(r => setTimeout(r, 1010 - speed));
-    }
-  } else {
-    // --- MANUAL MODE (Single Shot) ---
-    // If we aren't in auto, and this cell ran, it means 'flipBtn' was clicked
-    // (or a slider changed). We flip once.
-    if (coin_state.count > 0 || flipBtn > 0) {
-       doFlip();
-    }
-    return coin_state.count;
-  }
-}
-
-// 3. THE VISUALIZATION (Fixed: Split into two plots)
 {
-  // DEPENDENCY: Listen to the logic!
-  coin_logic; 
+  // 1. SETUP
+  const width = 450;
+  const height = 400;
+  const canvas = document.createElement("canvas");
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = `${width}px`;
+  canvas.style.height = `${height}px`;
   
-  // Plot A: The Coins (Top Strip)
-  const coinPlot = Plot.plot({
-    width: 600,
-    height: 80, // Fixed height for just the coins
-    title: `Toss #${coin_state.count}: Result`,
-    x: {axis: null, domain: [0, n_coins]},
-    y: {axis: null},
-    marks: [
-      Plot.dot(coin_state.currentToss.map((d, i) => ({x: i, val: d})), {
-        x: (d, i) => mapRange(i, 0, n_coins-1, 0.5, n_coins-0.5), 
-        y: 0, 
-        r: 12,
-        fill: d => d.val === 1 ? "#f7941d" : "#ccc", 
-        stroke: "black",
-        strokeWidth: 2
-      }),
-      Plot.text(coin_state.currentToss.map((d, i) => ({x: i, val: d})), {
-        x: (d, i) => mapRange(i, 0, n_coins-1, 0.5, n_coins-0.5), 
-        y: 0, 
-        text: d => d.val === 1 ? "H" : "T",
-        fill: "black", fontWeight: "bold", dy: 1
-      })
-    ]
+  const ctx = canvas.getContext("2d", { alpha: false });
+  ctx.scale(dpr, dpr);
+
+  // CONSTANTS
+  const N = 10; 
+  
+  // COLORS
+  const BG_COLOR = "#f8f9fa"; 
+  const TEXT_COLOR = "#2c3e50";
+  const HEAD_COLOR = "#f1c40f"; 
+  const HEAD_BORDER = "#d4ac0d";
+  const TAIL_COLOR = "#bdc3c7"; 
+  const TAIL_BORDER = "#95a5a6";
+  const CHART_BAR = "#3498db"; 
+  const CHART_ACTIVE = "#2980b9";
+  const CHART_THEO = "rgba(44, 62, 80, 0.1)"; 
+
+  // MATH HELPER
+  function binomial(k, n, p) {
+    function nCr(n, r) {
+        if (r < 0 || r > n) return 0;
+        let res = 1;
+        for(let i=0; i<r; i++) res = res * (n - i) / (i + 1);
+        return res;
+    }
+    return nCr(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+  }
+
+  // 2. STATE
+  if (!this.stateCoinReset) {
+    this.stateCoinReset = {
+       history: [], 
+       counts: {},  
+       totalFlips: 0,
+       currentResult: [], 
+       animation: 0, 
+       cooldown: 0,
+       lastFlipVal: coin_sim_reset_p.flip,
+       lastResetVal: coin_sim_reset_p.reset,
+       lastP: coin_sim_reset_p.p // Track P to detect changes
+    };
+    for(let i=0; i<=N; i++) this.stateCoinReset.counts[i] = 0;
+  }
+  const S = this.stateCoinReset;
+  
+  // Current P
+  const P = coin_sim_reset_p.p;
+
+  // 3. LOGIC
+  
+  // Helper to clear data
+  function doReset() {
+     S.history = [];
+     for(let i=0; i<=N; i++) S.counts[i] = 0;
+     S.totalFlips = 0;
+     S.currentResult = [];
+     S.animation = 0;
+  }
+
+  // A. Explicit Reset Button
+  if (coin_sim_reset_p.reset > S.lastResetVal) {
+     doReset();
+     S.lastResetVal = coin_sim_reset_p.reset;
+  }
+
+  // B. Auto-Reset on Probability Change
+  // If the user moved the slider, we wipe the data immediately.
+  if (P !== S.lastP) {
+     doReset();
+     S.lastP = P;
+  }
+
+  // Flip Function
+  function runFlip() {
+     let heads = 0;
+     const res = [];
+     for(let i=0; i<N; i++) {
+        const isHead = Math.random() < P;
+        res.push(isHead ? 1 : 0);
+        if (isHead) heads++;
+     }
+     
+     const coinSize = 28;
+     const gap = 6;
+     const totalW = N * coinSize + (N-1)*gap;
+     const startX = (width - totalW) / 2 + coinSize/2;
+
+     S.currentResult = res.map((val, i) => ({
+        val: val,
+        x: width/2, 
+        y: 50,
+        targetX: startX + i * (coinSize + gap), 
+        targetY: 60,
+        r: coinSize / 2,
+        t: 0
+     }));
+
+     S.history.push(heads);
+     S.counts[heads] = (S.counts[heads] || 0) + 1;
+     S.totalFlips++;
+     S.animation = 1;
+     S.cooldown = 0;
+  }
+
+  // Manual Flip Check
+  if (coin_sim_reset_p.flip > S.lastFlipVal) {
+     runFlip();
+     S.lastFlipVal = coin_sim_reset_p.flip;
+  }
+
+  // 4. RENDER LOOP
+  function update() {
+    const form = viewof coin_sim_reset_p;
+    const checkbox = form.querySelector("input[type=checkbox]");
+    const isAuto = checkbox ? checkbox.checked : false;
+
+    if (S.animation === 1) {
+       let done = true;
+       for (let c of S.currentResult) {
+          if (c.t < 1) {
+             c.t += 0.15; 
+             if (c.t > 1) c.t = 1;
+             const ease = 1 - Math.pow(1 - c.t, 3); 
+             c.x = width/2 + (c.targetX - width/2) * ease;
+             c.y = c.targetY - Math.sin(c.t * Math.PI) * 20; 
+             done = false;
+          }
+       }
+       if (done) S.animation = 0;
+    } 
+    else if (isAuto) {
+       S.cooldown++;
+       if (S.cooldown > 90) runFlip();
+    }
+  }
+
+  function draw() {
+    const form = viewof coin_sim_reset_p;
+    const checkbox = form.querySelector("input[type=checkbox]");
+    const isAuto = checkbox ? checkbox.checked : false;
+
+    ctx.fillStyle = BG_COLOR;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.textAlign = "left";
+    ctx.fillStyle = TEXT_COLOR;
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText(`Lần thứ ${S.totalFlips}`, 20, 30);
+    
+    if (isAuto) {
+       ctx.fillStyle = "#27ae60";
+       ctx.fillText("● Tự động", 150, 30);
+    }
+    
+    if (S.currentResult.length > 0) {
+       const hCount = S.currentResult.filter(c => c.val===1).length;
+       ctx.textAlign = "right";
+       ctx.fillStyle = TEXT_COLOR;
+       ctx.fillText(`Mặt ngửa: ${hCount} / ${N}`, width - 20, 30);
+    }
+
+    for (let c of S.currentResult) {
+       ctx.beginPath();
+       ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
+       ctx.fillStyle = c.val === 1 ? HEAD_COLOR : TAIL_COLOR;
+       ctx.fill();
+       ctx.lineWidth = 2;
+       ctx.strokeStyle = c.val === 1 ? HEAD_BORDER : TAIL_BORDER;
+       ctx.stroke();
+       ctx.fillStyle = "white";
+       ctx.textAlign = "center";
+       ctx.textBaseline = "middle";
+       ctx.font = `bold ${c.r}px sans-serif`;
+       ctx.fillText(c.val === 1 ? "N" : "S", c.x, c.y + 1);
+    }
+
+    const chartY = 360;
+    const chartH = 200;
+    const chartX = 40;
+    const chartW = width - 60;
+    
+    ctx.beginPath();
+    ctx.strokeStyle = "#bdc3c7";
+    ctx.lineWidth = 1;
+    ctx.moveTo(chartX, chartY);
+    ctx.lineTo(chartX + chartW, chartY);
+    ctx.stroke();
+
+    const barW = chartW / (N + 1);
+    
+    // Scale Y-axis based on CURRENT P
+    let maxTheoreticalProb = 0;
+    for(let k=0; k<=N; k++) {
+        const prob = binomial(k, N, P);
+        if(prob > maxTheoreticalProb) maxTheoreticalProb = prob;
+    }
+    const Y_SCALE_MAX = maxTheoreticalProb * 1.2; 
+    
+    const activeHeads = S.currentResult.filter(c => c.val===1).length;
+
+    for (let k = 0; k <= N; k++) {
+       const cx = chartX + k * barW + barW/2;
+       
+       // Theoretical Bar
+       const prob = binomial(k, N, P);
+       const theoH = (prob / Y_SCALE_MAX) * chartH;
+       
+       ctx.fillStyle = CHART_THEO;
+       ctx.fillRect(cx - barW*0.3, chartY - theoH, barW*0.6, theoH);
+       
+       // Actual Bar
+       let observedProb = 0;
+       if (S.totalFlips > 0) observedProb = S.counts[k] / S.totalFlips;
+       
+       let barH = (observedProb / Y_SCALE_MAX) * chartH;
+       if (barH > chartH + 20) barH = chartH + 20;
+
+       const isActive = (S.animation === 0 && k === activeHeads && S.totalFlips > 0);
+       ctx.fillStyle = isActive ? CHART_ACTIVE : CHART_BAR;
+       ctx.fillRect(cx - barW*0.3, chartY - barH, barW*0.6, barH);
+       
+       ctx.fillStyle = TEXT_COLOR;
+       ctx.font = "10px sans-serif";
+       ctx.textAlign = "center";
+       ctx.fillText(k, cx, chartY + 15);
+    }
+    
+    ctx.save();
+    ctx.translate(12, chartY - chartH/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#7f8c8d";
+    ctx.fillText("Xác suất", 0, 0);
+    ctx.restore();
+  }
+
+  let frameId;
+  function tick() {
+    update();
+    draw();
+    frameId = requestAnimationFrame(tick);
+  }
+  tick();
+  
+  return Object.assign(canvas, {
+    remove: () => cancelAnimationFrame(frameId)
   });
-
-  // Plot B: The Histogram (Bottom Chart)
-  const histPlot = Plot.plot({
-    width: 600,
-    height: 350,
-    title: `Distribution of Heads (Total: ${coin_state.history.length} experiments)`,
-    x: {label: "Number of Heads", domain: [0, n_coins]},
-    y: {label: "Frequency", grid: true}, // Standard quantitative axis (Bottom-Up)
-    marks: [
-      // 1. The Blue Histogram
-      Plot.rectY(coin_state.history, Plot.binX(
-        {y: "count"}, 
-        {x: d => d, domain: [0, n_coins], thresholds: d3.range(0, n_coins + 2), fill: "#4e79a7", opacity: 0.6}
-      )),
-      
-      // 2. The Theoretical Red Line
-      Plot.line(d3.range(0, n_coins + 1), {
-        x: d => d + 0.5, 
-        y: d => binomialPMF(d, n_coins, p_head) * coin_state.history.length,
-        stroke: "red", strokeWidth: 2, curve: "natural"
-      }),
-      
-      Plot.ruleY([0])
-    ]
-  });
-
-  // Return both stacked together
-  return htl.html`<div>${coinPlot}${histPlot}</div>`;
-}
-
-// Helper Functions
-function mapRange(value, low1, high1, low2, high2) {
-    if (high1 === low1) return low2;
-    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
-}
-
-function factorial(n) {
-  if (n === 0 || n === 1) return 1;
-  let result = 1; 
-  for (let i = 2; i <= n; i++) result *= i; 
-  return result; 
-}
-
-function combination(n, k) {
-  return factorial(n) / (factorial(k) * factorial(n - k));
-}
-
-function binomialPMF(k, n, p) {
-  return combination(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
 }
 ```
 
@@ -483,7 +591,7 @@ Câu hỏi: "Tôi rút được bao nhiêu lá A?"
 //| echo: false
 viewof ace_sim_fixed = Inputs.form({
   draw: Inputs.button("Rút 10 lá"),
-  auto: Inputs.toggle({label: "Chạy tự động", value: false}),
+  auto: Inputs.toggle({label: "Tự động", value: false}),
   reset: Inputs.button("Lại từ đầu")
 })
 
