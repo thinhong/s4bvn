@@ -307,7 +307,7 @@ Giả sử một bệnh nhân nhận kết quả xét nghiệm dương tính v�
 
 - Độ nhạy (Sensitivity): 95%
 - Độ đặc hiệu (Specificity): 90%
-- Tỷ lệ hiện mắc: Căn bệnh này chiếm 10% dân số
+- Tỉ lệ hiện mắc: Căn bệnh này chiếm 10% dân số
 
 Xác suất thực sự người đó bị bệnh khi cầm kết quả dương tính $\mathbb{P}(B|D)$ là bao nhiêu?
 
