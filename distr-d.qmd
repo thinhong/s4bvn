@@ -20,7 +20,7 @@ Hầu hết các phân phối rời rạc đều xuất phát từ chuỗi Berno
 
 Chúng ta quyết định trước sẽ bỏ ra bao nhiêu công sức ($n$ lần thử), và đếm xem thu được bao nhiêu phần thưởng ($k$ thành công).
 
-### Phân phối Nhị thức (binomial distribution)
+### Phân phối Nhị thức (Binomial distribution)
 
 Đếm số lần thành công ($k$) trong một số lượng cố định các phép thử Bernoulli độc lập ($n$).
 
@@ -415,7 +415,7 @@ viewof galton_sim_dense = (() => {
         color: white; 
         border-color: #2563eb;
       }
-      .galton-btn-primary:hover { background-color: #2563eb; }
+      .galton-btn-primary:hover { background-color: #2563eb; color: white; }
 
       canvas {
         border-radius: 4px;
