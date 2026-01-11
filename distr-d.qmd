@@ -550,8 +550,8 @@ viewof control_sharp = Inputs.form({
 **Tại sao lại là phân phối nhị thức?**
 
 - Mỗi lần viên bi chạm vào chiếc đinh, có hai trường hợp xảy ra: viên bi sẽ nảy sang trái hoặc sang phải, xác suất nảy sang mỗi bên là $p = 0.5$, giống như tung đồng xu. Đây là một phép thử Bernoulli.
-- Nếu bảng có 10 hàng đinh, viên bi sẽ thực hiện 10 lần tung đồng xu liên tiếp.
-- Các ô chứa tương ứng với số lần viên bi nảy về bên phải. Để vào ô giữa, viên bi phải nảy sang bên phải 5 lần, để vào ô cuối cùng, viên bi phải nảy sang bên phải 10 lần.
+- Nếu bảng có 10 hàng đinh, viên bi sẽ thực hiện chuỗi Bernoulli có 10 phép thử liên tiếp.
+- Các ô chứa tương ứng với số lần viên bi nảy về bên phải. Để vào ô giữa, viên bi phải nảy sang bên phải 5 lần (và bên trái 5 lần), để vào ô cuối cùng, viên bi phải nảy sang bên phải 10 lần (và bên trái 0 lần).
 
 #### Hồi quy logistic
 
