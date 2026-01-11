@@ -106,7 +106,7 @@ viewof coin_sim_manual = (() => {
     </style>
 
     <div class="coin-controls-row">
-      <button id="btn-flip" class="coin-btn coin-btn-primary">Tung 10 đồng xu</button>
+      <button id="btn-flip" class="coin-btn coin-btn-primary">Tung đồng xu</button>
       <label class="coin-toggle">
         <input type="checkbox" id="chk-auto">
         Tự động chạy
@@ -250,7 +250,7 @@ viewof coin_sim_manual = (() => {
     // Right: Result
     if (S.currentResult.length > 0) {
        const hCount = S.currentResult.filter(c => c.val===1).length;
-       ctx.textAlign = "right"; ctx.fillStyle = TEXT_COLOR;
+       ctx.textAlign = "right"; ctx.fillStyle = "#d35400";
        ctx.fillText(`Mặt Ngửa: ${hCount} / ${N}`, width - 20, 30);
     }
     ctx.restore();
