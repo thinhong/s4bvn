@@ -9,7 +9,7 @@ Là một lần thử nghiệm duy nhất, không gian mẫu chỉ có đúng 2 
 
 Ví dụ: tung đồng xu (mặt sấp, mặt ngửa), xét nghiệm một ca nghi ngờ (dương tính, âm tính)
 
-Khi ta thực hiện phép thử Bernoulli nhiều lần liên tiếp (ví dụ: tung một đồng xu nhiều lần, dùng một loại xét nghiệm để test nhiều người), ta đang thực hiện 1 chuỗi Bernoulli. Chuỗi Bernoulli chuẩn cần thỏa 2 điều kiện:
+Khi ta thực hiện phép thử Bernoulli nhiều lần liên tiếp (ví dụ: tung một đồng xu nhiều lần, dùng một loại xét nghiệm để test nhiều người), ta đang thực hiện 1 chuỗi Bernoulli (Bernoulli process). Chuỗi Bernoulli chuẩn cần thỏa 2 điều kiện:
 
 -   Độc lập (Independent): Kết quả của lần thử này không ảnh hưởng đến lần thử khác.
 -   Xác suất không đổi: Xác suất thành công ($p$) phải giống hệt nhau ở mọi lần thử.
@@ -22,15 +22,23 @@ Chúng ta quyết định trước sẽ bỏ ra bao nhiêu công sức ($n$ lầ
 
 ### Phân phối nhị nhức (binomial distribution)
 
-Tình huống: Bạn mua 10 tờ vé số.
+Đếm số lần thành công ($k$) trong một số lượng cố định các phép thử Bernoulli độc lập ($n$).
 
-Luật chơi:
+Xác suất để đạt được đúng $k$ lần thành công là:
 
--   Số lần thử cố định ($n$)
--   Các lần thử độc lập với nhau
--   Lấy mẫu có hoàn lại (hoặc từ một quần thể vô hạn)
+$$P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
 
-Câu hỏi: "Tôi trúng được bao nhiêu tờ?"
+Với:
+
+- $n$: Tổng số lần thực hiện phép thử
+- $p$: Xác suất thành công của mỗi lần thử (không đổi)
+
+#### Ví dụ
+
+Tung 1 đồng xu 10 lần, sau 10 lần tung, khả năng đếm được 1, 2, 3... mặt ngửa là bao nhiêu?
+
+- Tổng số lần thực hiện phép thử: $n = 10$
+- Xác suất ra mặt ngửa mỗi lần: $p = 0.5$
 
 ```{ojs}
 //| echo: false
@@ -194,6 +202,252 @@ function binomialPMF(k, n, p) {
 }
 ```
 
+#### Bảng Galton
+
+Bảng Galton là một tấm bảng dựng đứng, được đóng các hàng đinh so le nhau theo hình tam giác. Ta thả những viên bi nhỏ từ đỉnh tháp. Khi một viên bi chạm vào một chiếc đinh, nó sẽ nảy sang trái hoặc sang phải. Sau khi đi hết các hàng đinh, viên bi sẽ rơi vào các ô chứa để hứng bi. Số lượng bi trong các ô chứa này tuân theo phân phối nhị thức.
+
+```{ojs}
+//| echo: false
+viewof galton_sharp = Inputs.form({
+  rows: Inputs.range([8, 20], {value: 10, step: 1, label: "Số hàng đinh"}),
+  speed: Inputs.range([0.5, 3], {value: 2, step: 0.1, label: "Tốc độ"}),
+  total: Inputs.range([50, 800], {value: 200, step: 10, label: "Số viên bi"})
+})
+
+viewof control_sharp = Inputs.form({
+  start: Inputs.button("Bắt đầu", {value: null, reduce: () => "START"}),
+  stop: Inputs.button("Dừng", {value: null, reduce: () => "STOP"})
+})
+
+{
+  const rows = galton_sharp.rows;
+  const speed = galton_sharp.speed;
+  const maxBalls = galton_sharp.total;
+  
+  // 1. DIMENSIONS
+  // The "Logical" size (how big it looks on screen)
+  const logicalWidth = 360;
+  const logicalHeight = 600;
+
+  // 2. HIGH-DPI SCALING
+  // We detect the user's screen density (e.g., 2.0 for Retina)
+  const dpr = window.devicePixelRatio || 1;
+  
+  const canvas = document.createElement("canvas");
+  // Set the "Real" size (pixels in memory) higher
+  canvas.width = logicalWidth * dpr;
+  canvas.height = logicalHeight * dpr;
+  // Set the "CSS" size (pixels on screen) standard
+  canvas.style.width = `${logicalWidth}px`;
+  canvas.style.height = `${logicalHeight}px`;
+  
+  const ctx = canvas.getContext("2d");
+  // Scale all drawing operations automatically
+  ctx.scale(dpr, dpr);
+
+  // --- GEOMETRY (Uses logical units) ---
+  const pegSpacing = logicalWidth / (rows + 2);
+  const rowHeight = pegSpacing * 0.85; 
+  const startY = 60;
+  const pegRadius = pegSpacing * 0.12; 
+  const ballRadius = pegSpacing * 0.23; 
+
+  const floorY = logicalHeight - 10;
+  const binWidth = pegSpacing;
+  const totalBinWidth = (rows + 1) * binWidth;
+  const binsStartX = (logicalWidth - totalBinWidth) / 2;
+  const wallsTopY = startY + (rows) * rowHeight + 10;
+
+  // PRE-COMPUTE BOARD
+  const pegGrid = []; 
+  for (let r = 0; r < rows; r++) {
+    const rowPegs = [];
+    const pegsInThisRow = r + 1;
+    const rowWidth = (pegsInThisRow - 1) * pegSpacing;
+    const rowStartX = (logicalWidth - rowWidth) / 2;
+    for (let p = 0; p < pegsInThisRow; p++) {
+      rowPegs.push({
+        x: rowStartX + p * pegSpacing,
+        y: startY + r * rowHeight
+      });
+    }
+    pegGrid.push(rowPegs);
+  }
+
+  // STATE
+  let balls = [];
+  let bins = new Array(rows + 1).fill(0);
+  let spawnedCount = 0;
+  let isRunning = false;
+
+  // CONTROLS
+  const startBtn = viewof control_sharp.querySelector("button"); 
+  const stopBtn = viewof control_sharp.querySelectorAll("button")[1];
+
+  startBtn.onclick = () => {
+    balls = [];
+    bins = new Array(rows + 1).fill(0);
+    spawnedCount = 0;
+    isRunning = true;
+  };
+  stopBtn.onclick = () => { isRunning = false; };
+
+  // PATH LOGIC
+  function createBall() {
+    let currentInd = 0; 
+    let path = [];
+    path.push({ x: logicalWidth / 2, y: startY - 20 });
+
+    for (let r = 0; r < rows; r++) {
+       const peg = pegGrid[r][currentInd];
+       path.push({ x: peg.x, y: peg.y - pegRadius - ballRadius });
+       if (Math.random() > 0.5) currentInd++; 
+    }
+
+    const binX = binsStartX + currentInd * binWidth + binWidth/2;
+    path.push({ x: binX, y: wallsTopY });
+    path.push({ x: binX, y: floorY - ballRadius, isFloor: true, binIndex: currentInd });
+
+    return {
+      path: path,
+      segment: 0, t: 0, active: true,
+      x: path[0].x, y: path[0].y
+    };
+  }
+
+  function spawnBall() {
+    if (!isRunning) return;
+    if (spawnedCount >= maxBalls) return;
+    
+    const centerBinIdx = Math.floor(rows / 2);
+    const maxCapacity = (floorY - wallsTopY) / (ballRadius * 0.6); 
+    if (bins[centerBinIdx] >= maxCapacity) return;
+
+    balls.push(createBall());
+    spawnedCount++;
+  }
+
+  function update(dt) {
+    const spawnRate = 0.15 / speed; 
+    if (isRunning && Math.random() < dt / spawnRate) spawnBall();
+
+    for (let b of balls) {
+      if (!b.active) continue;
+      if (!isRunning) continue; 
+
+      const moveSpeed = 3.5 * speed * dt; 
+      b.t += moveSpeed;
+
+      if (b.t >= 1) {
+        b.t = 0;
+        b.segment++;
+        if (b.segment >= b.path.length - 1) {
+           b.active = false;
+           const finalPt = b.path[b.path.length - 1];
+           bins[finalPt.binIndex]++;
+           continue;
+        }
+      }
+
+      const p0 = b.path[b.segment];
+      const p1 = b.path[b.segment + 1];
+      
+      b.x = p0.x + (p1.x - p0.x) * b.t;
+      if (p1.isFloor) {
+         b.y = p0.y + (p1.y - p0.y) * (b.t * b.t); 
+      } else {
+         b.y = p0.y + (p1.y - p0.y) * (b.t * b.t); 
+      }
+    }
+    balls = balls.filter(b => b.active);
+  }
+
+  function draw() {
+    // Clear the full logical area
+    ctx.fillStyle = "#E8E0C5";
+    ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+    // Pegs
+    ctx.fillStyle = "#666";
+    for (let row of pegGrid) {
+      for (let p of row) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, pegRadius, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    // Walls
+    ctx.strokeStyle = "#998866";
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= rows + 1; i++) {
+      const x = binsStartX + i * binWidth;
+      ctx.beginPath();
+      ctx.moveTo(x, wallsTopY);
+      ctx.lineTo(x, logicalHeight);
+      ctx.stroke();
+    }
+
+    // Active Balls
+    ctx.fillStyle = "#0033CC";
+    for (let b of balls) {
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, ballRadius, 0, Math.PI*2);
+      ctx.fill();
+    }
+
+    // Stacked Balls
+    for (let i = 0; i < bins.length; i++) {
+      const count = bins[i];
+      const cx = binsStartX + i * binWidth + binWidth/2;
+      ctx.strokeStyle = "#4d79ff";
+      ctx.lineWidth = 0.5;
+
+      for (let j = 0; j < count; j++) {
+        const cy = floorY - j * (ballRadius * 0.6); 
+        if (cy < wallsTopY) break;
+        ctx.beginPath();
+        ctx.arc(cx, cy, ballRadius, 0, Math.PI*2);
+        ctx.fillStyle = "#0033CC";
+        ctx.fill();
+        ctx.stroke();
+      }
+    }
+    
+    // Status Text
+    ctx.fillStyle = "#444";
+    ctx.font = "bold 14px sans-serif"; // Slightly bigger font
+    let status = isRunning ? "Đang chạy..." : "Dừng";
+    if (spawnedCount >= maxBalls) status = "Kết thúc";
+    
+    ctx.fillText(`Trạng thái: ${status}`, 10, 25);
+    ctx.fillText(`Số viên bi: ${spawnedCount} / ${maxBalls}`, 10, 45);
+  }
+
+  let lastTime = performance.now();
+  let frameId;
+  function tick(now) {
+    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
+    update(dt);
+    draw();
+    frameId = requestAnimationFrame(tick);
+  }
+  
+  draw();
+  tick(lastTime);
+  
+  return Object.assign(canvas, {
+    remove: () => cancelAnimationFrame(frameId)
+  });
+}
+```
+
+**Tại sao lại là phân phối nhị thức?**
+
+- Mỗi lần viên bi chạm vào chiếc đinh, có hai trường hợp xảy ra: viên bi sẽ nảy sang trái hoặc sang phải, xác suất nảy sang mỗi bên là $p = 0.5$, giống như tung đồng xu. Đây là một phép thử Bernoulli.
+- Nếu bảng có 10 hàng đinh, viên bi sẽ thực hiện 10 lần tung đồng xu liên tiếp.
+- Các ô chứa tương ứng với số lần viên bi nảy về bên phải. Để vào ô giữa, viên bi phải nảy sang bên phải 5 lần, để vào ô cuối cùng, viên bi phải nảy sang bên phải 10 lần.
 
 ### Phân phối siêu bội (hypergeometric distribution)
 
@@ -238,11 +492,9 @@ Poisson là giới hạn của nhị thức khi $n \to \infty$ và $p \to 0$, sa
 Các phân phối phức tạp có thể được tạo ra bằng cách cộng các phân phối đơn giản:
 
 | Nếu cộng | Sẽ có | Điều kiện |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | Nhiều Bernoulli | Nhị thức | Cùng $p$. |
 | Nhiều Nhị thức | Nhị thức | $X+Y \sim \text{Bin}(n+m, p)$ |
 | Nhiều Hình học | Nhị thức âm | Chờ $k$ thành công thực chất là chờ 1 thành công, lặp lại $k$ lần |
 | Nhiều Nhị thức âm | Nhị thức âm | $X+Y \sim \text{NB}(r_1+r_2, p)$ |
 | Nhiều Poisson | Poisson | $X+Y \sim \text{Pois}(\lambda_1 + \lambda_2)$ |
-
-

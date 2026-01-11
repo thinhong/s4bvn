@@ -15,7 +15,6 @@ book:
     - bayes.qmd
     - distr-shape.qmd
     - distr-d.qmd
-    - sampling.qmd
     - references.qmd
 
 bibliography: references.bib
