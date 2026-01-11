@@ -20,66 +20,63 @@ Hầu hết các phân phối rời rạc đều xuất phát từ chuỗi Berno
 
 Chúng ta quyết định trước sẽ bỏ ra bao nhiêu công sức ($n$ lần thử), và đếm xem thu được bao nhiêu phần thưởng ($k$ thành công).
 
-### Phân phối nhị nhức (binomial distribution)
+### Phân phối Nhị thức (binomial distribution)
 
 Đếm số lần thành công ($k$) trong một số lượng cố định các phép thử Bernoulli độc lập ($n$).
 
 Xác suất để đạt được đúng $k$ lần thành công là:
 
-$$P(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
+$$\mathbb{P}(X = k) = \binom{n}{k} p^k (1-p)^{n-k}$$
 
 Với:
 
 - $n$: Tổng số lần thực hiện phép thử
 - $p$: Xác suất thành công của mỗi lần thử (không đổi)
 
+::: {.callout-note}
+## Giải thích
+
+$$\underbrace{\binom{n}{k}}_{\text{Số cách chọn}} \cdot \underbrace{p^k}_{k \text{ lần thành công}} \cdot \underbrace{(1-p)^{n-k}}_{n-k \text{ lần thất bại}}$$
+:::
+
 #### Ví dụ
 
-Tung 1 đồng xu 10 lần, sau 10 lần tung, khả năng đếm được 1, 2, 3... mặt ngửa là bao nhiêu?
+Tung 1 đồng xu 10 lần, khả năng đếm được 1, 2, 3... mặt ngửa là bao nhiêu?
 
 - Tổng số lần thực hiện phép thử: $n = 10$
 - Xác suất ra mặt ngửa mỗi lần: $p = 0.5$
 
 ```{ojs}
 //| echo: false
-viewof coin_sim_optimized = (() => {
-  // --- 1. UI DEFINITION ---
-  const form = Inputs.form({
-    flip: Inputs.button("Tung 10 đồng xu"),
-    auto: Inputs.toggle({label: "Tự động chạy", value: false}),
-    reset: Inputs.button("Làm lại")
-  });
+viewof coin_sim_manual = (() => {
+  // --- 1. SETUP DOM & STYLES ---
+  const container = document.createElement("div");
+  // Rigid container size: 400px width, 340px height (40px controls + 300px canvas)
+  container.style.cssText = `
+    width: 400px;
+    height: 340px; 
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid transparent;
+  `;
 
-  const ui = html`
+  // Inject UI HTML directly (Total Control, Zero Shift)
+  container.innerHTML = `
     <style>
-      .coin-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 450px;       /* Match Canvas Width */
-        margin: 0 auto;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      }
-
-      /* CONTROLS ROW */
-      .coin-controls {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 8px; /* Reduced margin */
+      .coin-controls-row {
         width: 100%;
-        justify-content: center;
-      }
-      
-      .coin-controls form, .coin-controls form > div {
+        height: 40px;
         display: flex;
+        justify-content: center;
         align-items: center;
-        gap: 10px;
-        margin: 0 !important;
+        gap: 12px;
+        margin-bottom: 0px;
       }
-
-      /* BUTTON STYLES */
-      .coin-controls button {
-        padding: 6px 14px; /* Slightly more compact */
+      .coin-btn {
+        padding: 6px 14px;
         border-radius: 6px;
         border: 1px solid #d1d5db;
         background-color: white;
@@ -87,33 +84,40 @@ viewof coin_sim_optimized = (() => {
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.1s ease;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        line-height: 1.2;
       }
-      .coin-controls button:hover { background-color: #f3f4f6; }
+      .coin-btn:hover { background-color: #f3f4f6; }
       
-      /* Primary Button (Blue) */
-      .coin-controls form > div:nth-child(1) button {
+      .coin-btn-primary {
         background-color: #3b82f6; 
         color: white; 
         border-color: #2563eb;
       }
-      .coin-controls form > div:nth-child(1) button:hover { background-color: #2563eb; }
-
-      /* TOGGLE */
-      .coin-controls input[type="checkbox"] { width: 16px; height: 16px; accent-color: #10b981; }
-      .coin-controls label { font-size: 14px; font-weight: 500; color: #4b5563; }
+      .coin-btn-primary:hover { background-color: #2563eb; color: white; }
+      
+      .coin-toggle {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 14px; font-weight: 500; color: #4b5563;
+        cursor: pointer; user-select: none;
+      }
+      .coin-toggle input { width: 16px; height: 16px; accent-color: #10b981; cursor: pointer; }
+      
+      canvas { display: block; } /* Removes ghost margin */
     </style>
-    
-    <div class="coin-wrapper">
-      <div class="coin-controls">${form}</div>
-      <div id="canvas-container"></div> 
+
+    <div class="coin-controls-row">
+      <button id="btn-flip" class="coin-btn coin-btn-primary">Tung 10 đồng xu</button>
+      <label class="coin-toggle">
+        <input type="checkbox" id="chk-auto">
+        Tự động chạy
+      </label>
+      <button id="btn-reset" class="coin-btn">Làm lại</button>
     </div>
   `;
 
   // --- 2. CANVAS SETUP ---
-  const width = 450;
-  const height = 300; // REDUCED HEIGHT (was 400)
+  const width = 400;
+  const height = 300;
   const canvas = document.createElement("canvas");
   const dpr = window.devicePixelRatio || 1;
   
@@ -124,19 +128,19 @@ viewof coin_sim_optimized = (() => {
   
   const ctx = canvas.getContext("2d", { alpha: false });
   ctx.scale(dpr, dpr);
-  
-  ui.querySelector("#canvas-container").appendChild(canvas);
+  container.appendChild(canvas);
 
-  // --- 3. SIMULATION CONSTANTS ---
-  const N = 10; 
+  // --- 3. STATE & CONSTANTS ---
+  const N = 10;
   const P = 0.5;
-  const BG_COLOR = "#f8f9fa";
-  const TEXT_COLOR = "#2c3e50";
-  const HEAD_COLOR = "#f1c40f"; const HEAD_BORDER = "#d4ac0d";
-  const TAIL_COLOR = "#bdc3c7"; const TAIL_BORDER = "#95a5a6";
-  const CHART_BAR = "#3498db";  const CHART_ACTIVE = "#2980b9";
-  const CHART_THEO = "rgba(44, 62, 80, 0.1)";
+  
+  // Colors
+  const BG_COLOR="#fff", TEXT_COLOR="#2c3e50";
+  const HEAD_COLOR="#f1c40f", HEAD_BORDER="#d4ac0d";
+  const TAIL_COLOR="#bdc3c7", TAIL_BORDER="#95a5a6";
+  const CHART_BAR="#3498db", CHART_ACTIVE="#2980b9", CHART_THEO="rgba(44, 62, 80, 0.1)";
 
+  // Math Helper
   function binomial(k, n, p) {
     function nCr(n, r) {
         if (r < 0 || r > n) return 0;
@@ -147,7 +151,7 @@ viewof coin_sim_optimized = (() => {
     return nCr(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
   }
 
-  // State
+  // Simulation State
   const S = {
      history: [], 
      counts: {},  
@@ -155,81 +159,68 @@ viewof coin_sim_optimized = (() => {
      currentResult: [], 
      animation: 0, 
      cooldown: 0,
-     lastFlipVal: 0, 
-     lastResetVal: 0
+     isAuto: false
   };
   for(let i=0; i<=N; i++) S.counts[i] = 0;
 
-  // --- 4. UPDATE LOOP ---
+  // --- 4. LOGIC ---
+  function runFlip() {
+     let heads = 0;
+     const res = [];
+     for(let i=0; i<N; i++) {
+        const isHead = Math.random() < P;
+        res.push(isHead ? 1 : 0);
+        if (isHead) heads++;
+     }
+     
+     const coinSize = 28;
+     const gap = 6;
+     const totalW = N * coinSize + (N-1)*gap;
+     const startX = (width - totalW) / 2 + coinSize/2;
+
+     S.currentResult = res.map((val, i) => ({
+        val: val,
+        x: width/2, 
+        y: 50,
+        targetX: startX + i * (coinSize + gap), 
+        targetY: 85,
+        r: coinSize / 2,
+        t: 0
+     }));
+
+     S.history.push(heads);
+     S.counts[heads] = (S.counts[heads] || 0) + 1;
+     S.totalFlips++;
+     S.animation = 1;
+     S.cooldown = 0;
+  }
+
+  function reset() {
+     S.history = [];
+     for(let i=0; i<=N; i++) S.counts[i] = 0;
+     S.totalFlips = 0;
+     S.currentResult = [];
+     S.animation = 0;
+  }
+
+  // --- 5. LOOP ---
   function update() {
-    const currentFlip = form.value.flip;
-    const currentReset = form.value.reset;
-    const isAuto = form.value.auto;
-
-    // Reset
-    if (currentReset > S.lastResetVal) {
-       S.history = [];
-       for(let i=0; i<=N; i++) S.counts[i] = 0;
-       S.totalFlips = 0;
-       S.currentResult = [];
-       S.animation = 0;
-       S.lastResetVal = currentReset;
-    }
-
-    // Flip
-    let shouldFlip = false;
-    if (currentFlip > S.lastFlipVal) {
-        shouldFlip = true;
-        S.lastFlipVal = currentFlip;
-    } 
-    else if (isAuto && S.animation === 0) {
+     // Auto Run Logic
+     if (S.isAuto && S.animation === 0) {
         S.cooldown++;
-        // FASTER SPEED: 20 frames = ~0.3 seconds delay (was 90)
-        if (S.cooldown > 20) { 
-            shouldFlip = true;
-        }
-    }
+        if (S.cooldown > 20) runFlip(); // Speed: ~0.3s
+     }
 
-    if (shouldFlip) {
-         let heads = 0;
-         const res = [];
-         for(let i=0; i<N; i++) {
-            const isHead = Math.random() < P;
-            res.push(isHead ? 1 : 0);
-            if (isHead) heads++;
-         }
-         
-         const coinSize = 28;
-         const gap = 6;
-         const totalW = N * coinSize + (N-1)*gap;
-         const startX = (width - totalW) / 2 + coinSize/2;
-
-         S.currentResult = res.map((val, i) => ({
-            val: val,
-            x: width/2, 
-            y: 50,
-            targetX: startX + i * (coinSize + gap), 
-            targetY: 85, // LOWERED COINS (was 60, now 85)
-            r: coinSize / 2,
-            t: 0
-         }));
-
-         S.history.push(heads);
-         S.counts[heads] = (S.counts[heads] || 0) + 1;
-         S.totalFlips++;
-         S.animation = 1;
-         S.cooldown = 0;
-    }
-
-    if (S.animation === 1) {
+     // Animation Logic
+     if (S.animation === 1) {
        let done = true;
        for (let c of S.currentResult) {
           if (c.t < 1) {
-             c.t += 0.2; // Faster pop animation (was 0.15)
+             c.t += 0.2; 
              if (c.t > 1) c.t = 1;
-             const ease = 1 - Math.pow(1 - c.t, 3); 
+             const ease = 1 - Math.pow(1 - c.t, 3);
              c.x = width/2 + (c.targetX - width/2) * ease;
-             c.y = c.targetY - Math.sin(c.t * Math.PI) * 20; 
+             c.y = c.targetY - Math.sin(c.t * Math.PI) * 20;
              done = false;
           }
        }
@@ -237,7 +228,6 @@ viewof coin_sim_optimized = (() => {
     }
   }
 
-  // --- 5. DRAW LOOP ---
   function draw() {
     ctx.fillStyle = BG_COLOR;
     ctx.fillRect(0, 0, width, height);
@@ -246,28 +236,26 @@ viewof coin_sim_optimized = (() => {
     ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fontVariantNumeric = "tabular-nums";
     
+    // 1. Text Info
     // Left: Count
-    ctx.textAlign = "left";
-    ctx.fillStyle = TEXT_COLOR;
-    // CHANGED TEXT: "Lần chạy"
+    ctx.textAlign = "left"; ctx.fillStyle = TEXT_COLOR;
     ctx.fillText(`Lần chạy: ${S.totalFlips}`, 20, 30);
     
     // Center: Status
-    if (form.value.auto) {
-       ctx.fillStyle = "#27ae60";
-       ctx.fillText("● Đang chạy...", 160, 30);
+    if (S.isAuto) {
+       ctx.textAlign = "center"; ctx.fillStyle = "#27ae60";
+       ctx.fillText("● Đang chạy...", 170, 30); // Adjusted center for visual balance
     }
     
     // Right: Result
     if (S.currentResult.length > 0) {
        const hCount = S.currentResult.filter(c => c.val===1).length;
-       ctx.textAlign = "right";
-       ctx.fillStyle = TEXT_COLOR;
+       ctx.textAlign = "right"; ctx.fillStyle = TEXT_COLOR;
        ctx.fillText(`Mặt Ngửa: ${hCount} / ${N}`, width - 20, 30);
     }
     ctx.restore();
 
-    // COINS
+    // 2. Coins
     for (let c of S.currentResult) {
        ctx.beginPath();
        ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
@@ -277,25 +265,20 @@ viewof coin_sim_optimized = (() => {
        ctx.strokeStyle = c.val === 1 ? HEAD_BORDER : TAIL_BORDER;
        ctx.stroke();
        ctx.fillStyle = "white";
-       ctx.textAlign = "center";
-       ctx.textBaseline = "middle";
+       ctx.textAlign = "center"; ctx.textBaseline = "middle";
        ctx.font = `bold ${c.r}px sans-serif`;
        ctx.fillText(c.val === 1 ? "N" : "S", c.x, c.y + 1);
     }
 
-    // CHART
-    // MOVED CHART UP: Bottom Y=280 (was 360), Height=140 (was 200)
+    // 3. Chart
     const chartY = 280; 
     const chartH = 140; 
     const chartX = 40;
     const chartW = width - 60;
     
     ctx.beginPath();
-    ctx.strokeStyle = "#bdc3c7";
-    ctx.lineWidth = 1;
-    ctx.moveTo(chartX, chartY);
-    ctx.lineTo(chartX + chartW, chartY);
-    ctx.stroke();
+    ctx.strokeStyle = "#bdc3c7"; ctx.lineWidth = 1;
+    ctx.moveTo(chartX, chartY); ctx.lineTo(chartX + chartW, chartY); ctx.stroke();
 
     const barW = chartW / (N + 1);
     const MAX_PROB = 0.246; 
@@ -322,20 +305,34 @@ viewof coin_sim_optimized = (() => {
        ctx.fillRect(cx - barW*0.3, chartY - barH, barW*0.6, barH);
        
        // Labels
+       ctx.save();
+       ctx.fontVariantNumeric = "tabular-nums";
        ctx.fillStyle = TEXT_COLOR;
        ctx.font = "10px sans-serif";
        ctx.textAlign = "center";
        ctx.fillText(k, cx, chartY + 15);
+       ctx.restore();
     }
     
+    // Y-Axis Label
     ctx.save();
     ctx.translate(12, chartY - chartH/2);
     ctx.rotate(-Math.PI/2);
     ctx.textAlign = "center";
+    ctx.font = "14px sans-serif";
     ctx.fillStyle = "#7f8c8d";
     ctx.fillText("Tần suất", 0, 0);
     ctx.restore();
   }
+
+  // --- 6. BINDINGS ---
+  const btnFlip = container.querySelector("#btn-flip");
+  const btnReset = container.querySelector("#btn-reset");
+  const chkAuto = container.querySelector("#chk-auto");
+
+  btnFlip.onclick = () => runFlip();
+  btnReset.onclick = () => reset();
+  chkAuto.onchange = (e) => { S.isAuto = e.target.checked; };
 
   let frameId;
   function tick() {
@@ -345,21 +342,15 @@ viewof coin_sim_optimized = (() => {
   }
   tick();
 
-  ui.value = form.value;
-  form.addEventListener("input", () => {
-      ui.value = form.value;
-      ui.dispatchEvent(new Event("input"));
-  });
-  
-  invalidation.then(() => cancelAnimationFrame(frameId));
+  if (this && this.invalidation) this.invalidation.then(() => cancelAnimationFrame(frameId));
 
-  return ui;
+  return container;
 })();
 ```
 
 #### Bảng Galton
 
-Bảng Galton (Galton board) là một tấm bảng dựng đứng, được đóng các hàng đinh so le nhau theo hình tam giác. Ta thả những viên bi nhỏ từ đỉnh tháp. Khi một viên bi chạm vào một chiếc đinh, nó sẽ nảy sang trái hoặc sang phải. Sau khi đi hết các hàng đinh, viên bi sẽ rơi vào các ô chứa để hứng bi. Số lượng bi trong các ô chứa này tuân theo phân phối nhị thức.
+Bảng Galton (Galton board) là một tấm bảng dựng đứng, được đóng các hàng đinh so le nhau theo hình tam giác. Ta thả những viên bi nhỏ từ đỉnh tháp. Khi một viên bi chạm vào một chiếc đinh, nó sẽ nảy sang trái hoặc sang phải. Sau khi đi hết các hàng đinh, viên bi sẽ rơi vào các ô chứa để hứng bi. Số lượng bi trong các ô chứa này tuân theo phân phối Nhị thức.
 
 ```{ojs}
 //| echo: false
@@ -369,38 +360,108 @@ viewof galton_sharp = Inputs.form({
   total: Inputs.range([50, 800], {value: 200, step: 10, label: "Số viên bi"})
 })
 
-viewof control_sharp = Inputs.form({
-  start: Inputs.button("Bắt đầu", {value: null, reduce: () => "START"}),
-  stop: Inputs.button("Dừng", {value: null, reduce: () => "STOP"})
-})
+viewof control_sharp = (() => {
+  // --- 1. SETUP CONTAINER ---
+  const container = document.createElement("div");
+  container.style.cssText = `
+    display: flex;
+    justify-content: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 10px 0;
+  `;
+
+  // --- 2. INJECT HTML & CSS ---
+  container.innerHTML = `
+    <style>
+      .ctrl-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .ctrl-btn {
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        background-color: white;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        line-height: 1.2;
+        transition: all 0.1s ease;
+      }
+      .ctrl-btn:hover { background-color: #f3f4f6; }
+      
+      /* Primary Button (Blue) for Start */
+      .ctrl-btn-primary {
+        background-color: #3b82f6; 
+        color: white; 
+        border-color: #2563eb;
+      }
+      .ctrl-btn-primary:hover { background-color: #2563eb; color: white; }
+    </style>
+
+    <div class="ctrl-row">
+      <button id="btn-start" class="ctrl-btn ctrl-btn-primary">Bắt đầu</button>
+      <button id="btn-stop" class="ctrl-btn">Dừng</button>
+    </div>
+  `;
+
+  // --- 3. BIND EVENTS ---
+  const btnStart = container.querySelector("#btn-start");
+  const btnStop = container.querySelector("#btn-stop");
+
+  // Default Value
+  container.value = null;
+
+  btnStart.onclick = () => {
+    container.value = "START";
+    container.dispatchEvent(new Event("input", {bubbles: true}));
+  };
+
+  btnStop.onclick = () => {
+    container.value = "STOP";
+    container.dispatchEvent(new Event("input", {bubbles: true}));
+  };
+
+  return container;
+})();
 
 {
   const rows = galton_sharp.rows;
   const speed = galton_sharp.speed;
   const maxBalls = galton_sharp.total;
   
-  // 1. DIMENSIONS
-  // The "Logical" size (how big it looks on screen)
+  // 1. CENTERED CONTAINER FOR CANVAS
+  // We wrap the canvas in a flex div to center it on the page
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+  `;
+
+  // 2. DIMENSIONS
   const logicalWidth = 360;
   const logicalHeight = 600;
 
-  // 2. HIGH-DPI SCALING
-  // We detect the user's screen density (e.g., 2.0 for Retina)
+  // 3. HIGH-DPI SCALING
   const dpr = window.devicePixelRatio || 1;
   
   const canvas = document.createElement("canvas");
-  // Set the "Real" size (pixels in memory) higher
   canvas.width = logicalWidth * dpr;
   canvas.height = logicalHeight * dpr;
-  // Set the "CSS" size (pixels on screen) standard
   canvas.style.width = `${logicalWidth}px`;
   canvas.style.height = `${logicalHeight}px`;
   
   const ctx = canvas.getContext("2d");
-  // Scale all drawing operations automatically
   ctx.scale(dpr, dpr);
+  
+  // Add canvas to the centered wrapper
+  wrapper.appendChild(canvas);
 
-  // --- GEOMETRY (Uses logical units) ---
+  // --- GEOMETRY ---
   const pegSpacing = logicalWidth / (rows + 2);
   const rowHeight = pegSpacing * 0.85; 
   const startY = 60;
@@ -439,13 +500,20 @@ viewof control_sharp = Inputs.form({
   const startBtn = viewof control_sharp.querySelector("button"); 
   const stopBtn = viewof control_sharp.querySelectorAll("button")[1];
 
-  startBtn.onclick = () => {
-    balls = [];
-    bins = new Array(rows + 1).fill(0);
-    spawnedCount = 0;
-    isRunning = true;
-  };
-  stopBtn.onclick = () => { isRunning = false; };
+  // We need to re-bind these because the cell re-runs when inputs change
+  // Note: ideally controls and canvas would be in one cell to avoid re-binding issues,
+  // but following your requested structure, we hook into the DOM elements.
+  if (startBtn) {
+      startBtn.onclick = () => {
+        balls = [];
+        bins = new Array(rows + 1).fill(0);
+        spawnedCount = 0;
+        isRunning = true;
+      };
+  }
+  if (stopBtn) {
+      stopBtn.onclick = () => { isRunning = false; };
+  }
 
   // PATH LOGIC
   function createBall() {
@@ -518,7 +586,7 @@ viewof control_sharp = Inputs.form({
   }
 
   function draw() {
-    // Clear the full logical area
+    // Clear
     ctx.fillStyle = "#E8E0C5";
     ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
@@ -588,13 +656,14 @@ viewof control_sharp = Inputs.form({
   draw();
   tick(lastTime);
   
-  return Object.assign(canvas, {
+  // Return the wrapper (div), not just the canvas
+  return Object.assign(wrapper, {
     remove: () => cancelAnimationFrame(frameId)
   });
 }
 ```
 
-**Tại sao lại là phân phối nhị thức?**
+**Tại sao lại là phân phối Nhị thức?**
 
 - Mỗi lần viên bi chạm vào chiếc đinh, có hai trường hợp xảy ra: viên bi sẽ nảy sang trái hoặc sang phải, xác suất nảy sang mỗi bên là $p = 0.5$, giống như tung đồng xu. Đây là một phép thử Bernoulli.
 - Nếu bảng có 10 hàng đinh, viên bi sẽ thực hiện chuỗi Bernoulli có 10 phép thử liên tiếp.
@@ -620,11 +689,13 @@ Khi xây dựng mô hình, chúng ta xem xét từng cá nhân trong dữ liệu
 - Với một người cụ thể (ví dụ: anh A, hút 1 gói/ngày), việc anh ta có bị ung thư hay không giống như việc tung một đồng xu: mặt ngửa (1) là bị ung thư, mặt sấp (0) là không bị ung thư. **Nhưng** xác suất tung ra mặt ngửa của đồng xu này không phải là 0.5, mà phụ thuộc vào việc anh ta hút bao nhiêu thuốc.
 - Khi chúng ta tiến hành nghiên cứu trên $n$ người, đây là 1 chuỗi Bernoulli, vì vậy có thể chọn phân phối Binomial để mô hình nó.
 
-Khai báo `family = "binomial"` nghĩa là: "Biến kết quả ($Y$) là đếm số lần thành công (hoặc thất bại) từ các phép thử nhị phân, hãy dùng công thức xác suất của phân phối nhị thức để ước lượng."
+Khai báo `family = "binomial"` nghĩa là: "Biến kết quả ($Y$) là đếm số lần thành công (hoặc thất bại) từ các phép thử nhị phân, hãy dùng công thức xác suất của phân phối Nhị thức để ước lượng."
 
-### Phân phối siêu bội (hypergeometric distribution)
+### Phân phối Siêu bội (Hypergeometric distribution)
 
-Tình huống: Bạn có bộ bài 52 lá, trong đó có 4 lá A. Bạn rút 10 lá.
+Nếu phân phối Nhị thức là việc tung đồng xu, thì Phân phối Siêu bội giống như việc chia bài.
+
+Tình huống: Bạn có bộ bài 52 lá, trong đó có 4 lá Át. Bạn rút 10 lá và hỏi "Tôi rút được bao nhiêu lá Át?".
 
 Luật chơi:
 
@@ -632,44 +703,124 @@ Luật chơi:
 -   Các lần thử phụ thuộc nhau
 -   Lấy mẫu không hoàn lại từ một quần thể hữu hạn ($N$)
 
-Câu hỏi: "Tôi rút được bao nhiêu lá A?"
+Khi bạn rút được một lá Át ra khỏi bộ bài và giữ nó lại, **xác suất rút được lá Át tiếp theo sẽ thay đổi** (vì trong bộ bài giờ đây thiếu mất 1 lá Át và tổng số lá cũng giảm đi 1). Đây là đặc trưng của việc lấy mẫu không hoàn lại. 
+
+Phân phối Siêu bội mô tả xác suất lấy được đúng $k$ phần tử thành công trong $n$ lần lấy mẫu từ một quần thể hữu hạn gồm $N$ phần tử, mà không có sự thay thế (không hoàn lại).
+
+$$\mathbb{P}(X=k) = \frac{\binom{K}{k} \binom{N-K}{n-k}}{\binom{N}{n}}$$
+
+- $N$: Tổng kích thước quần thể (Ví dụ: 52 lá bài)
+- $n$: Kích thước mẫu lấy ra (Ví dụ: Rút 5 lá trên tay)
+- $K$: Tổng số phần tử thành công có trong quần thể (Ví dụ: 4 lá Át)
+- $k$: Số lượng thành công mong muốn trong mẫu (Ví dụ: Muốn có đúng 2 lá Át)
+- $N-K$: Số lượng phần tử thất bại trong quần thể (Ví dụ: 48 lá bài còn lại)
+- $n-k$: Số lượng thất bại phải lấy trong mẫu (Ví dụ: 3 lá còn lại trong tay phải là lá thường).
+
+::: {.callout-note}
+## Giải thích
+
+$$\frac{ \overbrace{\binom{K}{k}}^{\text{Chọn } k \text{ thành công}} \cdot \overbrace{\binom{N-K}{n-k}}^{\text{Chọn } n-k \text{ thất bại}} }{ \underbrace{\binom{N}{n}}_{\text{Tổng số cách chọn ra } n \text{ mẫu}} }$$
+:::
 
 ```{ojs}
 //| echo: false
-viewof ace_sim_fixed = Inputs.form({
-  draw: Inputs.button("Rút 10 lá"),
-  auto: Inputs.toggle({label: "Tự động chạy", value: false}),
-  reset: Inputs.button("Làm lại")
-})
+viewof ace_sim_manual = (() => {
+  // --- 1. SETUP DOM & STYLES ---
+  const container = document.createElement("div");
+  container.style.cssText = `
+    width: 400px;
+    height: 440px; 
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid transparent; /* Prevents margin collapse */
+  `;
 
-{
-  // 1. SETUP
+  // Inject UI HTML directly (Total Control)
+  container.innerHTML = `
+    <style>
+      .ace-controls-row {
+        width: 100%;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 5px;
+      }
+      .ace-btn {
+        padding: 6px 14px;
+        border-radius: 6px;
+        border: 1px solid #d1d5db;
+        background-color: white;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        line-height: 1.2;
+      }
+      .ace-btn:hover { background-color: #f3f4f6; }
+      .ace-btn-primary {
+        background-color: #3b82f6; 
+        color: white; 
+        border-color: #2563eb;
+      }
+      .ace-btn-primary:hover { background-color: #2563eb; color: white; }
+      
+      .ace-toggle {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 14px; font-weight: 500; color: #4b5563;
+        cursor: pointer; user-select: none;
+      }
+      .ace-toggle input { width: 16px; height: 16px; accent-color: #10b981; cursor: pointer; }
+      
+      canvas { display: block; } /* Removes ghost margin */
+    </style>
+
+    <div class="ace-controls-row">
+      <button id="btn-draw" class="ace-btn ace-btn-primary">Rút 10 lá</button>
+      <label class="ace-toggle">
+        <input type="checkbox" id="chk-auto">
+        Tự động chạy
+      </label>
+      <button id="btn-reset" class="ace-btn">Làm lại</button>
+    </div>
+  `;
+
+  // --- 2. CANVAS SETUP ---
   const width = 400;
-  const height = 400;
+  const height = 380;
   const canvas = document.createElement("canvas");
   const dpr = window.devicePixelRatio || 1;
+  
   canvas.width = width * dpr;
   canvas.height = height * dpr;
   canvas.style.width = `${width}px`;
   canvas.style.height = `${height}px`;
+  
   const ctx = canvas.getContext("2d", { alpha: false });
   ctx.scale(dpr, dpr);
+  container.appendChild(canvas);
 
-  // COLORS
-  const BG_COLOR = "#f4f6f8"; 
-  const TEXT_COLOR = "#333333";
-  const ACE_COLOR = "#d35400"; 
-  const ACE_BG = "#fffbe6"; 
-  const CARD_BG_STD = "#ffffff"; 
-  const CARD_BORDER = "#cccccc"; 
-  const CARD_RED = "#e74c3c";
-  const CARD_BLACK = "#2c3e50";
+  // --- 3. STATE & CONSTANTS ---
+  const SUITS = ["♠", "♥", "♣", "♦"];
+  const RANKS = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+  const CARD_W = 30, CARD_H = 45;
   
-  const CHART_THEO = "rgba(0, 0, 0, 0.05)";
-  const CHART_ACTUAL = "#009688"; 
-  const CHART_ACTIVE = "#00796b"; 
+  // Layout Constants
+  const Y_HEADER = 45;
+  const Y_CARDS = 85;
+  const Y_CHART_BASE = 320;
+  const CHART_H = 60;
+  
+  // Colors
+  const BG_COLOR="#fff", TEXT_COLOR="#333333", ACE_COLOR="#d35400", ACE_BG="#fffbe6";
+  const CARD_BG="#ffffff", CARD_BORDER="#cccccc", RED="#e74c3c", BLACK="#2c3e50";
+  const CHART_THEO="rgba(44, 62, 80, 0.1)", CHART_ACT="#009688", CHART_ACTIVE="#00796b";
+  const DECK_BACK="#c0392b";
 
-  // MATH
   function hypergeom(k, N, K, n) {
      function nCr(n, r) {
         if (r < 0 || r > n) return 0;
@@ -682,33 +833,20 @@ viewof ace_sim_fixed = Inputs.form({
   const THEORETICAL = [];
   for(let k=0; k<=4; k++) THEORETICAL[k] = hypergeom(k, 52, 4, 10);
 
-  // 2. STATE (Persistent)
-  if (!this.stateFixed) {
-    this.stateFixed = {
-       counts: [0, 0, 0, 0, 0], 
-       totalDeals: 0,
-       lastHand: [],
-       animation: 0, 
-       cooldown: 0,
-       // TRACKERS to detect real clicks
-       lastDrawVal: ace_sim_fixed.draw,
-       lastResetVal: ace_sim_fixed.reset
-    };
-  }
-  const S = this.stateFixed;
+  const S = {
+     counts: [0, 0, 0, 0, 0], 
+     totalDeals: 0,
+     lastHand: [],
+     animation: 0, 
+     cooldown: 0,
+     isAuto: false
+  };
 
-  // 3. LOGIC
-  const SUITS = ["♠", "♥", "♣", "♦"];
-  const RANKS = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
-  const CARD_W = 30;
-  const CARD_H = 45;
-
+  // --- 4. LOGIC ---
   function runDeal() {
     let deck = [];
     for(let s of SUITS) {
-      for(let r of RANKS) {
-        deck.push({ rank: r, suit: s, isAce: r === "A" });
-      }
+      for(let r of RANKS) deck.push({ rank: r, suit: s, isAce: r === "A" });
     }
     for(let i=deck.length-1; i>0; i--) {
        const j = Math.floor(Math.random() * (i+1));
@@ -717,19 +855,19 @@ viewof ace_sim_fixed = Inputs.form({
     
     const hand = deck.slice(0, 10);
     const aceCount = hand.filter(c => c.isAce).length;
-    
     S.counts[aceCount]++;
     S.totalDeals++;
     
+    // Animation targets
     const startX = (width - (5 * (CARD_W + 8))) / 2 + 4;
     S.lastHand = hand.map((c, i) => {
        const row = Math.floor(i / 5);
        const col = i % 5;
        return {
          ...c,
-         x: 20, y: 20, 
+         x: 30, y: 30,
          targetX: startX + col * (CARD_W + 8),
-         targetY: 70 + row * (CARD_H + 12),
+         targetY: Y_CARDS + row * (CARD_H + 12),
          t: 0
        };
     });
@@ -737,92 +875,80 @@ viewof ace_sim_fixed = Inputs.form({
     S.cooldown = 0; 
   }
 
-  // --- BUTTON HANDLING (The Fix) ---
-  
-  // 1. Detect RESET Click
-  if (ace_sim_fixed.reset > S.lastResetVal) {
+  function reset() {
      S.counts = [0,0,0,0,0];
      S.totalDeals = 0;
      S.lastHand = [];
      S.animation = 0;
-     // Update tracker so we don't reset again until next click
-     S.lastResetVal = ace_sim_fixed.reset;
   }
 
-  // 2. Detect DRAW Click
-  // We only run deal if the button count is HIGHER than last time
-  if (ace_sim_fixed.draw > S.lastDrawVal) {
-     runDeal();
-     S.lastDrawVal = ace_sim_fixed.draw;
-  }
-
-  // 4. RENDER LOOP
+  // --- 5. LOOP ---
   function update() {
-    const form = viewof ace_sim_fixed;
-    const checkbox = form.querySelector("input[type=checkbox]");
-    const isAutoRunning = checkbox ? checkbox.checked : false;
+     if (S.isAuto && S.animation === 0) {
+        S.cooldown++;
+        if (S.cooldown > 40) runDeal();
+     }
 
-    if (S.animation === 1) {
+     if (S.animation === 1) {
        let done = true;
        for (let c of S.lastHand) {
           if (c.t < 1) {
-             c.t += 0.08; 
+             c.t += 0.1; 
              if (c.t > 1) c.t = 1;
-             c.x = 20 + (c.targetX - 20) * c.t;
-             c.y = 20 + (c.targetY - 20) * c.t;
+             const ease = 1 - Math.pow(1 - c.t, 3);
+             c.x = 30 + (c.targetX - 30) * ease;
+             c.y = 30 + (c.targetY - 30) * ease;
              done = false;
           }
        }
        if (done) S.animation = 0;
-    } else if (isAutoRunning) {
-       S.cooldown++;
-       if (S.cooldown > 100) runDeal(); 
     }
   }
 
   function draw() {
-    const form = viewof ace_sim_fixed;
-    const checkbox = form.querySelector("input[type=checkbox]");
-    const isAutoRunning = checkbox ? checkbox.checked : false;
-
     ctx.fillStyle = BG_COLOR;
     ctx.fillRect(0, 0, width, height);
-
-    // Text
-    ctx.textAlign = "left";
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "14px sans-serif";
-    ctx.fillText(`Lần rút thứ: ${S.totalDeals}`, 60, 30);
     
-    if (isAutoRunning) {
-        ctx.fillStyle = CHART_ACTUAL;
-        ctx.fillText("● Tự động", 60, 50);
-    } else if (S.lastHand.length > 0) {
-       const aces = S.lastHand.filter(c=>c.isAce).length;
-       ctx.fillStyle = ACE_COLOR;
-       ctx.fillText(`Kết quả: ${aces} lá A`, 60, 50);
+    ctx.save();
+    ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fontVariantNumeric = "tabular-nums";
+
+    // Header
+    ctx.textAlign = "left"; ctx.fillStyle = TEXT_COLOR;
+    ctx.fillText(`Lần rút: ${S.totalDeals}`, 75, Y_HEADER); 
+    
+    if (S.isAuto) {
+        ctx.textAlign = "center"; ctx.fillStyle = CHART_ACT;
+        ctx.fillText("● Đang chạy...", width/2, Y_HEADER);
     }
+
+    if (S.lastHand.length > 0) {
+       const aces = S.lastHand.filter(c=>c.isAce).length;
+       ctx.textAlign = "right"; ctx.fillStyle = ACE_COLOR;
+       ctx.fillText(`Kết quả: ${aces} lá Át`, width - 30, Y_HEADER); 
+    }
+    ctx.restore();
 
     // Deck
-    ctx.fillStyle = CARD_BG_STD;
-    ctx.strokeStyle = CARD_BORDER;
     for(let i=0; i<3; i++) {
-      ctx.fillRect(20-i, 20-i, CARD_W, CARD_H);
-      ctx.strokeRect(20-i, 20-i, CARD_W, CARD_H);
+      ctx.fillStyle = "white"; ctx.strokeStyle = "#ccc";
+      ctx.fillRect(30-i*2, 30-i*2, CARD_W, CARD_H);
+      ctx.strokeRect(30-i*2, 30-i*2, CARD_W, CARD_H);
     }
+    ctx.fillStyle = DECK_BACK; ctx.fillRect(30, 30, CARD_W, CARD_H);
+    ctx.strokeStyle = "white"; ctx.lineWidth = 2; ctx.strokeRect(34, 34, CARD_W-8, CARD_H-8);
+    ctx.lineWidth = 1;
 
     // Hand
     for (let c of S.lastHand) {
-        ctx.fillStyle = c.isAce ? ACE_BG : CARD_BG_STD;
+        ctx.fillStyle = c.isAce ? ACE_BG : CARD_BG;
         ctx.fillRect(c.x, c.y, CARD_W, CARD_H);
         
-        ctx.lineWidth = 1;
         ctx.strokeStyle = c.isAce ? ACE_COLOR : CARD_BORDER;
         ctx.strokeRect(c.x, c.y, CARD_W, CARD_H);
 
         const isRed = (c.suit === "♥" || c.suit === "♦");
-        ctx.fillStyle = c.isAce ? ACE_COLOR : (isRed ? CARD_RED : CARD_BLACK);
-        
+        ctx.fillStyle = c.isAce ? ACE_COLOR : (isRed ? RED : BLACK);
         ctx.textAlign = "left"; ctx.textBaseline = "top";
         ctx.font = "bold 14px sans-serif";
         ctx.fillText(c.rank, c.x + 3, c.y + 4);
@@ -831,56 +957,56 @@ viewof ace_sim_fixed = Inputs.form({
     }
 
     // Chart
-    const chartY = 340; 
-    const chartH = 80; 
-    const chartX = 40;
-    const barW = 40;
-    const gap = 25;
+    const chartX = 50, barW = 40, gap = 25;
     
-    ctx.beginPath();
-    ctx.strokeStyle = "#999999";
-    ctx.lineWidth = 1;
-    ctx.moveTo(chartX - 10, chartY);
-    ctx.lineTo(width - 20, chartY);
-    ctx.stroke();
+    ctx.beginPath(); ctx.strokeStyle = "#bdc3c7"; ctx.lineWidth = 1;
+    ctx.moveTo(chartX - 10, Y_CHART_BASE); ctx.lineTo(width - 20, Y_CHART_BASE); ctx.stroke();
     
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.font = "12px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Số lá A rút được (k)", width/2 + 10, chartY + 35);
+    ctx.save();
+    ctx.fillStyle = TEXT_COLOR; ctx.font = "12px sans-serif"; ctx.textAlign = "center";
+    ctx.fillText("Số lá Át rút được (k)", width/2 + 15, Y_CHART_BASE + 35);
+    
+    ctx.translate(20, Y_CHART_BASE - CHART_H/2);
+    ctx.rotate(-Math.PI/2);
+    ctx.fillStyle = "#7f8c8d";
+    ctx.fillText("Tần suất", 0, 0);
+    ctx.restore();
 
     const activeAces = S.lastHand.filter(c=>c.isAce).length;
 
     for (let k = 0; k <= 4; k++) {
        const x = chartX + k * (barW + gap);
+       const Y_SCALE = 0.5;
        
-       const prob = THEORETICAL[k];
-       const scaleH = chartH / 0.5;
-       const theoH = prob * scaleH;
+       const theoH = (THEORETICAL[k] / Y_SCALE) * CHART_H;
        ctx.fillStyle = CHART_THEO;
-       ctx.fillRect(x, chartY - theoH, barW, theoH);
+       ctx.fillRect(x, Y_CHART_BASE - theoH, barW, theoH);
        
        let count = S.counts[k];
        let pct = S.totalDeals > 0 ? count / S.totalDeals : 0;
-       let barH = pct * scaleH;
+       let barH = (pct / Y_SCALE) * CHART_H;
+       if (barH > CHART_H + 10) barH = CHART_H + 10;
        
        const isActive = (S.animation === 0 && S.totalDeals > 0 && k === activeAces);
-       ctx.fillStyle = isActive ? CHART_ACTIVE : CHART_ACTUAL;
-       ctx.fillRect(x, chartY - barH, barW, barH);
+       ctx.fillStyle = isActive ? CHART_ACTIVE : CHART_ACT;
+       ctx.fillRect(x, Y_CHART_BASE - barH, barW, barH);
        
-       ctx.fillStyle = TEXT_COLOR;
-       ctx.font = "bold 12px sans-serif";
-       ctx.fillText(k, x + barW/2, chartY + 15);
-       
-       if (pct > 0) {
-          ctx.fillStyle = isActive ? CHART_ACTIVE : TEXT_COLOR;
-          ctx.font = "10px sans-serif";
-          const labelY = barH > 20 ? chartY - barH + 12 : chartY - barH - 5;
-          if (isActive && barH > 20) ctx.fillStyle = "#ffffff";
-          ctx.fillText((pct*100).toFixed(0)+"%", x+barW/2, labelY);
-       }
+       ctx.save();
+       ctx.fontVariantNumeric = "tabular-nums";
+       ctx.fillStyle = TEXT_COLOR; ctx.font = "12px sans-serif"; ctx.textAlign = "center";
+       ctx.fillText(k, x + barW/2, Y_CHART_BASE + 15);
+       ctx.restore();
     }
   }
+
+  // --- 6. BINDINGS ---
+  const btnDraw = container.querySelector("#btn-draw");
+  const btnReset = container.querySelector("#btn-reset");
+  const chkAuto = container.querySelector("#chk-auto");
+
+  btnDraw.onclick = () => runDeal();
+  btnReset.onclick = () => reset();
+  chkAuto.onchange = (e) => { S.isAuto = e.target.checked; };
 
   let frameId;
   function tick() {
@@ -889,11 +1015,12 @@ viewof ace_sim_fixed = Inputs.form({
     frameId = requestAnimationFrame(tick);
   }
   tick();
-  
-  return Object.assign(canvas, {
-    remove: () => cancelAnimationFrame(frameId)
-  });
-}
+
+  // Clean up
+  if (this && this.invalidation) this.invalidation.then(() => cancelAnimationFrame(frameId));
+
+  return container;
+})();
 ```
 
 ## Đếm số lần thử
@@ -908,7 +1035,7 @@ Câu hỏi: Họ phải sinh bao nhiêu con cho đến khi có con trai?
 
 Đặc tính: Không có bộ nhớ (Memoryless). Dù đã sinh 10 con gái liên tiếp, xác suất đứa tiếp theo là trai vẫn y như lúc bắt đầu.
 
-### Phân phối nhị thức âm (negative binomial distribution)
+### Phân phối Nhị thức âm (negative binomial distribution)
 
 Tình huống: Gia đình phong kiến đã sinh được con trai nhưng vẫn muốn có con trai nữa, thầy bói nói nhà phải có 3 đứa con trai mới giàu được
 
@@ -922,7 +1049,7 @@ Trong sinh học thực tế (ví dụ: đếm số ký sinh trùng, ấu trùng
 
 ### Phân phối Poisson
 
-Poisson là giới hạn của nhị thức khi $n \to \infty$ và $p \to 0$, sao cho $np = \lambda$
+Poisson là giới hạn của Nhị thức khi $n \to \infty$ và $p \to 0$, sao cho $np = \lambda$
 
 Các phân phối phức tạp có thể được tạo ra bằng cách cộng các phân phối đơn giản:
 
