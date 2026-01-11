@@ -3,6 +3,7 @@ project:
   output-dir: docs
 
 book:
+  google-analytics: "G-N2T5TFNFY7"
   title: "Statistics for babies"
   author:
     - name: Thinh Ong
@@ -25,5 +26,8 @@ format:
       - zephyr
       - brand
 
-
+comments:
+  giscus:
+    repo: thinhong/s4bvn
+    repo-id: R_kgDOQtVYcQ
 
