@@ -1,0 +1,10 @@
+---
+title: "Lời cảm ơn"
+format: html
+---
+
+Em Thịnh xin gửi lời cảm ơn chân thành đến:
+
+- TS. Marc Choisy, GS. Louise Thwaites, GS. Ronald Geskus (mặc dù các thầy cô không hiểu tiếng Việt). Cảm ơn các thầy cô đã kiên nhẫn hướng dẫn, chia sẻ tài liệu và định hình sự nghiệp của em. Sự dẫn dắt này đã thực sự thay đổi cuộc đời em từ khi bắt đầu làm NCS
+
+- TS. Lưu Phúc Lợi. Cảm ơn thầy đã dạy em những bước đầu tiên về thống kê và lập trình, giúp em hết sợ code và công thức toán, giới thiệu giáo trình "STATS 210: Statistical Theory" và luôn hỗ trợ em từ chuyện chuyên môn đến những vấn đề cá nhân

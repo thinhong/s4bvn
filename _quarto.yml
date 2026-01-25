@@ -16,6 +16,8 @@ book:
     - bayes.qmd
     - distr-shape.qmd
     - distr-d.qmd
+    - distr-c.qmd
+    - thanks.qmd
     - references.qmd
 
 bibliography: references.bib

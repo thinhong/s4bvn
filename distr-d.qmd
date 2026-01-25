@@ -707,6 +707,187 @@ Khi xây dựng mô hình, chúng ta xem xét từng cá nhân trong dữ liệu
 
 Khai báo `family = "binomial"` nghĩa là: "Biến kết quả ($Y$) là đếm số lần thành công (hoặc thất bại) từ các phép thử nhị phân, hãy dùng công thức xác suất của phân phối Nhị thức để ước lượng."
 
+#### Xấp xỉ phân phối Chuẩn
+
+Định lý Moivre-Laplace (một dạng đặc biệt của Định lý Giới hạn Trung tâm): Khi số lượng phép thử $n$ đủ lớn, hình dáng của phân phối Nhị thức sẽ tiệm cận về phân phối Chuẩn.
+
+```{ojs}
+//| echo: false
+viewof normal_approx_fixed_axis = (() => {
+  // --- 1. SETUP CONTAINER ---
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin-top: 20px;
+    width: 100%;
+    min-height: 500px;
+  `;
+
+  // --- 2. INPUT CREATION ---
+  function createInput(id, label, min, max, step, val) {
+    const container = document.createElement("div");
+    container.style.cssText = "display: flex; flex-direction: column; width: 220px;";
+    
+    const labelEl = document.createElement("label");
+    labelEl.htmlFor = id;
+    labelEl.style.cssText = "font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px;";
+    labelEl.innerHTML = `${label} <span style="color: #be185d;">${val}</span>`;
+    
+    const input = document.createElement("input");
+    input.type = "range";
+    input.id = id;
+    input.min = min;
+    input.max = max;
+    input.step = step;
+    input.value = val;
+    input.style.width = "100%";
+    input.style.accentColor = "#be185d"; 
+    
+    container.appendChild(labelEl);
+    container.appendChild(input);
+    return { container, input, labelEl };
+  }
+
+  const nCtrl = createInput("n_val_fx", "Số phép thử (n):", 10, 500, 10, 50);
+  const pCtrl = createInput("p_val_fx", "Xác suất (p):", 0.05, 0.95, 0.05, 0.5);
+
+  const controlsDiv = document.createElement("div");
+  controlsDiv.style.cssText = "display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin-bottom: 20px; width: 100%;";
+  controlsDiv.appendChild(nCtrl.container);
+  controlsDiv.appendChild(pCtrl.container);
+  wrapper.appendChild(controlsDiv);
+
+  // Stats Display
+  const statsDiv = document.createElement("div");
+  statsDiv.style.cssText = "font-size: 16px; color: #374151; margin-bottom: 10px; font-weight: 500; font-family: monospace;";
+  wrapper.appendChild(statsDiv);
+  
+  // Plot Container
+  const plotContainer = document.createElement("div");
+  wrapper.appendChild(plotContainer);
+
+  // --- 3. MATH KERNEL ---
+  function logFact(n) {
+    if (n <= 1) return 0;
+    return n * Math.log(n) - n + 0.5 * Math.log(2 * Math.PI * n);
+  }
+
+  function getBinomialProb(k, n, p) {
+    if (k < 0 || k > n) return 0;
+    if (p <= 0) return k === 0 ? 1 : 0;
+    if (p >= 1) return k === n ? 1 : 0;
+    
+    const logP = logFact(n) - logFact(k) - logFact(n - k) + k * Math.log(p) + (n - k) * Math.log(1 - p);
+    return Math.exp(logP);
+  }
+
+  function normalPDF(x, mu, sigma) {
+    if (sigma <= 0) return 0;
+    return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+  }
+
+  // --- 4. RENDER LOGIC ---
+  function update() {
+    const n = parseFloat(nCtrl.input.value);
+    const p = parseFloat(pCtrl.input.value);
+
+    // Update Text
+    nCtrl.labelEl.querySelector("span").textContent = n;
+    pCtrl.labelEl.querySelector("span").textContent = p.toFixed(2);
+
+    const mu = n * p;
+    const sigma = Math.sqrt(n * p * (1 - p));
+
+    // Stats
+    statsDiv.innerHTML = `&mu; = <b>${mu.toFixed(2)}</b> &nbsp;|&nbsp; &sigma; = <b>${sigma.toFixed(2)}</b>`;
+
+    // CALCULATION WINDOW: We still optimize calculation to +/- 4 sigma
+    // to keep performance high, even though visual axis is 0-n.
+    let startK = Math.floor(mu - 4 * sigma);
+    let endK = Math.ceil(mu + 4 * sigma);
+    if (startK < 0) startK = 0;
+    if (endK > n) endK = n;
+
+    // 1. Generate Binomial Data
+    const binomData = [];
+    for (let k = startK; k <= endK; k++) {
+      binomData.push({ 
+          k: k, 
+          x1: k - 0.5, 
+          x2: k + 0.5,
+          prob: getBinomialProb(k, n, p) 
+      });
+    }
+
+    // 2. Generate Normal Data
+    const normalData = [];
+    const step = (endK - startK) / 100;
+    const safeStep = step > 0.1 ? step : 0.1;
+    
+    for (let x = startK; x <= endK; x += safeStep) {
+      normalData.push({ x: x, y: normalPDF(x, mu, sigma) });
+    }
+
+    // 3. Plot
+    const chart = Plot.plot({
+      width: 600,
+      height: 380,
+      marginTop: 30,
+      marginLeft: 40,
+      marginBottom: 30,
+      x: { 
+        label: "Số lần thành công (k)",
+        // FIX: Hard-code domain to full range [0, n] to prevent jumping
+        domain: [0, n]
+      },
+      y: { 
+        label: "Xác suất", 
+        grid: true 
+      },
+      marks: [
+        // Binomial
+        Plot.rectY(binomData, {
+          x1: "x1", 
+          x2: "x2", 
+          y: "prob", 
+          fill: "#3b82f6", 
+          fillOpacity: 0.5,
+          title: d => `k: ${d.k}\nP: ${d.prob.toFixed(4)}`
+        }),
+        
+        // Normal Curve
+        Plot.line(normalData, {
+          x: "x", 
+          y: "y", 
+          stroke: "#be185d", 
+          strokeWidth: 3
+        }),
+        
+        // Mean Line
+        Plot.ruleX([mu], {
+          stroke: "#374151", 
+          strokeDasharray: "4,4", 
+          strokeOpacity: 0.6
+        })
+      ]
+    });
+
+    plotContainer.innerHTML = "";
+    plotContainer.appendChild(chart);
+  }
+
+  nCtrl.input.addEventListener("input", update);
+  pCtrl.input.addEventListener("input", update);
+  
+  update();
+
+  return wrapper;
+})();
+```
+
 ### Phân phối Siêu bội (Hypergeometric distribution)
 
 Nếu phân phối Nhị thức là việc tung đồng xu, thì Phân phối Siêu bội giống như việc chia bài.
@@ -1065,7 +1246,234 @@ Trong sinh học thực tế (ví dụ: đếm số ký sinh trùng, ấu trùng
 
 ### Phân phối Poisson
 
-Poisson là giới hạn của Nhị thức khi $n \to \infty$ và $p \to 0$, sao cho $np = \lambda$
+Khác với những phân phối kể trên, phân phối Poisson không dựa trên chuỗi Bernoulli.
+
+Quá trình Poisson (Poisson process)
+
+Quá trình Poisson là 1 cơ chế xảy ra biến cố với các điều kiện:
+
+- Các biến cố xảy ra độc lập nhau (independent): biến cố này xảy ra không ảnh hưởng đến xác suất xảy ra của biến cố tiếp theo
+- Các biến cố xảy ra với 1 **tốc độ trung bình không đổi**: Số lượng sự kiện trung bình trên một đơn vị thời gian là hằng số (ví dụ: trung bình có 5 chiếc xe chạy trên con đường này mỗi giờ)
+- Các biến cố không xảy ra cùng 1 lúc
+
+Phân phối Poisson dùng để đếm **số lượng** biến cố ngẫu nhiên xảy ra trong 1 khoảng thời gian cố định (với điều kiện $\lambda$ không thay đổi trong khoảng thời gian này) của chuỗi Poisson.
+
+$$P(X=k) = \frac{e^{-\lambda} \lambda^k}{k!}$$
+
+Trong đó:
+
+- $\lambda$: Tốc độ trung bình (kỳ vọng) số sự kiện trong khoảng thời gian đó.
+- $k$: Số sự kiện muốn tính xác suất.
+
+### Ví dụ
+
+Tại một phòng cấp cứu, trung bình cứ 1 giờ lại có 3 bệnh nhân đến khám ($\lambda = 3$). Xác suất để trong 1 giờ tới có chính xác 5 ca đến khám là bao nhiêu?
+
+Áp dụng công thức với $\lambda = 3$ và $k = 5$:
+
+$$P(X=5) = \frac{e^{-3} \cdot 3^5}{5!} = \frac{0.0498 \times 243}{120} \approx 0.1008 \quad (\approx 10\%)$$
+
+Poisson là giới hạn của Nhị thức khi $n \to \infty$ và xác suất thành công $p \to 0$, sao cho $np = \lambda$
+
+Hãy tưởng tượng bạn đang ngồi đợi tin nhắn điện thoại trong 1 giờ. Dựa vào kinh nghiệm, trung bình bạn nhận được $\lambda = 5$ tin nhắn/giờ. Xác suất trong 1 giờ tới bạn chỉ nhận được 2 tin nhắn là bao nhiêu?
+
+- Bạn chia 1 giờ thành 60 phút. Mỗi phút là một phép thử Bernoulli (có tin nhắn/không tin nhắn). Bạn có $n = 60$ phép thử liên tiếp.
+- Bạn chia nhỏ thời gian ra nữa. Lúc này số phép thử $n$ trở nên vô cùng lớn, và xác suất có tin nhắn trong một khoảnh khắc siêu nhỏ ($p$) trở nên vô cùng nhỏ. Càng chia nhỏ, bạn sẽ thấy phân phối nhị thức càng gần với Poisson.
+
+```{ojs}
+//| echo: false
+viewof poisson_visual_final = (() => {
+  // --- 1. CONFIGURATION ---
+  const lambda = 5; 
+  
+  // Input Slider (Width 400px to match binning bar)
+  const form = Inputs.range([10, 360], {
+    value: 10, 
+    step: 5, 
+    label: "Chia 1 giờ thành n khoảng (n)"
+  });
+  
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin-top: 20px;
+  `;
+  
+  // --- 2. TIME BIN VISUALIZATION (Canvas) ---
+  const timeCanvas = document.createElement("canvas");
+  const timeW = 400; // REDUCED WIDTH
+  const timeH = 50;
+  const dpr = window.devicePixelRatio || 1;
+  
+  timeCanvas.width = timeW * dpr;
+  timeCanvas.height = timeH * dpr;
+  timeCanvas.style.width = `${timeW}px`;
+  timeCanvas.style.height = `${timeH}px`;
+  timeCanvas.style.marginTop = "10px"; 
+  timeCanvas.style.marginBottom = "5px";
+  
+  const tCtx = timeCanvas.getContext("2d");
+  tCtx.scale(dpr, dpr);
+
+  // --- 3. STATS DISPLAY ---
+  const statsDiv = document.createElement("div");
+  statsDiv.style.cssText = `
+    margin-bottom: 5px; 
+    font-size: 16px; 
+    color: #333;
+    font-weight: 500;
+  `;
+  
+  // --- 4. APPEND ELEMENTS (Order: Input -> Binning -> Stats -> Plot) ---
+  wrapper.appendChild(form);       
+  wrapper.appendChild(timeCanvas); 
+  wrapper.appendChild(statsDiv);   
+  const plotContainer = document.createElement("div");
+  wrapper.appendChild(plotContainer); 
+
+  // --- 5. MATH HELPERS ---
+  function getBinomialData(n, p) {
+    const data = [];
+    let prob = Math.pow(1 - p, n); 
+    for (let k = 0; k <= 16; k++) {
+      data.push({k, type: "Binomial", prob});
+      if (k < n) {
+        prob = prob * ((n - k) / (k + 1)) * (p / (1 - p));
+      } else {
+        prob = 0;
+      }
+    }
+    return data;
+  }
+
+  const poissonData = [];
+  {
+    let prob = Math.exp(-lambda); 
+    for (let k = 0; k <= 16; k++) {
+      poissonData.push({k, type: "Poisson", prob});
+      prob = prob * lambda / (k + 1);
+    }
+  }
+
+  // --- 6. RENDER LOOPS ---
+  function drawTimeBins(n) {
+    tCtx.clearRect(0, 0, timeW, timeH);
+    
+    const barX = 0; // Start at 0 since canvas is now exact width
+    const barY = 15;
+    const barW = timeW;
+    const barH = 20;
+    
+    // Background
+    tCtx.fillStyle = "#f3f4f6";
+    tCtx.fillRect(barX, barY, barW, barH);
+    tCtx.strokeStyle = "#9ca3af";
+    tCtx.lineWidth = 1;
+    tCtx.strokeRect(barX, barY, barW, barH);
+    
+    // Draw Dividers
+    tCtx.beginPath();
+    tCtx.strokeStyle = n > 150 ? "rgba(107, 114, 128, 0.5)" : "#6b7280";
+    tCtx.lineWidth = n > 200 ? 0.5 : 1; 
+
+    const binSize = barW / n;
+    
+    // Draw internal lines
+    for (let i = 1; i < n; i++) {
+        const x = Math.floor(barX + i * binSize) + 0.5;
+        tCtx.moveTo(x, barY);
+        tCtx.lineTo(x, barY + barH);
+    }
+    tCtx.stroke();
+    
+    // Labels
+    tCtx.fillStyle = "#374151";
+    tCtx.font = "bold 12px sans-serif";
+    
+    tCtx.textAlign = "left"; 
+    tCtx.fillText("0", barX, barY + barH + 14);
+    
+    tCtx.textAlign = "right"; 
+    tCtx.fillText("1h", barX + barW, barY + barH + 14);
+    
+    // Center Label (Changed Text)
+    tCtx.textAlign = "center"; 
+    tCtx.fillStyle = "#3b82f6";
+    tCtx.fillText(`${n} phép thử liên tiếp`, timeW / 2, barY - 5);
+  }
+
+  function update() {
+    const n = form.value;
+    const p = lambda / n; 
+    
+    // Update Stats
+    statsDiv.innerHTML = `n = ${n} &nbsp;|&nbsp; p = ${p.toFixed(4)} &nbsp;|&nbsp; np = ${(n*p).toFixed(1)}`;
+
+    // Update Top Canvas
+    drawTimeBins(n);
+
+    // Update Plot
+    const binomData = getBinomialData(n, p);
+    const combinedData = poissonData.concat(binomData);
+    const xDomain = Array.from({length: 17}, (_, i) => i);
+
+    const chart = Plot.plot({
+      width: 600,
+      height: 320,
+      marginTop: 20,
+      x: { 
+        type: "band", 
+        domain: xDomain, 
+        label: "Số tin nhắn (k)",
+        padding: 0.1
+      },
+      y: { label: "Xác suất", domain: [0, 0.2] },
+      marks: [
+        // Binomial Bars
+        Plot.barY(combinedData.filter(d => d.type === "Binomial"), {
+          x: "k", 
+          y: "prob", 
+          fill: "#3b82f6", 
+          fillOpacity: 0.6,
+          title: d => `Binomial: ${d.prob.toFixed(4)}`
+        }),
+        // Poisson Line
+        Plot.line(combinedData.filter(d => d.type === "Poisson"), {
+          x: "k", 
+          y: "prob", 
+          stroke: "#be185d", 
+          strokeWidth: 3,
+          curve: "monotone-x"
+        }),
+        // Poisson Dots
+        Plot.dot(combinedData.filter(d => d.type === "Poisson"), {
+          x: "k", 
+          y: "prob", 
+          fill: "#be185d",
+          r: 4
+        }),
+        Plot.ruleY([0])
+      ]
+    });
+
+    plotContainer.innerHTML = "";
+    plotContainer.appendChild(chart);
+  }
+
+  form.addEventListener("input", update);
+  update();
+
+  return wrapper;
+})();
+```
+
+### Ứng dụng
+
+
+
 
 Các phân phối phức tạp có thể được tạo ra bằng cách cộng các phân phối đơn giản:
 

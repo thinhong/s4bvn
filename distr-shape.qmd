@@ -123,6 +123,10 @@ $$E\left[\left(\frac{X - E[X]}{\sigma}\right)^4\right]$$
 
 Lũy thừa bậc 4 làm cho những giá trị nhỏ (gần trung bình) trở nên siêu nhỏ, và những giá trị lớn (xa trung bình - outliers) trở nên lớn hơn nhiều lần. Moment này càng lớn thì đuôi của phân phối càng dày, nghĩa là xác suất xảy ra các sự kiện cực đoan càng lớn.
 
+Leptokurtic (tiền tố lepto- nghĩa là nhỏ, mảnh khảnh): độ nhọn > 3.
+
+
+
 ```{r}
 library(tidyverse)
 library(patchwork) # Great for combining plots
@@ -186,6 +190,7 @@ final_plot <- p1 + p2 + plot_layout(widths = c(2, 1))
 
 print(final_plot)
 ```
+
 
 
 Estimate

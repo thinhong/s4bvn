@@ -5,3 +5,5 @@ Sách được biên soạn dựa trên các tài liệu:
 - Giáo trình "STATS 210: Statistical Theory" của Bộ môn Thống kê, Đại học Auckland
 
 - Sách "Ecological Models and Data in R" của Benjamin M. Bolker (2008)
+
+Cách dịch các thuật ngữ tiếng Việt được tham khảo từ Wikipedia.
