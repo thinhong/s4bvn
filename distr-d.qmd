@@ -1246,9 +1246,7 @@ Trong sinh học thực tế (ví dụ: đếm số ký sinh trùng, ấu trùng
 
 ### Phân phối Poisson
 
-Khác với những phân phối kể trên, phân phối Poisson không dựa trên chuỗi Bernoulli.
-
-Quá trình Poisson (Poisson process)
+Khác với những phân phối kể trên, phân phối Poisson không dựa trên chuỗi Bernoulli, mà dựa trên quá trình Poisson (Poisson process).
 
 Quá trình Poisson là 1 cơ chế xảy ra biến cố với các điều kiện:
 
@@ -1256,7 +1254,7 @@ Quá trình Poisson là 1 cơ chế xảy ra biến cố với các điều ki�
 - Các biến cố xảy ra với 1 **tốc độ trung bình không đổi**: Số lượng sự kiện trung bình trên một đơn vị thời gian là hằng số (ví dụ: trung bình có 5 chiếc xe chạy trên con đường này mỗi giờ)
 - Các biến cố không xảy ra cùng 1 lúc
 
-Phân phối Poisson dùng để đếm **số lượng** biến cố ngẫu nhiên xảy ra trong 1 khoảng thời gian cố định (với điều kiện $\lambda$ không thay đổi trong khoảng thời gian này) của chuỗi Poisson.
+Phân phối Poisson dùng để đếm **số lượng** biến cố ngẫu nhiên xảy ra trong 1 khoảng thời gian cố định (với điều kiện $\lambda$ không thay đổi trong khoảng thời gian này) của quá trình Poisson.
 
 $$P(X=k) = \frac{e^{-\lambda} \lambda^k}{k!}$$
 
@@ -1470,7 +1468,7 @@ viewof poisson_visual_final = (() => {
 })();
 ```
 
-### Ứng dụng
+## Ứng dụng
 
 Dữ liệu dạng đếm (ví dụ: số ca bệnh trong 1 tuần):
 

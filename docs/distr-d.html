@@ -256,8 +256,8 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#phân-phối-poisson" id="toc-phân-phối-poisson" class="nav-link" data-scroll-target="#phân-phối-poisson"><span class="header-section-number">4.4.1</span> Phân phối Poisson</a></li>
   <li><a href="#ví-dụ-1" id="toc-ví-dụ-1" class="nav-link" data-scroll-target="#ví-dụ-1"><span class="header-section-number">4.4.2</span> Ví dụ</a></li>
-  <li><a href="#ứng-dụng" id="toc-ứng-dụng" class="nav-link" data-scroll-target="#ứng-dụng"><span class="header-section-number">4.4.3</span> Ứng dụng</a></li>
   </ul></li>
+  <li><a href="#ứng-dụng" id="toc-ứng-dụng" class="nav-link" data-scroll-target="#ứng-dụng"><span class="header-section-number">4.5</span> Ứng dụng</a></li>
   </ul>
 </nav>
     </div>
@@ -1547,15 +1547,14 @@ window.Quarto = {
 <h2 data-number="4.4" class="anchored" data-anchor-id="đếm-sự-kiện-khi-biết-tốc-độ-trung-bình"><span class="header-section-number">4.4</span> Đếm sự kiện khi biết tốc độ trung bình</h2>
 <section id="phân-phối-poisson" class="level3" data-number="4.4.1">
 <h3 data-number="4.4.1" class="anchored" data-anchor-id="phân-phối-poisson"><span class="header-section-number">4.4.1</span> Phân phối Poisson</h3>
-<p>Khác với những phân phối kể trên, phân phối Poisson không dựa trên chuỗi Bernoulli.</p>
-<p>Quá trình Poisson (Poisson process)</p>
+<p>Khác với những phân phối kể trên, phân phối Poisson không dựa trên chuỗi Bernoulli, mà dựa trên quá trình Poisson (Poisson process).</p>
 <p>Quá trình Poisson là 1 cơ chế xảy ra biến cố với các điều kiện:</p>
 <ul>
 <li>Các biến cố xảy ra độc lập nhau (independent): biến cố này xảy ra không ảnh hưởng đến xác suất xảy ra của biến cố tiếp theo</li>
 <li>Các biến cố xảy ra với 1 <strong>tốc độ trung bình không đổi</strong>: Số lượng sự kiện trung bình trên một đơn vị thời gian là hằng số (ví dụ: trung bình có 5 chiếc xe chạy trên con đường này mỗi giờ)</li>
 <li>Các biến cố không xảy ra cùng 1 lúc</li>
 </ul>
-<p>Phân phối Poisson dùng để đếm <strong>số lượng</strong> biến cố ngẫu nhiên xảy ra trong 1 khoảng thời gian cố định (với điều kiện <span class="math inline">\(\lambda\)</span> không thay đổi trong khoảng thời gian này) của chuỗi Poisson.</p>
+<p>Phân phối Poisson dùng để đếm <strong>số lượng</strong> biến cố ngẫu nhiên xảy ra trong 1 khoảng thời gian cố định (với điều kiện <span class="math inline">\(\lambda\)</span> không thay đổi trong khoảng thời gian này) của quá trình Poisson.</p>
 <p><span class="math display">\[P(X=k) = \frac{e^{-\lambda} \lambda^k}{k!}\]</span></p>
 <p>Trong đó:</p>
 <ul>
@@ -1575,192 +1574,192 @@ window.Quarto = {
 <li>Bạn chia nhỏ thời gian ra nữa. Lúc này số phép thử <span class="math inline">\(n\)</span> trở nên vô cùng lớn, và xác suất có tin nhắn trong một khoảnh khắc siêu nhỏ (<span class="math inline">\(p\)</span>) trở nên vô cùng nhỏ. Càng chia nhỏ, bạn sẽ thấy phân phối nhị thức càng gần với Poisson.</li>
 </ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb6" data-startfrom="1284" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 1283;"><span id="cb6-1284"><a href="#cb6-1284" aria-hidden="true" tabindex="-1"></a>viewof poisson_visual_final <span class="op">=</span> (() <span class="kw">=&gt;</span> {</span>
-<span id="cb6-1285"><a href="#cb6-1285" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 1. CONFIGURATION ---</span></span>
-<span id="cb6-1286"><a href="#cb6-1286" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> lambda <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> </span>
-<span id="cb6-1287"><a href="#cb6-1287" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-1288"><a href="#cb6-1288" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Input Slider (Width 400px to match binning bar)</span></span>
-<span id="cb6-1289"><a href="#cb6-1289" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> form <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">10</span><span class="op">,</span> <span class="dv">360</span>]<span class="op">,</span> {</span>
-<span id="cb6-1290"><a href="#cb6-1290" aria-hidden="true" tabindex="-1"></a>    <span class="dt">value</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span> </span>
-<span id="cb6-1291"><a href="#cb6-1291" aria-hidden="true" tabindex="-1"></a>    <span class="dt">step</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span> </span>
-<span id="cb6-1292"><a href="#cb6-1292" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Chia 1 giờ thành n khoảng (n)"</span></span>
-<span id="cb6-1293"><a href="#cb6-1293" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
-<span id="cb6-1294"><a href="#cb6-1294" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-1295"><a href="#cb6-1295" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> wrapper <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
-<span id="cb6-1296"><a href="#cb6-1296" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="vs">`</span></span>
-<span id="cb6-1297"><a href="#cb6-1297" aria-hidden="true" tabindex="-1"></a><span class="vs">    display: flex;</span></span>
-<span id="cb6-1298"><a href="#cb6-1298" aria-hidden="true" tabindex="-1"></a><span class="vs">    flex-direction: column;</span></span>
-<span id="cb6-1299"><a href="#cb6-1299" aria-hidden="true" tabindex="-1"></a><span class="vs">    align-items: center;</span></span>
-<span id="cb6-1300"><a href="#cb6-1300" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;</span></span>
-<span id="cb6-1301"><a href="#cb6-1301" aria-hidden="true" tabindex="-1"></a><span class="vs">    margin-top: 20px;</span></span>
-<span id="cb6-1302"><a href="#cb6-1302" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
-<span id="cb6-1303"><a href="#cb6-1303" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-1304"><a href="#cb6-1304" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 2. TIME BIN VISUALIZATION (Canvas) ---</span></span>
-<span id="cb6-1305"><a href="#cb6-1305" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> timeCanvas <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"canvas"</span>)<span class="op">;</span></span>
-<span id="cb6-1306"><a href="#cb6-1306" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> timeW <span class="op">=</span> <span class="dv">400</span><span class="op">;</span> <span class="co">// REDUCED WIDTH</span></span>
-<span id="cb6-1307"><a href="#cb6-1307" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> timeH <span class="op">=</span> <span class="dv">50</span><span class="op">;</span></span>
-<span id="cb6-1308"><a href="#cb6-1308" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> dpr <span class="op">=</span> <span class="bu">window</span><span class="op">.</span><span class="at">devicePixelRatio</span> <span class="op">||</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb6-1309"><a href="#cb6-1309" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-1310"><a href="#cb6-1310" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">width</span> <span class="op">=</span> timeW <span class="op">*</span> dpr<span class="op">;</span></span>
-<span id="cb6-1311"><a href="#cb6-1311" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">height</span> <span class="op">=</span> timeH <span class="op">*</span> dpr<span class="op">;</span></span>
-<span id="cb6-1312"><a href="#cb6-1312" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">width</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>timeW<span class="sc">}</span><span class="vs">px`</span><span class="op">;</span></span>
-<span id="cb6-1313"><a href="#cb6-1313" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">height</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>timeH<span class="sc">}</span><span class="vs">px`</span><span class="op">;</span></span>
-<span id="cb6-1314"><a href="#cb6-1314" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">marginTop</span> <span class="op">=</span> <span class="st">"10px"</span><span class="op">;</span> </span>
-<span id="cb6-1315"><a href="#cb6-1315" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">marginBottom</span> <span class="op">=</span> <span class="st">"5px"</span><span class="op">;</span></span>
-<span id="cb6-1316"><a href="#cb6-1316" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-1317"><a href="#cb6-1317" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tCtx <span class="op">=</span> timeCanvas<span class="op">.</span><span class="fu">getContext</span>(<span class="st">"2d"</span>)<span class="op">;</span></span>
-<span id="cb6-1318"><a href="#cb6-1318" aria-hidden="true" tabindex="-1"></a>  tCtx<span class="op">.</span><span class="fu">scale</span>(dpr<span class="op">,</span> dpr)<span class="op">;</span></span>
-<span id="cb6-1319"><a href="#cb6-1319" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1320"><a href="#cb6-1320" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 3. STATS DISPLAY ---</span></span>
-<span id="cb6-1321"><a href="#cb6-1321" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> statsDiv <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
-<span id="cb6-1322"><a href="#cb6-1322" aria-hidden="true" tabindex="-1"></a>  statsDiv<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="vs">`</span></span>
-<span id="cb6-1323"><a href="#cb6-1323" aria-hidden="true" tabindex="-1"></a><span class="vs">    margin-bottom: 5px; </span></span>
-<span id="cb6-1324"><a href="#cb6-1324" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-size: 16px; </span></span>
-<span id="cb6-1325"><a href="#cb6-1325" aria-hidden="true" tabindex="-1"></a><span class="vs">    color: #333;</span></span>
-<span id="cb6-1326"><a href="#cb6-1326" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-weight: 500;</span></span>
-<span id="cb6-1327"><a href="#cb6-1327" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
-<span id="cb6-1328"><a href="#cb6-1328" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb6-1329"><a href="#cb6-1329" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 4. APPEND ELEMENTS (Order: Input -&gt; Binning -&gt; Stats -&gt; Plot) ---</span></span>
-<span id="cb6-1330"><a href="#cb6-1330" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(form)<span class="op">;</span>       </span>
-<span id="cb6-1331"><a href="#cb6-1331" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(timeCanvas)<span class="op">;</span> </span>
-<span id="cb6-1332"><a href="#cb6-1332" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(statsDiv)<span class="op">;</span>   </span>
-<span id="cb6-1333"><a href="#cb6-1333" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> plotContainer <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
-<span id="cb6-1334"><a href="#cb6-1334" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(plotContainer)<span class="op">;</span> </span>
-<span id="cb6-1335"><a href="#cb6-1335" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1336"><a href="#cb6-1336" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 5. MATH HELPERS ---</span></span>
-<span id="cb6-1337"><a href="#cb6-1337" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">getBinomialData</span>(n<span class="op">,</span> p) {</span>
-<span id="cb6-1338"><a href="#cb6-1338" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> data <span class="op">=</span> []<span class="op">;</span></span>
-<span id="cb6-1339"><a href="#cb6-1339" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> prob <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">pow</span>(<span class="dv">1</span> <span class="op">-</span> p<span class="op">,</span> n)<span class="op">;</span> </span>
-<span id="cb6-1340"><a href="#cb6-1340" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> k <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> k <span class="op">&lt;=</span> <span class="dv">16</span><span class="op">;</span> k<span class="op">++</span>) {</span>
-<span id="cb6-1341"><a href="#cb6-1341" aria-hidden="true" tabindex="-1"></a>      data<span class="op">.</span><span class="fu">push</span>({k<span class="op">,</span> <span class="dt">type</span><span class="op">:</span> <span class="st">"Binomial"</span><span class="op">,</span> prob})<span class="op">;</span></span>
-<span id="cb6-1342"><a href="#cb6-1342" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (k <span class="op">&lt;</span> n) {</span>
-<span id="cb6-1343"><a href="#cb6-1343" aria-hidden="true" tabindex="-1"></a>        prob <span class="op">=</span> prob <span class="op">*</span> ((n <span class="op">-</span> k) <span class="op">/</span> (k <span class="op">+</span> <span class="dv">1</span>)) <span class="op">*</span> (p <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> p))<span class="op">;</span></span>
-<span id="cb6-1344"><a href="#cb6-1344" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
-<span id="cb6-1345"><a href="#cb6-1345" aria-hidden="true" tabindex="-1"></a>        prob <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb6-1346"><a href="#cb6-1346" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb6-1347"><a href="#cb6-1347" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb6-1348"><a href="#cb6-1348" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> data<span class="op">;</span></span>
-<span id="cb6-1349"><a href="#cb6-1349" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-1350"><a href="#cb6-1350" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1351"><a href="#cb6-1351" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> poissonData <span class="op">=</span> []<span class="op">;</span></span>
-<span id="cb6-1352"><a href="#cb6-1352" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb6-1353"><a href="#cb6-1353" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> prob <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>lambda)<span class="op">;</span> </span>
-<span id="cb6-1354"><a href="#cb6-1354" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> k <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> k <span class="op">&lt;=</span> <span class="dv">16</span><span class="op">;</span> k<span class="op">++</span>) {</span>
-<span id="cb6-1355"><a href="#cb6-1355" aria-hidden="true" tabindex="-1"></a>      poissonData<span class="op">.</span><span class="fu">push</span>({k<span class="op">,</span> <span class="dt">type</span><span class="op">:</span> <span class="st">"Poisson"</span><span class="op">,</span> prob})<span class="op">;</span></span>
-<span id="cb6-1356"><a href="#cb6-1356" aria-hidden="true" tabindex="-1"></a>      prob <span class="op">=</span> prob <span class="op">*</span> lambda <span class="op">/</span> (k <span class="op">+</span> <span class="dv">1</span>)<span class="op">;</span></span>
-<span id="cb6-1357"><a href="#cb6-1357" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb6-1358"><a href="#cb6-1358" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-1359"><a href="#cb6-1359" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1360"><a href="#cb6-1360" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 6. RENDER LOOPS ---</span></span>
-<span id="cb6-1361"><a href="#cb6-1361" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">drawTimeBins</span>(n) {</span>
-<span id="cb6-1362"><a href="#cb6-1362" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">clearRect</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> timeW<span class="op">,</span> timeH)<span class="op">;</span></span>
-<span id="cb6-1363"><a href="#cb6-1363" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1364"><a href="#cb6-1364" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barX <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// Start at 0 since canvas is now exact width</span></span>
-<span id="cb6-1365"><a href="#cb6-1365" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barY <span class="op">=</span> <span class="dv">15</span><span class="op">;</span></span>
-<span id="cb6-1366"><a href="#cb6-1366" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barW <span class="op">=</span> timeW<span class="op">;</span></span>
-<span id="cb6-1367"><a href="#cb6-1367" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barH <span class="op">=</span> <span class="dv">20</span><span class="op">;</span></span>
-<span id="cb6-1368"><a href="#cb6-1368" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1369"><a href="#cb6-1369" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Background</span></span>
-<span id="cb6-1370"><a href="#cb6-1370" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">fillStyle</span> <span class="op">=</span> <span class="st">"#f3f4f6"</span><span class="op">;</span></span>
-<span id="cb6-1371"><a href="#cb6-1371" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">fillRect</span>(barX<span class="op">,</span> barY<span class="op">,</span> barW<span class="op">,</span> barH)<span class="op">;</span></span>
-<span id="cb6-1372"><a href="#cb6-1372" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">strokeStyle</span> <span class="op">=</span> <span class="st">"#9ca3af"</span><span class="op">;</span></span>
-<span id="cb6-1373"><a href="#cb6-1373" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">lineWidth</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb6-1374"><a href="#cb6-1374" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">strokeRect</span>(barX<span class="op">,</span> barY<span class="op">,</span> barW<span class="op">,</span> barH)<span class="op">;</span></span>
-<span id="cb6-1375"><a href="#cb6-1375" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1376"><a href="#cb6-1376" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Draw Dividers</span></span>
-<span id="cb6-1377"><a href="#cb6-1377" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">beginPath</span>()<span class="op">;</span></span>
-<span id="cb6-1378"><a href="#cb6-1378" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">strokeStyle</span> <span class="op">=</span> n <span class="op">&gt;</span> <span class="dv">150</span> <span class="op">?</span> <span class="st">"rgba(107, 114, 128, 0.5)"</span> <span class="op">:</span> <span class="st">"#6b7280"</span><span class="op">;</span></span>
-<span id="cb6-1379"><a href="#cb6-1379" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">lineWidth</span> <span class="op">=</span> n <span class="op">&gt;</span> <span class="dv">200</span> <span class="op">?</span> <span class="fl">0.5</span> <span class="op">:</span> <span class="dv">1</span><span class="op">;</span> </span>
-<span id="cb6-1380"><a href="#cb6-1380" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1381"><a href="#cb6-1381" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> binSize <span class="op">=</span> barW <span class="op">/</span> n<span class="op">;</span></span>
-<span id="cb6-1382"><a href="#cb6-1382" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1383"><a href="#cb6-1383" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Draw internal lines</span></span>
-<span id="cb6-1384"><a href="#cb6-1384" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;</span> n<span class="op">;</span> i<span class="op">++</span>) {</span>
-<span id="cb6-1385"><a href="#cb6-1385" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> x <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">floor</span>(barX <span class="op">+</span> i <span class="op">*</span> binSize) <span class="op">+</span> <span class="fl">0.5</span><span class="op">;</span></span>
-<span id="cb6-1386"><a href="#cb6-1386" aria-hidden="true" tabindex="-1"></a>        tCtx<span class="op">.</span><span class="fu">moveTo</span>(x<span class="op">,</span> barY)<span class="op">;</span></span>
-<span id="cb6-1387"><a href="#cb6-1387" aria-hidden="true" tabindex="-1"></a>        tCtx<span class="op">.</span><span class="fu">lineTo</span>(x<span class="op">,</span> barY <span class="op">+</span> barH)<span class="op">;</span></span>
-<span id="cb6-1388"><a href="#cb6-1388" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb6-1389"><a href="#cb6-1389" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">stroke</span>()<span class="op">;</span></span>
-<span id="cb6-1390"><a href="#cb6-1390" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1391"><a href="#cb6-1391" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Labels</span></span>
-<span id="cb6-1392"><a href="#cb6-1392" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">fillStyle</span> <span class="op">=</span> <span class="st">"#374151"</span><span class="op">;</span></span>
-<span id="cb6-1393"><a href="#cb6-1393" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">font</span> <span class="op">=</span> <span class="st">"bold 12px sans-serif"</span><span class="op">;</span></span>
-<span id="cb6-1394"><a href="#cb6-1394" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1395"><a href="#cb6-1395" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">textAlign</span> <span class="op">=</span> <span class="st">"left"</span><span class="op">;</span> </span>
-<span id="cb6-1396"><a href="#cb6-1396" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">fillText</span>(<span class="st">"0"</span><span class="op">,</span> barX<span class="op">,</span> barY <span class="op">+</span> barH <span class="op">+</span> <span class="dv">14</span>)<span class="op">;</span></span>
-<span id="cb6-1397"><a href="#cb6-1397" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1398"><a href="#cb6-1398" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">textAlign</span> <span class="op">=</span> <span class="st">"right"</span><span class="op">;</span> </span>
-<span id="cb6-1399"><a href="#cb6-1399" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">fillText</span>(<span class="st">"1h"</span><span class="op">,</span> barX <span class="op">+</span> barW<span class="op">,</span> barY <span class="op">+</span> barH <span class="op">+</span> <span class="dv">14</span>)<span class="op">;</span></span>
-<span id="cb6-1400"><a href="#cb6-1400" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1401"><a href="#cb6-1401" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Center Label (Changed Text)</span></span>
-<span id="cb6-1402"><a href="#cb6-1402" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">textAlign</span> <span class="op">=</span> <span class="st">"center"</span><span class="op">;</span> </span>
-<span id="cb6-1403"><a href="#cb6-1403" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">fillStyle</span> <span class="op">=</span> <span class="st">"#3b82f6"</span><span class="op">;</span></span>
-<span id="cb6-1404"><a href="#cb6-1404" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">fillText</span>(<span class="vs">`</span><span class="sc">${</span>n<span class="sc">}</span><span class="vs"> phép thử liên tiếp`</span><span class="op">,</span> timeW <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> barY <span class="op">-</span> <span class="dv">5</span>)<span class="op">;</span></span>
-<span id="cb6-1405"><a href="#cb6-1405" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-1406"><a href="#cb6-1406" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1407"><a href="#cb6-1407" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">update</span>() {</span>
-<span id="cb6-1408"><a href="#cb6-1408" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> n <span class="op">=</span> form<span class="op">.</span><span class="at">value</span><span class="op">;</span></span>
-<span id="cb6-1409"><a href="#cb6-1409" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p <span class="op">=</span> lambda <span class="op">/</span> n<span class="op">;</span> </span>
-<span id="cb6-1410"><a href="#cb6-1410" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb6-1411"><a href="#cb6-1411" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Update Stats</span></span>
-<span id="cb6-1412"><a href="#cb6-1412" aria-hidden="true" tabindex="-1"></a>    statsDiv<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> <span class="vs">`n = </span><span class="sc">${</span>n<span class="sc">}</span><span class="vs"> &amp;nbsp;|&amp;nbsp; p = </span><span class="sc">${</span>p<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="vs"> &amp;nbsp;|&amp;nbsp; np = </span><span class="sc">${</span>(n<span class="op">*</span>p)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
-<span id="cb6-1413"><a href="#cb6-1413" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1414"><a href="#cb6-1414" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Update Top Canvas</span></span>
-<span id="cb6-1415"><a href="#cb6-1415" aria-hidden="true" tabindex="-1"></a>    <span class="fu">drawTimeBins</span>(n)<span class="op">;</span></span>
-<span id="cb6-1416"><a href="#cb6-1416" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1417"><a href="#cb6-1417" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Update Plot</span></span>
-<span id="cb6-1418"><a href="#cb6-1418" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> binomData <span class="op">=</span> <span class="fu">getBinomialData</span>(n<span class="op">,</span> p)<span class="op">;</span></span>
-<span id="cb6-1419"><a href="#cb6-1419" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> combinedData <span class="op">=</span> poissonData<span class="op">.</span><span class="fu">concat</span>(binomData)<span class="op">;</span></span>
-<span id="cb6-1420"><a href="#cb6-1420" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> xDomain <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> <span class="dv">17</span>}<span class="op">,</span> (_<span class="op">,</span> i) <span class="kw">=&gt;</span> i)<span class="op">;</span></span>
-<span id="cb6-1421"><a href="#cb6-1421" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1422"><a href="#cb6-1422" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> chart <span class="op">=</span> Plot<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb6-1423"><a href="#cb6-1423" aria-hidden="true" tabindex="-1"></a>      <span class="dt">width</span><span class="op">:</span> <span class="dv">600</span><span class="op">,</span></span>
-<span id="cb6-1424"><a href="#cb6-1424" aria-hidden="true" tabindex="-1"></a>      <span class="dt">height</span><span class="op">:</span> <span class="dv">320</span><span class="op">,</span></span>
-<span id="cb6-1425"><a href="#cb6-1425" aria-hidden="true" tabindex="-1"></a>      <span class="dt">marginTop</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span></span>
-<span id="cb6-1426"><a href="#cb6-1426" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> { </span>
-<span id="cb6-1427"><a href="#cb6-1427" aria-hidden="true" tabindex="-1"></a>        <span class="dt">type</span><span class="op">:</span> <span class="st">"band"</span><span class="op">,</span> </span>
-<span id="cb6-1428"><a href="#cb6-1428" aria-hidden="true" tabindex="-1"></a>        <span class="dt">domain</span><span class="op">:</span> xDomain<span class="op">,</span> </span>
-<span id="cb6-1429"><a href="#cb6-1429" aria-hidden="true" tabindex="-1"></a>        <span class="dt">label</span><span class="op">:</span> <span class="st">"Số tin nhắn (k)"</span><span class="op">,</span></span>
-<span id="cb6-1430"><a href="#cb6-1430" aria-hidden="true" tabindex="-1"></a>        <span class="dt">padding</span><span class="op">:</span> <span class="fl">0.1</span></span>
-<span id="cb6-1431"><a href="#cb6-1431" aria-hidden="true" tabindex="-1"></a>      }<span class="op">,</span></span>
-<span id="cb6-1432"><a href="#cb6-1432" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"Xác suất"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="fl">0.2</span>] }<span class="op">,</span></span>
-<span id="cb6-1433"><a href="#cb6-1433" aria-hidden="true" tabindex="-1"></a>      <span class="dt">marks</span><span class="op">:</span> [</span>
-<span id="cb6-1434"><a href="#cb6-1434" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Binomial Bars</span></span>
-<span id="cb6-1435"><a href="#cb6-1435" aria-hidden="true" tabindex="-1"></a>        Plot<span class="op">.</span><span class="fu">barY</span>(combinedData<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">type</span> <span class="op">===</span> <span class="st">"Binomial"</span>)<span class="op">,</span> {</span>
-<span id="cb6-1436"><a href="#cb6-1436" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">"k"</span><span class="op">,</span> </span>
-<span id="cb6-1437"><a href="#cb6-1437" aria-hidden="true" tabindex="-1"></a>          <span class="dt">y</span><span class="op">:</span> <span class="st">"prob"</span><span class="op">,</span> </span>
-<span id="cb6-1438"><a href="#cb6-1438" aria-hidden="true" tabindex="-1"></a>          <span class="dt">fill</span><span class="op">:</span> <span class="st">"#3b82f6"</span><span class="op">,</span> </span>
-<span id="cb6-1439"><a href="#cb6-1439" aria-hidden="true" tabindex="-1"></a>          <span class="dt">fillOpacity</span><span class="op">:</span> <span class="fl">0.6</span><span class="op">,</span></span>
-<span id="cb6-1440"><a href="#cb6-1440" aria-hidden="true" tabindex="-1"></a>          <span class="dt">title</span><span class="op">:</span> d <span class="kw">=&gt;</span> <span class="vs">`Binomial: </span><span class="sc">${</span>d<span class="op">.</span><span class="at">prob</span><span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="vs">`</span></span>
-<span id="cb6-1441"><a href="#cb6-1441" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
-<span id="cb6-1442"><a href="#cb6-1442" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Poisson Line</span></span>
-<span id="cb6-1443"><a href="#cb6-1443" aria-hidden="true" tabindex="-1"></a>        Plot<span class="op">.</span><span class="fu">line</span>(combinedData<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">type</span> <span class="op">===</span> <span class="st">"Poisson"</span>)<span class="op">,</span> {</span>
-<span id="cb6-1444"><a href="#cb6-1444" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">"k"</span><span class="op">,</span> </span>
-<span id="cb6-1445"><a href="#cb6-1445" aria-hidden="true" tabindex="-1"></a>          <span class="dt">y</span><span class="op">:</span> <span class="st">"prob"</span><span class="op">,</span> </span>
-<span id="cb6-1446"><a href="#cb6-1446" aria-hidden="true" tabindex="-1"></a>          <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#be185d"</span><span class="op">,</span> </span>
-<span id="cb6-1447"><a href="#cb6-1447" aria-hidden="true" tabindex="-1"></a>          <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
-<span id="cb6-1448"><a href="#cb6-1448" aria-hidden="true" tabindex="-1"></a>          <span class="dt">curve</span><span class="op">:</span> <span class="st">"monotone-x"</span></span>
-<span id="cb6-1449"><a href="#cb6-1449" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
-<span id="cb6-1450"><a href="#cb6-1450" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Poisson Dots</span></span>
-<span id="cb6-1451"><a href="#cb6-1451" aria-hidden="true" tabindex="-1"></a>        Plot<span class="op">.</span><span class="fu">dot</span>(combinedData<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">type</span> <span class="op">===</span> <span class="st">"Poisson"</span>)<span class="op">,</span> {</span>
-<span id="cb6-1452"><a href="#cb6-1452" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">"k"</span><span class="op">,</span> </span>
-<span id="cb6-1453"><a href="#cb6-1453" aria-hidden="true" tabindex="-1"></a>          <span class="dt">y</span><span class="op">:</span> <span class="st">"prob"</span><span class="op">,</span> </span>
-<span id="cb6-1454"><a href="#cb6-1454" aria-hidden="true" tabindex="-1"></a>          <span class="dt">fill</span><span class="op">:</span> <span class="st">"#be185d"</span><span class="op">,</span></span>
-<span id="cb6-1455"><a href="#cb6-1455" aria-hidden="true" tabindex="-1"></a>          <span class="dt">r</span><span class="op">:</span> <span class="dv">4</span></span>
-<span id="cb6-1456"><a href="#cb6-1456" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
-<span id="cb6-1457"><a href="#cb6-1457" aria-hidden="true" tabindex="-1"></a>        Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">0</span>])</span>
-<span id="cb6-1458"><a href="#cb6-1458" aria-hidden="true" tabindex="-1"></a>      ]</span>
-<span id="cb6-1459"><a href="#cb6-1459" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
-<span id="cb6-1460"><a href="#cb6-1460" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1461"><a href="#cb6-1461" aria-hidden="true" tabindex="-1"></a>    plotContainer<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
-<span id="cb6-1462"><a href="#cb6-1462" aria-hidden="true" tabindex="-1"></a>    plotContainer<span class="op">.</span><span class="fu">appendChild</span>(chart)<span class="op">;</span></span>
-<span id="cb6-1463"><a href="#cb6-1463" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb6-1464"><a href="#cb6-1464" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1465"><a href="#cb6-1465" aria-hidden="true" tabindex="-1"></a>  form<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"input"</span><span class="op">,</span> update)<span class="op">;</span></span>
-<span id="cb6-1466"><a href="#cb6-1466" aria-hidden="true" tabindex="-1"></a>  <span class="fu">update</span>()<span class="op">;</span></span>
-<span id="cb6-1467"><a href="#cb6-1467" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-1468"><a href="#cb6-1468" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> wrapper<span class="op">;</span></span>
-<span id="cb6-1469"><a href="#cb6-1469" aria-hidden="true" tabindex="-1"></a>})()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb6" data-startfrom="1282" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 1281;"><span id="cb6-1282"><a href="#cb6-1282" aria-hidden="true" tabindex="-1"></a>viewof poisson_visual_final <span class="op">=</span> (() <span class="kw">=&gt;</span> {</span>
+<span id="cb6-1283"><a href="#cb6-1283" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 1. CONFIGURATION ---</span></span>
+<span id="cb6-1284"><a href="#cb6-1284" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> lambda <span class="op">=</span> <span class="dv">5</span><span class="op">;</span> </span>
+<span id="cb6-1285"><a href="#cb6-1285" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-1286"><a href="#cb6-1286" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Input Slider (Width 400px to match binning bar)</span></span>
+<span id="cb6-1287"><a href="#cb6-1287" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> form <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">10</span><span class="op">,</span> <span class="dv">360</span>]<span class="op">,</span> {</span>
+<span id="cb6-1288"><a href="#cb6-1288" aria-hidden="true" tabindex="-1"></a>    <span class="dt">value</span><span class="op">:</span> <span class="dv">10</span><span class="op">,</span> </span>
+<span id="cb6-1289"><a href="#cb6-1289" aria-hidden="true" tabindex="-1"></a>    <span class="dt">step</span><span class="op">:</span> <span class="dv">5</span><span class="op">,</span> </span>
+<span id="cb6-1290"><a href="#cb6-1290" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Chia 1 giờ thành n khoảng (n)"</span></span>
+<span id="cb6-1291"><a href="#cb6-1291" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb6-1292"><a href="#cb6-1292" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-1293"><a href="#cb6-1293" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> wrapper <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb6-1294"><a href="#cb6-1294" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="vs">`</span></span>
+<span id="cb6-1295"><a href="#cb6-1295" aria-hidden="true" tabindex="-1"></a><span class="vs">    display: flex;</span></span>
+<span id="cb6-1296"><a href="#cb6-1296" aria-hidden="true" tabindex="-1"></a><span class="vs">    flex-direction: column;</span></span>
+<span id="cb6-1297"><a href="#cb6-1297" aria-hidden="true" tabindex="-1"></a><span class="vs">    align-items: center;</span></span>
+<span id="cb6-1298"><a href="#cb6-1298" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;</span></span>
+<span id="cb6-1299"><a href="#cb6-1299" aria-hidden="true" tabindex="-1"></a><span class="vs">    margin-top: 20px;</span></span>
+<span id="cb6-1300"><a href="#cb6-1300" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
+<span id="cb6-1301"><a href="#cb6-1301" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-1302"><a href="#cb6-1302" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 2. TIME BIN VISUALIZATION (Canvas) ---</span></span>
+<span id="cb6-1303"><a href="#cb6-1303" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> timeCanvas <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"canvas"</span>)<span class="op">;</span></span>
+<span id="cb6-1304"><a href="#cb6-1304" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> timeW <span class="op">=</span> <span class="dv">400</span><span class="op">;</span> <span class="co">// REDUCED WIDTH</span></span>
+<span id="cb6-1305"><a href="#cb6-1305" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> timeH <span class="op">=</span> <span class="dv">50</span><span class="op">;</span></span>
+<span id="cb6-1306"><a href="#cb6-1306" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> dpr <span class="op">=</span> <span class="bu">window</span><span class="op">.</span><span class="at">devicePixelRatio</span> <span class="op">||</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb6-1307"><a href="#cb6-1307" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-1308"><a href="#cb6-1308" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">width</span> <span class="op">=</span> timeW <span class="op">*</span> dpr<span class="op">;</span></span>
+<span id="cb6-1309"><a href="#cb6-1309" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">height</span> <span class="op">=</span> timeH <span class="op">*</span> dpr<span class="op">;</span></span>
+<span id="cb6-1310"><a href="#cb6-1310" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">width</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>timeW<span class="sc">}</span><span class="vs">px`</span><span class="op">;</span></span>
+<span id="cb6-1311"><a href="#cb6-1311" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">height</span> <span class="op">=</span> <span class="vs">`</span><span class="sc">${</span>timeH<span class="sc">}</span><span class="vs">px`</span><span class="op">;</span></span>
+<span id="cb6-1312"><a href="#cb6-1312" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">marginTop</span> <span class="op">=</span> <span class="st">"10px"</span><span class="op">;</span> </span>
+<span id="cb6-1313"><a href="#cb6-1313" aria-hidden="true" tabindex="-1"></a>  timeCanvas<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">marginBottom</span> <span class="op">=</span> <span class="st">"5px"</span><span class="op">;</span></span>
+<span id="cb6-1314"><a href="#cb6-1314" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-1315"><a href="#cb6-1315" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tCtx <span class="op">=</span> timeCanvas<span class="op">.</span><span class="fu">getContext</span>(<span class="st">"2d"</span>)<span class="op">;</span></span>
+<span id="cb6-1316"><a href="#cb6-1316" aria-hidden="true" tabindex="-1"></a>  tCtx<span class="op">.</span><span class="fu">scale</span>(dpr<span class="op">,</span> dpr)<span class="op">;</span></span>
+<span id="cb6-1317"><a href="#cb6-1317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1318"><a href="#cb6-1318" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 3. STATS DISPLAY ---</span></span>
+<span id="cb6-1319"><a href="#cb6-1319" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> statsDiv <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb6-1320"><a href="#cb6-1320" aria-hidden="true" tabindex="-1"></a>  statsDiv<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span> <span class="op">=</span> <span class="vs">`</span></span>
+<span id="cb6-1321"><a href="#cb6-1321" aria-hidden="true" tabindex="-1"></a><span class="vs">    margin-bottom: 5px; </span></span>
+<span id="cb6-1322"><a href="#cb6-1322" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-size: 16px; </span></span>
+<span id="cb6-1323"><a href="#cb6-1323" aria-hidden="true" tabindex="-1"></a><span class="vs">    color: #333;</span></span>
+<span id="cb6-1324"><a href="#cb6-1324" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-weight: 500;</span></span>
+<span id="cb6-1325"><a href="#cb6-1325" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
+<span id="cb6-1326"><a href="#cb6-1326" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-1327"><a href="#cb6-1327" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 4. APPEND ELEMENTS (Order: Input -&gt; Binning -&gt; Stats -&gt; Plot) ---</span></span>
+<span id="cb6-1328"><a href="#cb6-1328" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(form)<span class="op">;</span>       </span>
+<span id="cb6-1329"><a href="#cb6-1329" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(timeCanvas)<span class="op">;</span> </span>
+<span id="cb6-1330"><a href="#cb6-1330" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(statsDiv)<span class="op">;</span>   </span>
+<span id="cb6-1331"><a href="#cb6-1331" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> plotContainer <span class="op">=</span> <span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb6-1332"><a href="#cb6-1332" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(plotContainer)<span class="op">;</span> </span>
+<span id="cb6-1333"><a href="#cb6-1333" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1334"><a href="#cb6-1334" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 5. MATH HELPERS ---</span></span>
+<span id="cb6-1335"><a href="#cb6-1335" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">getBinomialData</span>(n<span class="op">,</span> p) {</span>
+<span id="cb6-1336"><a href="#cb6-1336" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> data <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb6-1337"><a href="#cb6-1337" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> prob <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">pow</span>(<span class="dv">1</span> <span class="op">-</span> p<span class="op">,</span> n)<span class="op">;</span> </span>
+<span id="cb6-1338"><a href="#cb6-1338" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> k <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> k <span class="op">&lt;=</span> <span class="dv">16</span><span class="op">;</span> k<span class="op">++</span>) {</span>
+<span id="cb6-1339"><a href="#cb6-1339" aria-hidden="true" tabindex="-1"></a>      data<span class="op">.</span><span class="fu">push</span>({k<span class="op">,</span> <span class="dt">type</span><span class="op">:</span> <span class="st">"Binomial"</span><span class="op">,</span> prob})<span class="op">;</span></span>
+<span id="cb6-1340"><a href="#cb6-1340" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (k <span class="op">&lt;</span> n) {</span>
+<span id="cb6-1341"><a href="#cb6-1341" aria-hidden="true" tabindex="-1"></a>        prob <span class="op">=</span> prob <span class="op">*</span> ((n <span class="op">-</span> k) <span class="op">/</span> (k <span class="op">+</span> <span class="dv">1</span>)) <span class="op">*</span> (p <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> p))<span class="op">;</span></span>
+<span id="cb6-1342"><a href="#cb6-1342" aria-hidden="true" tabindex="-1"></a>      } <span class="cf">else</span> {</span>
+<span id="cb6-1343"><a href="#cb6-1343" aria-hidden="true" tabindex="-1"></a>        prob <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-1344"><a href="#cb6-1344" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb6-1345"><a href="#cb6-1345" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-1346"><a href="#cb6-1346" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> data<span class="op">;</span></span>
+<span id="cb6-1347"><a href="#cb6-1347" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-1348"><a href="#cb6-1348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1349"><a href="#cb6-1349" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> poissonData <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb6-1350"><a href="#cb6-1350" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb6-1351"><a href="#cb6-1351" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> prob <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="op">-</span>lambda)<span class="op">;</span> </span>
+<span id="cb6-1352"><a href="#cb6-1352" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> k <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> k <span class="op">&lt;=</span> <span class="dv">16</span><span class="op">;</span> k<span class="op">++</span>) {</span>
+<span id="cb6-1353"><a href="#cb6-1353" aria-hidden="true" tabindex="-1"></a>      poissonData<span class="op">.</span><span class="fu">push</span>({k<span class="op">,</span> <span class="dt">type</span><span class="op">:</span> <span class="st">"Poisson"</span><span class="op">,</span> prob})<span class="op">;</span></span>
+<span id="cb6-1354"><a href="#cb6-1354" aria-hidden="true" tabindex="-1"></a>      prob <span class="op">=</span> prob <span class="op">*</span> lambda <span class="op">/</span> (k <span class="op">+</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb6-1355"><a href="#cb6-1355" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-1356"><a href="#cb6-1356" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-1357"><a href="#cb6-1357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1358"><a href="#cb6-1358" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- 6. RENDER LOOPS ---</span></span>
+<span id="cb6-1359"><a href="#cb6-1359" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">drawTimeBins</span>(n) {</span>
+<span id="cb6-1360"><a href="#cb6-1360" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">clearRect</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">0</span><span class="op">,</span> timeW<span class="op">,</span> timeH)<span class="op">;</span></span>
+<span id="cb6-1361"><a href="#cb6-1361" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1362"><a href="#cb6-1362" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barX <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// Start at 0 since canvas is now exact width</span></span>
+<span id="cb6-1363"><a href="#cb6-1363" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barY <span class="op">=</span> <span class="dv">15</span><span class="op">;</span></span>
+<span id="cb6-1364"><a href="#cb6-1364" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barW <span class="op">=</span> timeW<span class="op">;</span></span>
+<span id="cb6-1365"><a href="#cb6-1365" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barH <span class="op">=</span> <span class="dv">20</span><span class="op">;</span></span>
+<span id="cb6-1366"><a href="#cb6-1366" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1367"><a href="#cb6-1367" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Background</span></span>
+<span id="cb6-1368"><a href="#cb6-1368" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">fillStyle</span> <span class="op">=</span> <span class="st">"#f3f4f6"</span><span class="op">;</span></span>
+<span id="cb6-1369"><a href="#cb6-1369" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">fillRect</span>(barX<span class="op">,</span> barY<span class="op">,</span> barW<span class="op">,</span> barH)<span class="op">;</span></span>
+<span id="cb6-1370"><a href="#cb6-1370" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">strokeStyle</span> <span class="op">=</span> <span class="st">"#9ca3af"</span><span class="op">;</span></span>
+<span id="cb6-1371"><a href="#cb6-1371" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">lineWidth</span> <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb6-1372"><a href="#cb6-1372" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">strokeRect</span>(barX<span class="op">,</span> barY<span class="op">,</span> barW<span class="op">,</span> barH)<span class="op">;</span></span>
+<span id="cb6-1373"><a href="#cb6-1373" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1374"><a href="#cb6-1374" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Draw Dividers</span></span>
+<span id="cb6-1375"><a href="#cb6-1375" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">beginPath</span>()<span class="op">;</span></span>
+<span id="cb6-1376"><a href="#cb6-1376" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">strokeStyle</span> <span class="op">=</span> n <span class="op">&gt;</span> <span class="dv">150</span> <span class="op">?</span> <span class="st">"rgba(107, 114, 128, 0.5)"</span> <span class="op">:</span> <span class="st">"#6b7280"</span><span class="op">;</span></span>
+<span id="cb6-1377"><a href="#cb6-1377" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">lineWidth</span> <span class="op">=</span> n <span class="op">&gt;</span> <span class="dv">200</span> <span class="op">?</span> <span class="fl">0.5</span> <span class="op">:</span> <span class="dv">1</span><span class="op">;</span> </span>
+<span id="cb6-1378"><a href="#cb6-1378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1379"><a href="#cb6-1379" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> binSize <span class="op">=</span> barW <span class="op">/</span> n<span class="op">;</span></span>
+<span id="cb6-1380"><a href="#cb6-1380" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1381"><a href="#cb6-1381" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Draw internal lines</span></span>
+<span id="cb6-1382"><a href="#cb6-1382" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (<span class="kw">let</span> i <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> i <span class="op">&lt;</span> n<span class="op">;</span> i<span class="op">++</span>) {</span>
+<span id="cb6-1383"><a href="#cb6-1383" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> x <span class="op">=</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">floor</span>(barX <span class="op">+</span> i <span class="op">*</span> binSize) <span class="op">+</span> <span class="fl">0.5</span><span class="op">;</span></span>
+<span id="cb6-1384"><a href="#cb6-1384" aria-hidden="true" tabindex="-1"></a>        tCtx<span class="op">.</span><span class="fu">moveTo</span>(x<span class="op">,</span> barY)<span class="op">;</span></span>
+<span id="cb6-1385"><a href="#cb6-1385" aria-hidden="true" tabindex="-1"></a>        tCtx<span class="op">.</span><span class="fu">lineTo</span>(x<span class="op">,</span> barY <span class="op">+</span> barH)<span class="op">;</span></span>
+<span id="cb6-1386"><a href="#cb6-1386" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-1387"><a href="#cb6-1387" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">stroke</span>()<span class="op">;</span></span>
+<span id="cb6-1388"><a href="#cb6-1388" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1389"><a href="#cb6-1389" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Labels</span></span>
+<span id="cb6-1390"><a href="#cb6-1390" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">fillStyle</span> <span class="op">=</span> <span class="st">"#374151"</span><span class="op">;</span></span>
+<span id="cb6-1391"><a href="#cb6-1391" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">font</span> <span class="op">=</span> <span class="st">"bold 12px sans-serif"</span><span class="op">;</span></span>
+<span id="cb6-1392"><a href="#cb6-1392" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1393"><a href="#cb6-1393" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">textAlign</span> <span class="op">=</span> <span class="st">"left"</span><span class="op">;</span> </span>
+<span id="cb6-1394"><a href="#cb6-1394" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">fillText</span>(<span class="st">"0"</span><span class="op">,</span> barX<span class="op">,</span> barY <span class="op">+</span> barH <span class="op">+</span> <span class="dv">14</span>)<span class="op">;</span></span>
+<span id="cb6-1395"><a href="#cb6-1395" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1396"><a href="#cb6-1396" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">textAlign</span> <span class="op">=</span> <span class="st">"right"</span><span class="op">;</span> </span>
+<span id="cb6-1397"><a href="#cb6-1397" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">fillText</span>(<span class="st">"1h"</span><span class="op">,</span> barX <span class="op">+</span> barW<span class="op">,</span> barY <span class="op">+</span> barH <span class="op">+</span> <span class="dv">14</span>)<span class="op">;</span></span>
+<span id="cb6-1398"><a href="#cb6-1398" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1399"><a href="#cb6-1399" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Center Label (Changed Text)</span></span>
+<span id="cb6-1400"><a href="#cb6-1400" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">textAlign</span> <span class="op">=</span> <span class="st">"center"</span><span class="op">;</span> </span>
+<span id="cb6-1401"><a href="#cb6-1401" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="at">fillStyle</span> <span class="op">=</span> <span class="st">"#3b82f6"</span><span class="op">;</span></span>
+<span id="cb6-1402"><a href="#cb6-1402" aria-hidden="true" tabindex="-1"></a>    tCtx<span class="op">.</span><span class="fu">fillText</span>(<span class="vs">`</span><span class="sc">${</span>n<span class="sc">}</span><span class="vs"> phép thử liên tiếp`</span><span class="op">,</span> timeW <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> barY <span class="op">-</span> <span class="dv">5</span>)<span class="op">;</span></span>
+<span id="cb6-1403"><a href="#cb6-1403" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-1404"><a href="#cb6-1404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1405"><a href="#cb6-1405" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">update</span>() {</span>
+<span id="cb6-1406"><a href="#cb6-1406" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> n <span class="op">=</span> form<span class="op">.</span><span class="at">value</span><span class="op">;</span></span>
+<span id="cb6-1407"><a href="#cb6-1407" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p <span class="op">=</span> lambda <span class="op">/</span> n<span class="op">;</span> </span>
+<span id="cb6-1408"><a href="#cb6-1408" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-1409"><a href="#cb6-1409" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Update Stats</span></span>
+<span id="cb6-1410"><a href="#cb6-1410" aria-hidden="true" tabindex="-1"></a>    statsDiv<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> <span class="vs">`n = </span><span class="sc">${</span>n<span class="sc">}</span><span class="vs"> &amp;nbsp;|&amp;nbsp; p = </span><span class="sc">${</span>p<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="vs"> &amp;nbsp;|&amp;nbsp; np = </span><span class="sc">${</span>(n<span class="op">*</span>p)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">;</span></span>
+<span id="cb6-1411"><a href="#cb6-1411" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1412"><a href="#cb6-1412" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Update Top Canvas</span></span>
+<span id="cb6-1413"><a href="#cb6-1413" aria-hidden="true" tabindex="-1"></a>    <span class="fu">drawTimeBins</span>(n)<span class="op">;</span></span>
+<span id="cb6-1414"><a href="#cb6-1414" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1415"><a href="#cb6-1415" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Update Plot</span></span>
+<span id="cb6-1416"><a href="#cb6-1416" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> binomData <span class="op">=</span> <span class="fu">getBinomialData</span>(n<span class="op">,</span> p)<span class="op">;</span></span>
+<span id="cb6-1417"><a href="#cb6-1417" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> combinedData <span class="op">=</span> poissonData<span class="op">.</span><span class="fu">concat</span>(binomData)<span class="op">;</span></span>
+<span id="cb6-1418"><a href="#cb6-1418" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> xDomain <span class="op">=</span> <span class="bu">Array</span><span class="op">.</span><span class="fu">from</span>({<span class="dt">length</span><span class="op">:</span> <span class="dv">17</span>}<span class="op">,</span> (_<span class="op">,</span> i) <span class="kw">=&gt;</span> i)<span class="op">;</span></span>
+<span id="cb6-1419"><a href="#cb6-1419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1420"><a href="#cb6-1420" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> chart <span class="op">=</span> Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb6-1421"><a href="#cb6-1421" aria-hidden="true" tabindex="-1"></a>      <span class="dt">width</span><span class="op">:</span> <span class="dv">600</span><span class="op">,</span></span>
+<span id="cb6-1422"><a href="#cb6-1422" aria-hidden="true" tabindex="-1"></a>      <span class="dt">height</span><span class="op">:</span> <span class="dv">320</span><span class="op">,</span></span>
+<span id="cb6-1423"><a href="#cb6-1423" aria-hidden="true" tabindex="-1"></a>      <span class="dt">marginTop</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span></span>
+<span id="cb6-1424"><a href="#cb6-1424" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> { </span>
+<span id="cb6-1425"><a href="#cb6-1425" aria-hidden="true" tabindex="-1"></a>        <span class="dt">type</span><span class="op">:</span> <span class="st">"band"</span><span class="op">,</span> </span>
+<span id="cb6-1426"><a href="#cb6-1426" aria-hidden="true" tabindex="-1"></a>        <span class="dt">domain</span><span class="op">:</span> xDomain<span class="op">,</span> </span>
+<span id="cb6-1427"><a href="#cb6-1427" aria-hidden="true" tabindex="-1"></a>        <span class="dt">label</span><span class="op">:</span> <span class="st">"Số tin nhắn (k)"</span><span class="op">,</span></span>
+<span id="cb6-1428"><a href="#cb6-1428" aria-hidden="true" tabindex="-1"></a>        <span class="dt">padding</span><span class="op">:</span> <span class="fl">0.1</span></span>
+<span id="cb6-1429"><a href="#cb6-1429" aria-hidden="true" tabindex="-1"></a>      }<span class="op">,</span></span>
+<span id="cb6-1430"><a href="#cb6-1430" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> { <span class="dt">label</span><span class="op">:</span> <span class="st">"Xác suất"</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="fl">0.2</span>] }<span class="op">,</span></span>
+<span id="cb6-1431"><a href="#cb6-1431" aria-hidden="true" tabindex="-1"></a>      <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb6-1432"><a href="#cb6-1432" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Binomial Bars</span></span>
+<span id="cb6-1433"><a href="#cb6-1433" aria-hidden="true" tabindex="-1"></a>        Plot<span class="op">.</span><span class="fu">barY</span>(combinedData<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">type</span> <span class="op">===</span> <span class="st">"Binomial"</span>)<span class="op">,</span> {</span>
+<span id="cb6-1434"><a href="#cb6-1434" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">"k"</span><span class="op">,</span> </span>
+<span id="cb6-1435"><a href="#cb6-1435" aria-hidden="true" tabindex="-1"></a>          <span class="dt">y</span><span class="op">:</span> <span class="st">"prob"</span><span class="op">,</span> </span>
+<span id="cb6-1436"><a href="#cb6-1436" aria-hidden="true" tabindex="-1"></a>          <span class="dt">fill</span><span class="op">:</span> <span class="st">"#3b82f6"</span><span class="op">,</span> </span>
+<span id="cb6-1437"><a href="#cb6-1437" aria-hidden="true" tabindex="-1"></a>          <span class="dt">fillOpacity</span><span class="op">:</span> <span class="fl">0.6</span><span class="op">,</span></span>
+<span id="cb6-1438"><a href="#cb6-1438" aria-hidden="true" tabindex="-1"></a>          <span class="dt">title</span><span class="op">:</span> d <span class="kw">=&gt;</span> <span class="vs">`Binomial: </span><span class="sc">${</span>d<span class="op">.</span><span class="at">prob</span><span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="vs">`</span></span>
+<span id="cb6-1439"><a href="#cb6-1439" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
+<span id="cb6-1440"><a href="#cb6-1440" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Poisson Line</span></span>
+<span id="cb6-1441"><a href="#cb6-1441" aria-hidden="true" tabindex="-1"></a>        Plot<span class="op">.</span><span class="fu">line</span>(combinedData<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">type</span> <span class="op">===</span> <span class="st">"Poisson"</span>)<span class="op">,</span> {</span>
+<span id="cb6-1442"><a href="#cb6-1442" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">"k"</span><span class="op">,</span> </span>
+<span id="cb6-1443"><a href="#cb6-1443" aria-hidden="true" tabindex="-1"></a>          <span class="dt">y</span><span class="op">:</span> <span class="st">"prob"</span><span class="op">,</span> </span>
+<span id="cb6-1444"><a href="#cb6-1444" aria-hidden="true" tabindex="-1"></a>          <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#be185d"</span><span class="op">,</span> </span>
+<span id="cb6-1445"><a href="#cb6-1445" aria-hidden="true" tabindex="-1"></a>          <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">3</span><span class="op">,</span></span>
+<span id="cb6-1446"><a href="#cb6-1446" aria-hidden="true" tabindex="-1"></a>          <span class="dt">curve</span><span class="op">:</span> <span class="st">"monotone-x"</span></span>
+<span id="cb6-1447"><a href="#cb6-1447" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
+<span id="cb6-1448"><a href="#cb6-1448" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Poisson Dots</span></span>
+<span id="cb6-1449"><a href="#cb6-1449" aria-hidden="true" tabindex="-1"></a>        Plot<span class="op">.</span><span class="fu">dot</span>(combinedData<span class="op">.</span><span class="fu">filter</span>(d <span class="kw">=&gt;</span> d<span class="op">.</span><span class="at">type</span> <span class="op">===</span> <span class="st">"Poisson"</span>)<span class="op">,</span> {</span>
+<span id="cb6-1450"><a href="#cb6-1450" aria-hidden="true" tabindex="-1"></a>          <span class="dt">x</span><span class="op">:</span> <span class="st">"k"</span><span class="op">,</span> </span>
+<span id="cb6-1451"><a href="#cb6-1451" aria-hidden="true" tabindex="-1"></a>          <span class="dt">y</span><span class="op">:</span> <span class="st">"prob"</span><span class="op">,</span> </span>
+<span id="cb6-1452"><a href="#cb6-1452" aria-hidden="true" tabindex="-1"></a>          <span class="dt">fill</span><span class="op">:</span> <span class="st">"#be185d"</span><span class="op">,</span></span>
+<span id="cb6-1453"><a href="#cb6-1453" aria-hidden="true" tabindex="-1"></a>          <span class="dt">r</span><span class="op">:</span> <span class="dv">4</span></span>
+<span id="cb6-1454"><a href="#cb6-1454" aria-hidden="true" tabindex="-1"></a>        })<span class="op">,</span></span>
+<span id="cb6-1455"><a href="#cb6-1455" aria-hidden="true" tabindex="-1"></a>        Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">0</span>])</span>
+<span id="cb6-1456"><a href="#cb6-1456" aria-hidden="true" tabindex="-1"></a>      ]</span>
+<span id="cb6-1457"><a href="#cb6-1457" aria-hidden="true" tabindex="-1"></a>    })<span class="op">;</span></span>
+<span id="cb6-1458"><a href="#cb6-1458" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1459"><a href="#cb6-1459" aria-hidden="true" tabindex="-1"></a>    plotContainer<span class="op">.</span><span class="at">innerHTML</span> <span class="op">=</span> <span class="st">""</span><span class="op">;</span></span>
+<span id="cb6-1460"><a href="#cb6-1460" aria-hidden="true" tabindex="-1"></a>    plotContainer<span class="op">.</span><span class="fu">appendChild</span>(chart)<span class="op">;</span></span>
+<span id="cb6-1461"><a href="#cb6-1461" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb6-1462"><a href="#cb6-1462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1463"><a href="#cb6-1463" aria-hidden="true" tabindex="-1"></a>  form<span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"input"</span><span class="op">,</span> update)<span class="op">;</span></span>
+<span id="cb6-1464"><a href="#cb6-1464" aria-hidden="true" tabindex="-1"></a>  <span class="fu">update</span>()<span class="op">;</span></span>
+<span id="cb6-1465"><a href="#cb6-1465" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-1466"><a href="#cb6-1466" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> wrapper<span class="op">;</span></span>
+<span id="cb6-1467"><a href="#cb6-1467" aria-hidden="true" tabindex="-1"></a>})()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div id="ojs-cell-5" data-nodetype="declaration">
 
@@ -1768,8 +1767,9 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="ứng-dụng" class="level3" data-number="4.4.3">
-<h3 data-number="4.4.3" class="anchored" data-anchor-id="ứng-dụng"><span class="header-section-number">4.4.3</span> Ứng dụng</h3>
+</section>
+<section id="ứng-dụng" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="ứng-dụng"><span class="header-section-number">4.5</span> Ứng dụng</h2>
 <p>Dữ liệu dạng đếm (ví dụ: số ca bệnh trong 1 tuần):</p>
 <ul>
 <li>Poisson</li>
@@ -1820,7 +1820,6 @@ window.Quarto = {
 </table>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
