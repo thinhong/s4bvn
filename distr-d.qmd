@@ -1472,6 +1472,12 @@ viewof poisson_visual_final = (() => {
 
 ### Ứng dụng
 
+Dữ liệu dạng đếm (ví dụ: số ca bệnh trong 1 tuần):
+
+- Poisson
+- Negative binomial
+
+Dữ liệu là tỉ lệ:
 
 
 

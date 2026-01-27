@@ -5,100 +5,335 @@ format: html
 
 ## Xác suất có điều kiện
 
+Xác suất có điều kiện thực chất là thu nhỏ không gian mẫu.
+
+Ví dụ, tại một ngôi trường có 3 lớp A, B, C với số lượng học sinh như sau:
+
+|       | Nam | Nữ  | Tổng |
+|-------|-----|-----|------|
+| Lớp A | 30  | 10  | 40   |
+| Lớp B | 20  | 20  | 40   |
+| Lớp C | 15  | 25  | 40   |
+| Tổng  | 65  | 55  | 120  |
+
+Chọn ngẫu nhiên 1 học sinh trong trường.
+
+**1. Xác suất không điều kiện**
+
+Tính xác suất học sinh này là Nữ?
+
+Lúc này không gian mẫu là toàn bộ ngôi trường.
+
+$$\mathbb{P}(\text{Nữ}) = \frac{\overbrace{55}^{\text{Tổng số Nữ toàn trường}}}{\underbrace{120}_{\text{Tổng số học sinh toàn trường}}} \approx 45.8\%$$
+
+**2. Xác suất có điều kiện**
+
+Biết rằng học sinh được chọn ở Lớp A. Tính xác suất học sinh này là Nữ?
+
+Thông tin "Học sinh Lớp A" đã làm thu nhỏ không gian mẫu. Không gian mẫu lúc này chỉ là Học sinh lớp A thôi.
+
+$$\mathbb{P}(\text{Nữ} | \text{Lớp A}) = \frac{\overbrace{10}^{\text{Số Nữ trong Lớp C}}}{\underbrace{40}_{\text{Tổng sĩ số Lớp A}}} = 25.0\%$$
+
 ```{ojs}
 //| echo: false
-viewof condition_waffle = Inputs.radio(
-  ["Tất cả sinh viên", "Sinh viên nữ"], 
-  { label: "Xem", value: "Tất cả sinh viên" }
-)
+viewof classroom_prob_sharp = (() => {
+  // --- 1. SETUP ---
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  `;
 
-// 1. RAW DATA (The counts)
-counts = [
-  { group: "Lớp A", boys: 70, girls: 30 },
-  { group: "Lớp B", boys: 30, girls: 40 },
-  { group: "Lớp C", boys: 10, girls: 40 }
-]
-
-// 2. GRID GENERATION (The magic part)
-// We create a dot for every student and assign it a specific x/y coordinate.
-waffle_data = counts.flatMap((d, class_idx) => {
+  // --- 2. DATA ---
+  const CLASSES = {
+    A: { boys: 30, girls: 10, color: "#ef4444" }, 
+    B: { boys: 20, girls: 20, color: "#3b82f6" }, 
+    C: { boys: 15, girls: 25, color: "#10b981" } 
+  };
+  
   const students = [];
+  Object.keys(CLASSES).forEach(cls => {
+    const data = CLASSES[cls];
+    for(let i=0; i<data.boys; i++) students.push({ id: `b-${cls}-${i}`, cls: cls, gender: "Nam", color: data.color });
+    for(let i=0; i<data.girls; i++) students.push({ id: `g-${cls}-${i}`, cls: cls, gender: "Nữ", color: data.color });
+  });
+
+  // --- 3. CONTROLS ---
+  const controlPanel = document.createElement("div");
+  controlPanel.style.cssText = `
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    box-sizing: border-box;
+  `;
+
+  function createSelect(options) {
+    const sel = document.createElement("select");
+    sel.style.cssText = `
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      background-color: #f9fafb;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+    `;
+    options.forEach(opt => {
+      const el = document.createElement("option");
+      el.value = opt.val;
+      el.textContent = opt.label;
+      sel.appendChild(el);
+    });
+    return sel;
+  }
+
+  const targetOpts = [
+    {val: "Nam", label: "Học sinh Nam"},
+    {val: "Nữ", label: "Học sinh Nữ"},
+    {val: "A", label: "Học sinh Lớp A"},
+    {val: "B", label: "Học sinh Lớp B"},
+    {val: "C", label: "Học sinh Lớp C"}
+  ];
+
+  const givenOpts = [
+    {val: "Universe", label: "Toàn trường"},
+    {val: "A", label: "Học sinh Lớp A"},
+    {val: "B", label: "Học sinh Lớp B"},
+    {val: "C", label: "Học sinh Lớp C"},
+    {val: "Nam", label: "Đó là Nam"},
+    {val: "Nữ", label: "Đó là Nữ"}
+  ];
+
+  const selTarget = createSelect(targetOpts);
+  const selGiven = createSelect(givenOpts);
+  selTarget.value = "Nữ";
+  selGiven.value = "A";
+
+  const t1 = document.createElement("span"); t1.textContent = "Tính xác suất chọn"; t1.style.color = "#334155";
+  const t2 = document.createElement("span"); t2.textContent = "biết rằng"; t2.style.color = "#334155";
+
+  controlPanel.appendChild(t1);
+  controlPanel.appendChild(selTarget);
+  controlPanel.appendChild(t2);
+  controlPanel.appendChild(selGiven);
+  wrapper.appendChild(controlPanel);
+
+  // --- 4. CANVAS (High Resolution) ---
+  const canvas = document.createElement("canvas");
+  const logicalW = 800;
+  const logicalH = 340; 
   
-  // We put Girls first so they fill the bottom rows (y=0, y=1...)
-  for (let i = 0; i < d.girls; i++) students.push("Girl");
-  for (let i = 0; i < d.boys; i++) students.push("Boy");
+  // Set Display Size (CSS)
+  canvas.style.width = `${logicalW}px`;
+  canvas.style.height = `${logicalH}px`;
+  // Responsive Max Width
+  canvas.style.maxWidth = "100%";
+  canvas.style.height = "auto";
   
-  // Now map each student to a grid position
-  return students.map((gender, i) => ({
-    group: d.group,
-    gender: gender,
-    // X Logic: Offset by Class (class_idx * 14) + Column (i % 10)
-    // * 14 gives us 10 columns for the class + 4 empty columns gap
-    x: (class_idx * 14) + (i % 10), 
-    // Y Logic: Row is integer division of index
-    y: Math.floor(i / 10)
-  }));
-})
-
-// 3. LOGIC & ANNOTATIONS
-is_cond_waffle = condition_waffle === "Sinh viên nữ"
-// Helper to calculate probability dynamically
-total_girls_w = counts.reduce((sum, d) => sum + d.girls, 0)
-target_girls_w = counts.find(d => d.group === "Lớp C").girls
-prob_w = is_cond_waffle 
-  ? (target_girls_w / total_girls_w * 100).toFixed(1)
-  : (100 / 300 * 100).toFixed(1)
-
-// 4. STYLING FUNCTIONS
-color_waffle = (d) => {
-  if (is_cond_waffle) return d.gender === "Boy" ? "#e0e0e0" : "#ff006e";
-  return d.gender === "Boy" ? "#4cc9f0" : "#f72585";
-}
-
-opacity_waffle = (d) => {
-  if (is_cond_waffle && d.gender === "Boy") return 0.2;
-  return 1;
-}
-
-Plot.plot({
-  width: 700,
-  height: 300,
-  marginTop: 60,
-  marginLeft: 20,
-  marginRight: 20,
-  marginBottom: 50,
-  style: {
-    fontSize: "16px",
-    background: "white"
-  },
-  // Hide axes because the grid implies the count
-  x: { axis: null },
-  y: { axis: null },
+  // Set Actual Pixel Size (High DPI)
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = logicalW * dpr;
+  canvas.height = logicalH * dpr;
   
-  marks: [
-    // THE DOTS (Using explicit x and y)
-    Plot.dot(waffle_data, {
-      x: "x",
-      y: "y",
-      r: 6, // Slightly larger dots
-      fill: d => color_waffle(d),
-      fillOpacity: d => opacity_waffle(d),
-      stroke: "white",
-      strokeWidth: 0.5,
-      title: d => `${d.gender} (${d.group})`
-    }),
+  const ctx = canvas.getContext("2d");
+  // Scale drawing operations so we can use logical coordinates
+  ctx.scale(dpr, dpr);
+  wrapper.appendChild(canvas);
 
-    // LABELS FOR CLASSES (Below the grids)
-    Plot.text(["Lớp A", "Lớp B", "Lớp C"], {
-      x: (d, i) => (i * 14) + 4.5, // Center text: 0 offset + 4.5 (middle of 10)
-      y: -1.5, // Below the bottom row (0)
-      text: d => d,
-      fontWeight: "bold",
-      fontSize: 20,
-      clip: false
-    })
-  ]
-})
+  // --- 5. MATH PANEL ---
+  const mathDiv = document.createElement("div");
+  mathDiv.style.cssText = `
+    font-size: 18px;
+    margin-top: 20px; 
+    margin-bottom: 10px;
+    text-align: center;
+    line-height: 1.6;
+    width: 100%;
+  `;
+  wrapper.appendChild(mathDiv);
+
+  // --- 6. GEOMETRY PRE-CALCULATION ---
+  const boxW = 180;
+  const boxH = 300; 
+  const gap = 24;   
+  const startX = (logicalW - (3 * boxW + 2 * gap)) / 2;
+  const startY = 10;
+
+  const dotCols = 5;
+  const dotDiam = 13;   
+  const dotGap = 13;    
+  const gridWidth = (dotCols * dotDiam) + ((dotCols - 1) * dotGap);
+  const dotRad = dotDiam / 2;
+
+  const posMap = {}; 
+  ['A', 'B', 'C'].forEach((cls, i) => {
+     const clsStudents = students.filter(s => s.cls === cls);
+     const bx = startX + i * (boxW + gap);
+     const by = startY;
+     const gridStartX = bx + (boxW - gridWidth) / 2 + dotRad;
+     const gridStartY = by + 80; 
+     
+     clsStudents.forEach((s, idx) => {
+        const c = idx % dotCols;
+        const r = Math.floor(idx / dotCols);
+        posMap[s.id] = {
+            x: gridStartX + c * (dotDiam + dotGap),
+            y: gridStartY + r * (dotDiam + dotGap),
+            bx: bx, by: by 
+        };
+     });
+  });
+
+  // --- 7. LOGIC ---
+  function check(student, condition) {
+    if (condition === "Universe") return true;
+    if (condition === "A" || condition === "B" || condition === "C") return student.cls === condition;
+    if (condition === "Nam" || condition === "Nữ") return student.gender === condition;
+    return false;
+  }
+
+  function update() {
+    const targetCond = selTarget.value;
+    const givenCond = selGiven.value;
+    const validUniverse = students.filter(s => check(s, givenCond));
+    const validTarget = validUniverse.filter(s => check(s, targetCond));
+    const num = validTarget.length;
+    const den = validUniverse.length;
+    const prob = den === 0 ? 0 : ((num / den) * 100).toFixed(1);
+
+    const dict = {
+        "Nam": "Nam", "Nữ": "Nữ",
+        "A": "Lớp A", "B": "Lớp B", "C": "Lớp C",
+        "Universe": "Toàn trường"
+    };
+
+    // Cleaned up text, 18px base size
+    mathDiv.innerHTML = `
+      <div style="display:inline-block; padding: 15px 30px; background:#f8fafc; border-radius:12px; border:1px solid #e2e8f0;">
+        <div style="font-size: 18px; color:#0f172a; line-height: 1.4;">
+          P(${dict[targetCond] || targetCond} | ${dict[givenCond] || givenCond}) = 
+          <span style="color: #be185d; font-weight: bold;">${num}</span> 
+          / 
+          <span style="color: #0f172a; font-weight: bold;">${den}</span> 
+          = <b>${prob}%</b>
+        </div>
+      </div>
+    `;
+
+    drawScene(givenCond, targetCond, validUniverse, validTarget);
+  }
+
+  function drawScene(given, target, universeSet, targetSet) {
+    ctx.clearRect(0, 0, logicalW, logicalH);
+    
+    // Draw Boxes
+    ['A', 'B', 'C'].forEach((cls, i) => {
+       const bx = startX + i * (boxW + gap);
+       const by = startY;
+       const boxHasUniverse = universeSet.some(s => s.cls === cls);
+       
+       if (given === cls) {
+           ctx.fillStyle = "#eff6ff"; ctx.strokeStyle = "#3b82f6"; ctx.lineWidth = 3;
+           ctx.shadowColor = "rgba(59, 130, 246, 0.15)"; ctx.shadowBlur = 15; ctx.shadowOffsetY = 4;
+       } else if (boxHasUniverse) {
+           ctx.fillStyle = "#ffffff"; ctx.strokeStyle = "#cbd5e1"; ctx.lineWidth = 1.5;
+           ctx.shadowColor = "rgba(0,0,0,0)";
+       } else {
+           ctx.fillStyle = "#f8fafc"; ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 1;
+           ctx.shadowColor = "rgba(0,0,0,0)";
+       }
+
+       ctx.beginPath();
+       ctx.roundRect(bx, by, boxW, boxH, 16);
+       ctx.fill();
+       ctx.stroke();
+       ctx.shadowColor = "rgba(0,0,0,0)";
+
+       // Text
+       ctx.textAlign = "center";
+       ctx.fillStyle = boxHasUniverse ? "#1e293b" : "#cbd5e1";
+       ctx.font = "bold 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+       ctx.fillText(`Lớp ${cls}`, bx + boxW/2, by + 35);
+       
+       const count = CLASSES[cls];
+       ctx.font = "500 13px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+       ctx.fillStyle = boxHasUniverse ? "#64748b" : "#e2e8f0";
+       ctx.fillText(`${count.boys} Nam • ${count.girls} Nữ`, bx + boxW/2, by + 56);
+       
+       if (boxHasUniverse) {
+         ctx.beginPath(); ctx.strokeStyle = "#f1f5f9"; ctx.lineWidth = 1;
+         ctx.moveTo(bx + 30, by + 68); ctx.lineTo(bx + boxW - 30, by + 68); ctx.stroke();
+       }
+    });
+
+    // Draw Students
+    students.forEach(s => {
+        const pos = posMap[s.id];
+        const isUniverse = universeSet.includes(s);
+        const isTarget = targetSet.includes(s);
+
+        let alpha = 0.1;
+        let radius = 6;
+        let color = "#e5e7eb"; 
+
+        if (isUniverse) {
+            alpha = 0.4;
+            color = s.gender === "Nam" ? "#60a5fa" : "#f472b6"; 
+        }
+        
+        if (isTarget) {
+            alpha = 1.0; 
+            radius = 7.5;
+            color = s.gender === "Nam" ? "#2563eb" : "#db2777";
+        } else if (!isUniverse) {
+             color = "#f1f5f9"; 
+        }
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, radius, 0, Math.PI*2);
+        ctx.fill();
+
+        if (isTarget) {
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "#ffffff";
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, radius + 1.5, 0, Math.PI*2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 0.4;
+            ctx.stroke();
+        }
+    });
+    ctx.globalAlpha = 1.0;
+  }
+
+  selTarget.addEventListener("change", update);
+  selGiven.addEventListener("change", update);
+  
+  update();
+
+  return wrapper;
+})();
 ```
 
 ## Ví dụ
@@ -107,20 +342,19 @@ Bạn đang muốn tìm một đối tượng để hẹn hò nghiêm túc. Bạ
 
 Trước khi đi hẹn hò, bạn đã có sẵn một thiên kiến ban đầu. Có thể bạn hơi nghiêng về A vì cả hai có nhiều sở thích chung hơn, hoặc có thể bạn hoàn toàn trung lập.
 
-- Hãy hình dung một hình vuông lớn đại diện cho 100% niềm tin của bạn
-- Hình vuông này được chia làm 2 phần, bên trái dành cho A bên phải dành cho B
-- Chiều rộng của mỗi ô là thiên kiến ban đầu, trong thống kê Bayesian gọi là Xác suất tiên nghiệm (Prior) của bạn đối với mỗi người
+-   Hãy hình dung một hình vuông lớn đại diện cho 100% niềm tin của bạn
+-   Hình vuông này được chia làm 2 phần, bên trái dành cho A bên phải dành cho B
+-   Chiều rộng của mỗi ô là thiên kiến ban đầu, trong thống kê Bayesian gọi là Xác suất tiên nghiệm (Prior) của bạn đối với mỗi người
 
 Bạn quyết định đi date với từng người để thu thập dữ liệu thực tế. Sau khi đi date, bạn chấm điểm buổi date đó.
 
-- Phần được tô màu là điểm buổi date của từng người, trong thống kê Bayesian gọi là Hàm khả năng (Likelihood)
+-   Phần được tô màu là điểm buổi date của từng người, trong thống kê Bayesian gọi là Hàm khả năng (Likelihood)
 
 Sau khi đã đi date với từng người, bạn muốn tính xác suất mình nên chọn A $\mathbb{P}(A|Date)$
 
-- Tư duy Bayes: Chúng ta so sánh **Diện tích tô màu** của A so với B. Đây là Xác suất hậu nghiệm (Posterior).
+-   Tư duy Bayes: Chúng ta so sánh **Diện tích tô màu** của A so với B. Đây là Xác suất hậu nghiệm (Posterior).
 
-Biểu đồ này được tạo theo phương pháp trong video [
-Bayes theorem, the geometry of changing beliefs](https://www.youtube.com/watch?v=HZGCoVF3YvM) của kênh 3Blue1Brown.
+Biểu đồ này được tạo theo phương pháp trong video [Bayes theorem, the geometry of changing beliefs](https://www.youtube.com/watch?v=HZGCoVF3YvM) của kênh 3Blue1Brown.
 
 ```{ojs}
 //| echo: false
@@ -305,9 +539,9 @@ html`
 
 Giả sử một bệnh nhân nhận kết quả xét nghiệm dương tính với một căn bệnh. Các thông số của xét nghiệm như sau:
 
-- Độ nhạy (Sensitivity): 95%
-- Độ đặc hiệu (Specificity): 90%
-- Tỉ lệ hiện mắc: Căn bệnh này chiếm 10% dân số
+-   Độ nhạy (Sensitivity): 95%
+-   Độ đặc hiệu (Specificity): 90%
+-   Tỉ lệ hiện mắc: Căn bệnh này chiếm 10% dân số
 
 Xác suất thực sự người đó bị bệnh khi cầm kết quả dương tính $\mathbb{P}(B|D)$ là bao nhiêu?
 
@@ -315,15 +549,15 @@ Cách khác để đặt câu hỏi này là: Trong số những người cầm 
 
 Chúng ta sẽ áp dụng phương pháp "Hình vuông niềm tin" để giải quyết:
 
-- Hãy hình dung một hình vuông lớn đại diện cho 100% dân số
-- Hình vuông này được chia làm 2 phần, bên trái là tỉ lệ người bệnh trong dân số, bên phải là tỉ lệ người không bệnh
-- Trong cột người bệnh, độ nhạy là 95%, tô màu 95% chiều cao của cột này, đây là phần dương tính thật, diện tích là $0.10 \times 0.95 = 0.095$
-- Trong cột người không bệnh, độ đặc hiệu là 90%, tô màu 10% chiều cao của cột này, đây là phần dương tính giả, diện tích là $0.90 \times 0.10 = 0.09$
+-   Hãy hình dung một hình vuông lớn đại diện cho 100% dân số
+-   Hình vuông này được chia làm 2 phần, bên trái là tỉ lệ người bệnh trong dân số, bên phải là tỉ lệ người không bệnh
+-   Trong cột người bệnh, độ nhạy là 95%, tô màu 95% chiều cao của cột này, đây là phần dương tính thật, diện tích là $0.10 \times 0.95 = 0.095$
+-   Trong cột người không bệnh, độ đặc hiệu là 90%, tô màu 10% chiều cao của cột này, đây là phần dương tính giả, diện tích là $0.90 \times 0.10 = 0.09$
 
 Bây giờ, hãy nhìn vào toàn bộ phần được tô màu trên hình vuông.
 
-- Tổng diện tích màu (tổng dương tính) là $0.095 \text{ (Thật)} + 0.09 \text{ (Giả)} = 0.185$
-- Phần bị chiếm bởi dương tính thật chính là xác suất thực sự mắc bệnh khi có kết quả dương tính
+-   Tổng diện tích màu (tổng dương tính) là $0.095 \text{ (Thật)} + 0.09 \text{ (Giả)} = 0.185$
+-   Phần bị chiếm bởi dương tính thật chính là xác suất thực sự mắc bệnh khi có kết quả dương tính
 
 ```{ojs}
 //| echo: false
