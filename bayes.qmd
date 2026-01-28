@@ -336,6 +336,43 @@ viewof classroom_prob_sharp = (() => {
 })();
 ```
 
+## Định lý Bayes
+
+Trong ví dụ chọn ngẫu nhiên 1 học sinh trong trường, chúng ta có hai câu hỏi trái ngược nhau:
+
+- Nếu đã biết là học sinh Lớp A, xác suất đó là Nữ là bao nhiêu?
+
+$$\begin{aligned}
+\mathbb{P}(\text{Nữ} | \text{Lớp A}) &= \frac{\text{Số Nữ trong Lớp A}}{\text{Tổng sĩ số Lớp A}} \\[10pt]
+\Leftrightarrow \text{Số Nữ trong Lớp A} &= \mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng sĩ số Lớp A} \quad (1)
+\end{aligned}$$
+
+- Nếu đã biết là Nữ, xác suất đó là học sinh Lớp A là bao nhiêu?
+
+$$\begin{aligned}
+\mathbb{P}(\text{Lớp A} | \text{Nữ}) &= \frac{\text{Số Nữ trong Lớp A}}{\text{Tổng số Nữ toàn trường}} \\[10pt]
+\Leftrightarrow \text{Số Nữ trong Lớp A} &= \mathbb{P}(\text{Lớp A} | \text{Nữ}) \times \text{Tổng số Nữ toàn trường} \quad (2)
+\end{aligned}$$
+
+Từ $(1)$ và $(2)$ ta thấy vế trái đều là $\text{Số Nữ trong Lớp A}$, vậy:
+
+$$\begin{aligned}
+\mathbb{P}(\text{Lớp A} | \text{Nữ}) \times \text{Tổng Nữ} &= \mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A} \\[10pt]
+\Leftrightarrow \mathbb{P}(\text{Lớp A} | \text{Nữ}) &= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A}}{\text{Tổng Nữ}}
+\end{aligned}$$
+
+Chia cả Tử số và Mẫu số cho Tổng số học sinh toàn trường:
+
+$$\begin{aligned}
+\mathbb{P}(\text{Lớp A} | \text{Nữ}) &= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A}}{\text{Tổng Nữ}} \\
+&= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \frac{\text{Tổng Lớp A}}{\text{Tổng HS}}}{\frac{\text{Tổng Nữ}}{\text{Tổng HS}}} \\
+&= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \mathbb{P}(\text{Lớp A})}{\mathbb{P}(\text{Nữ})} \quad (3)
+\end{aligned}$$
+
+Đặt $A = \text{Lớp A}$, $B = \text{Nữ}$. Thay vào $(3)$, ta có **Định lý Bayes**:
+
+$$\mathbb{P}(A | B) = \frac{\mathbb{P}(B | A) \times \mathbb{P}(A)}{\mathbb{P}(B)}$$
+
 ## Ví dụ
 
 Bạn đang muốn tìm một đối tượng để hẹn hò nghiêm túc. Bạn có 2 ứng viên mập mờ tiềm năng: A và B. Bạn cần quyết định chọn ai trong 2 người để thực sự nghiêm túc.

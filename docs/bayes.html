@@ -242,8 +242,9 @@ window.Quarto = {
    
   <ul>
   <li><a href="#xác-suất-có-điều-kiện" id="toc-xác-suất-có-điều-kiện" class="nav-link active" data-scroll-target="#xác-suất-có-điều-kiện"><span class="header-section-number">2.1</span> Xác suất có điều kiện</a></li>
-  <li><a href="#ví-dụ" id="toc-ví-dụ" class="nav-link" data-scroll-target="#ví-dụ"><span class="header-section-number">2.2</span> Ví dụ</a></li>
-  <li><a href="#ứng-dụng" id="toc-ứng-dụng" class="nav-link" data-scroll-target="#ứng-dụng"><span class="header-section-number">2.3</span> Ứng dụng</a></li>
+  <li><a href="#định-lý-bayes" id="toc-định-lý-bayes" class="nav-link" data-scroll-target="#định-lý-bayes"><span class="header-section-number">2.2</span> Định lý Bayes</a></li>
+  <li><a href="#ví-dụ" id="toc-ví-dụ" class="nav-link" data-scroll-target="#ví-dụ"><span class="header-section-number">2.3</span> Ví dụ</a></li>
+  <li><a href="#ứng-dụng" id="toc-ứng-dụng" class="nav-link" data-scroll-target="#ứng-dụng"><span class="header-section-number">2.4</span> Ứng dụng</a></li>
   </ul>
 </nav>
     </div>
@@ -624,8 +625,39 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="ví-dụ" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="ví-dụ"><span class="header-section-number">2.2</span> Ví dụ</h2>
+<section id="định-lý-bayes" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="định-lý-bayes"><span class="header-section-number">2.2</span> Định lý Bayes</h2>
+<p>Trong ví dụ chọn ngẫu nhiên 1 học sinh trong trường, chúng ta có hai câu hỏi trái ngược nhau:</p>
+<ul>
+<li>Nếu đã biết là học sinh Lớp A, xác suất đó là Nữ là bao nhiêu?</li>
+</ul>
+<p><span class="math display">\[\begin{aligned}
+\mathbb{P}(\text{Nữ} | \text{Lớp A}) &amp;= \frac{\text{Số Nữ trong Lớp A}}{\text{Tổng sĩ số Lớp A}} \\[10pt]
+\Leftrightarrow \text{Số Nữ trong Lớp A} &amp;= \mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng sĩ số Lớp A} \quad (1)
+\end{aligned}\]</span></p>
+<ul>
+<li>Nếu đã biết là Nữ, xác suất đó là học sinh Lớp A là bao nhiêu?</li>
+</ul>
+<p><span class="math display">\[\begin{aligned}
+\mathbb{P}(\text{Lớp A} | \text{Nữ}) &amp;= \frac{\text{Số Nữ trong Lớp A}}{\text{Tổng số Nữ toàn trường}} \\[10pt]
+\Leftrightarrow \text{Số Nữ trong Lớp A} &amp;= \mathbb{P}(\text{Lớp A} | \text{Nữ}) \times \text{Tổng số Nữ toàn trường} \quad (2)
+\end{aligned}\]</span></p>
+<p>Từ <span class="math inline">\((1)\)</span> và <span class="math inline">\((2)\)</span> ta thấy vế trái đều là <span class="math inline">\(\text{Số Nữ trong Lớp A}\)</span>, vậy:</p>
+<p><span class="math display">\[\begin{aligned}
+\mathbb{P}(\text{Lớp A} | \text{Nữ}) \times \text{Tổng Nữ} &amp;= \mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A} \\[10pt]
+\Leftrightarrow \mathbb{P}(\text{Lớp A} | \text{Nữ}) &amp;= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A}}{\text{Tổng Nữ}}
+\end{aligned}\]</span></p>
+<p>Chia cả Tử số và Mẫu số cho Tổng số học sinh toàn trường:</p>
+<p><span class="math display">\[\begin{aligned}
+\mathbb{P}(\text{Lớp A} | \text{Nữ}) &amp;= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A}}{\text{Tổng Nữ}} \\
+&amp;= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \frac{\text{Tổng Lớp A}}{\text{Tổng HS}}}{\frac{\text{Tổng Nữ}}{\text{Tổng HS}}} \\
+&amp;= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \mathbb{P}(\text{Lớp A})}{\mathbb{P}(\text{Nữ})} \quad (3)
+\end{aligned}\]</span></p>
+<p>Đặt <span class="math inline">\(A = \text{Lớp A}\)</span>, <span class="math inline">\(B = \text{Nữ}\)</span>. Thay vào <span class="math inline">\((3)\)</span>, ta có <strong>Định lý Bayes</strong>:</p>
+<p><span class="math display">\[\mathbb{P}(A | B) = \frac{\mathbb{P}(B | A) \times \mathbb{P}(A)}{\mathbb{P}(B)}\]</span></p>
+</section>
+<section id="ví-dụ" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="ví-dụ"><span class="header-section-number">2.3</span> Ví dụ</h2>
 <p>Bạn đang muốn tìm một đối tượng để hẹn hò nghiêm túc. Bạn có 2 ứng viên mập mờ tiềm năng: A và B. Bạn cần quyết định chọn ai trong 2 người để thực sự nghiêm túc.</p>
 <p>Trước khi đi hẹn hò, bạn đã có sẵn một thiên kiến ban đầu. Có thể bạn hơi nghiêng về A vì cả hai có nhiều sở thích chung hơn, hoặc có thể bạn hoàn toàn trung lập.</p>
 <ul>
@@ -643,146 +675,146 @@ window.Quarto = {
 </ul>
 <p>Biểu đồ này được tạo theo phương pháp trong video <a href="https://www.youtube.com/watch?v=HZGCoVF3YvM">Bayes theorem, the geometry of changing beliefs</a> của kênh 3Blue1Brown.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="362" data-source-offset="-2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 361;"><span id="cb2-362"><a href="#cb2-362" aria-hidden="true" tabindex="-1"></a>viewof prior <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb2-363"><a href="#cb2-363" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Prior A"</span><span class="op">,</span> </span>
-<span id="cb2-364"><a href="#cb2-364" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.5</span><span class="op">,</span> </span>
-<span id="cb2-365"><a href="#cb2-365" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span></span>
-<span id="cb2-366"><a href="#cb2-366" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb2-367"><a href="#cb2-367" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-368"><a href="#cb2-368" aria-hidden="true" tabindex="-1"></a>viewof like_alex <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb2-369"><a href="#cb2-369" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Likelihood A"</span><span class="op">,</span> </span>
-<span id="cb2-370"><a href="#cb2-370" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.8</span><span class="op">,</span> </span>
-<span id="cb2-371"><a href="#cb2-371" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span></span>
-<span id="cb2-372"><a href="#cb2-372" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb2-373"><a href="#cb2-373" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-374"><a href="#cb2-374" aria-hidden="true" tabindex="-1"></a>viewof like_ben <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb2-375"><a href="#cb2-375" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Likelihood B"</span><span class="op">,</span> </span>
-<span id="cb2-376"><a href="#cb2-376" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.15</span><span class="op">,</span> </span>
-<span id="cb2-377"><a href="#cb2-377" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span></span>
-<span id="cb2-378"><a href="#cb2-378" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb2-379"><a href="#cb2-379" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-380"><a href="#cb2-380" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. THE CALCULATIONS</span></span>
-<span id="cb2-381"><a href="#cb2-381" aria-hidden="true" tabindex="-1"></a>rect_data <span class="op">=</span> [</span>
-<span id="cb2-382"><a href="#cb2-382" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- COLUMN 1: ALEX (Left Side) ---</span></span>
-<span id="cb2-383"><a href="#cb2-383" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb2-384"><a href="#cb2-384" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Thích A"</span><span class="op">,</span></span>
-<span id="cb2-385"><a href="#cb2-385" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> prior<span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> like_alex<span class="op">,</span></span>
-<span id="cb2-386"><a href="#cb2-386" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#6ecae1"</span> </span>
-<span id="cb2-387"><a href="#cb2-387" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb2-388"><a href="#cb2-388" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb2-389"><a href="#cb2-389" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Không thích A"</span><span class="op">,</span></span>
-<span id="cb2-390"><a href="#cb2-390" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> prior<span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> like_alex<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
-<span id="cb2-391"><a href="#cb2-391" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#1a1a1a"</span> </span>
-<span id="cb2-392"><a href="#cb2-392" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb2-393"><a href="#cb2-393" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- COLUMN 2: BEN (Right Side) ---</span></span>
-<span id="cb2-394"><a href="#cb2-394" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb2-395"><a href="#cb2-395" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Thích B"</span><span class="op">,</span></span>
-<span id="cb2-396"><a href="#cb2-396" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> prior<span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> like_ben<span class="op">,</span></span>
-<span id="cb2-397"><a href="#cb2-397" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#2f7e9b"</span> </span>
-<span id="cb2-398"><a href="#cb2-398" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Không thích B"</span><span class="op">,</span></span>
-<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> prior<span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> like_ben<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
-<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#0f0f0f"</span> </span>
-<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">550</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span></span>
-<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginTop</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
-<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
-<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginRight</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
-<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginBottom</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span></span>
-<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a>  <span class="dt">style</span><span class="op">:</span> {</span>
-<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"black"</span><span class="op">,</span></span>
-<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span></span>
-<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fontSize</span><span class="op">:</span> <span class="st">"16px"</span> </span>
-<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> { <span class="dt">axis</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>] }<span class="op">,</span></span>
-<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> { <span class="dt">axis</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>] }<span class="op">,</span></span>
-<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
-<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>    <span class="co">// --- PART 1: THE ANNOTATIONS ---</span></span>
-<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Fix: Use [1] as dummy data, and arrow functions `() =&gt;` for text strings.</span></span>
-<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A. TOP ANNOTATION: Prior P(H)</span></span>
-<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">1</span>]<span class="op">,</span> { </span>
-<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
-<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> prior<span class="op">,</span>  </span>
-<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
-<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> prior <span class="op">/</span> <span class="dv">2</span><span class="op">,</span>      </span>
-<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span> <span class="dt">dy</span><span class="op">:</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span></span>
-<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`P(A) = </span><span class="sc">${</span>prior<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// &lt;--- Arrow function required</span></span>
-<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span></span>
-<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>    <span class="co">// B. LEFT ANNOTATION: P(E|H)</span></span>
-<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="op">-</span><span class="fl">0.03</span><span class="op">,</span>          </span>
-<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> like_alex<span class="op">,</span> </span>
-<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#6ecae1"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
-<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="op">-</span><span class="fl">0.03</span><span class="op">,</span>          </span>
-<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> like_alex <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
-<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dx</span><span class="op">:</span> <span class="op">-</span><span class="dv">15</span><span class="op">,</span> <span class="co">// Push slightly left away from the line</span></span>
-<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a>      <span class="dt">rotate</span><span class="op">:</span> <span class="op">-</span><span class="dv">90</span><span class="op">,</span> <span class="co">// &lt;--- Rotates text vertically</span></span>
-<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`P(Date|A) = </span><span class="sc">${</span>like_alex<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// Removed \n for cleaner vertical look</span></span>
-<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#6ecae1"</span><span class="op">,</span> </span>
-<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span> <span class="co">// Centers text on the bar height</span></span>
-<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="399" data-source-offset="-2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 398;"><span id="cb2-399"><a href="#cb2-399" aria-hidden="true" tabindex="-1"></a>viewof prior <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb2-400"><a href="#cb2-400" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Prior A"</span><span class="op">,</span> </span>
+<span id="cb2-401"><a href="#cb2-401" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.5</span><span class="op">,</span> </span>
+<span id="cb2-402"><a href="#cb2-402" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span></span>
+<span id="cb2-403"><a href="#cb2-403" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-404"><a href="#cb2-404" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-405"><a href="#cb2-405" aria-hidden="true" tabindex="-1"></a>viewof like_alex <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb2-406"><a href="#cb2-406" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Likelihood A"</span><span class="op">,</span> </span>
+<span id="cb2-407"><a href="#cb2-407" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.8</span><span class="op">,</span> </span>
+<span id="cb2-408"><a href="#cb2-408" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span></span>
+<span id="cb2-409"><a href="#cb2-409" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-410"><a href="#cb2-410" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-411"><a href="#cb2-411" aria-hidden="true" tabindex="-1"></a>viewof like_ben <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb2-412"><a href="#cb2-412" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Likelihood B"</span><span class="op">,</span> </span>
+<span id="cb2-413"><a href="#cb2-413" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.15</span><span class="op">,</span> </span>
+<span id="cb2-414"><a href="#cb2-414" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.05</span></span>
+<span id="cb2-415"><a href="#cb2-415" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb2-416"><a href="#cb2-416" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-417"><a href="#cb2-417" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. THE CALCULATIONS</span></span>
+<span id="cb2-418"><a href="#cb2-418" aria-hidden="true" tabindex="-1"></a>rect_data <span class="op">=</span> [</span>
+<span id="cb2-419"><a href="#cb2-419" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- COLUMN 1: ALEX (Left Side) ---</span></span>
+<span id="cb2-420"><a href="#cb2-420" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb2-421"><a href="#cb2-421" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Thích A"</span><span class="op">,</span></span>
+<span id="cb2-422"><a href="#cb2-422" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> prior<span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> like_alex<span class="op">,</span></span>
+<span id="cb2-423"><a href="#cb2-423" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#6ecae1"</span> </span>
+<span id="cb2-424"><a href="#cb2-424" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb2-425"><a href="#cb2-425" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb2-426"><a href="#cb2-426" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Không thích A"</span><span class="op">,</span></span>
+<span id="cb2-427"><a href="#cb2-427" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> prior<span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> like_alex<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb2-428"><a href="#cb2-428" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#1a1a1a"</span> </span>
+<span id="cb2-429"><a href="#cb2-429" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb2-430"><a href="#cb2-430" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- COLUMN 2: BEN (Right Side) ---</span></span>
+<span id="cb2-431"><a href="#cb2-431" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb2-432"><a href="#cb2-432" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Thích B"</span><span class="op">,</span></span>
+<span id="cb2-433"><a href="#cb2-433" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> prior<span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> like_ben<span class="op">,</span></span>
+<span id="cb2-434"><a href="#cb2-434" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#2f7e9b"</span> </span>
+<span id="cb2-435"><a href="#cb2-435" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb2-436"><a href="#cb2-436" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb2-437"><a href="#cb2-437" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Không thích B"</span><span class="op">,</span></span>
+<span id="cb2-438"><a href="#cb2-438" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> prior<span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> like_ben<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb2-439"><a href="#cb2-439" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#0f0f0f"</span> </span>
+<span id="cb2-440"><a href="#cb2-440" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-441"><a href="#cb2-441" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-442"><a href="#cb2-442" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-443"><a href="#cb2-443" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb2-444"><a href="#cb2-444" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">550</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span></span>
+<span id="cb2-445"><a href="#cb2-445" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginTop</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
+<span id="cb2-446"><a href="#cb2-446" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
+<span id="cb2-447"><a href="#cb2-447" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginRight</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
+<span id="cb2-448"><a href="#cb2-448" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginBottom</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span></span>
+<span id="cb2-449"><a href="#cb2-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-450"><a href="#cb2-450" aria-hidden="true" tabindex="-1"></a>  <span class="dt">style</span><span class="op">:</span> {</span>
+<span id="cb2-451"><a href="#cb2-451" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"black"</span><span class="op">,</span></span>
+<span id="cb2-452"><a href="#cb2-452" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span></span>
+<span id="cb2-453"><a href="#cb2-453" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fontSize</span><span class="op">:</span> <span class="st">"16px"</span> </span>
+<span id="cb2-454"><a href="#cb2-454" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb2-455"><a href="#cb2-455" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-456"><a href="#cb2-456" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> { <span class="dt">axis</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>] }<span class="op">,</span></span>
+<span id="cb2-457"><a href="#cb2-457" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> { <span class="dt">axis</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>] }<span class="op">,</span></span>
 <span id="cb2-458"><a href="#cb2-458" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a>    <span class="co">// C. RIGHT ANNOTATION: P(E|¬H)</span></span>
-<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
-<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> like_ben<span class="op">,</span> </span>
-<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#2f7e9b"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
-<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> like_ben <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
-<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dx</span><span class="op">:</span> <span class="dv">15</span><span class="op">,</span> <span class="co">// Push slightly right away from the line</span></span>
-<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a>      <span class="dt">rotate</span><span class="op">:</span> <span class="op">-</span><span class="dv">90</span><span class="op">,</span> <span class="co">// &lt;--- Rotates text vertically</span></span>
-<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`P(Date|B) = </span><span class="sc">${</span>like_ben<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> </span>
-<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#2f7e9b"</span><span class="op">,</span> </span>
-<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span> </span>
-<span id="cb2-473"><a href="#cb2-473" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb2-474"><a href="#cb2-474" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb2-475"><a href="#cb2-475" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-476"><a href="#cb2-476" aria-hidden="true" tabindex="-1"></a>    <span class="co">// --- PART 2: THE MOSAIC ---</span></span>
-<span id="cb2-477"><a href="#cb2-477" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">rect</span>(rect_data<span class="op">,</span> {</span>
-<span id="cb2-478"><a href="#cb2-478" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> </span>
-<span id="cb2-479"><a href="#cb2-479" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"color"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
-<span id="cb2-480"><a href="#cb2-480" aria-hidden="true" tabindex="-1"></a>      <span class="dt">tip</span><span class="op">:</span> {</span>
-<span id="cb2-481"><a href="#cb2-481" aria-hidden="true" tabindex="-1"></a>        <span class="dt">fill</span><span class="op">:</span> <span class="st">"#222"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span></span>
-<span id="cb2-482"><a href="#cb2-482" aria-hidden="true" tabindex="-1"></a>        <span class="dt">maxRadius</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
-<span id="cb2-483"><a href="#cb2-483" aria-hidden="true" tabindex="-1"></a>        <span class="dt">title</span><span class="op">:</span> <span class="st">"label"</span><span class="op">,</span></span>
-<span id="cb2-484"><a href="#cb2-484" aria-hidden="true" tabindex="-1"></a>        <span class="dt">channels</span><span class="op">:</span> {</span>
-<span id="cb2-485"><a href="#cb2-485" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Diện tích"</span><span class="op">:</span> d <span class="kw">=&gt;</span> ((d<span class="op">.</span><span class="at">x2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">x1</span>) <span class="op">*</span> (d<span class="op">.</span><span class="at">y2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">y1</span>))<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)</span>
-<span id="cb2-486"><a href="#cb2-486" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
-<span id="cb2-487"><a href="#cb2-487" aria-hidden="true" tabindex="-1"></a>        <span class="dt">format</span><span class="op">:</span> {</span>
-<span id="cb2-488"><a href="#cb2-488" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Diện tích"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">x1</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb2-489"><a href="#cb2-489" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb2-490"><a href="#cb2-490" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb2-491"><a href="#cb2-491" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb2-492"><a href="#cb2-492" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb2-493"><a href="#cb2-493" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Labels inside boxes</span></span>
-<span id="cb2-494"><a href="#cb2-494" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>(rect_data<span class="op">,</span> {</span>
-<span id="cb2-495"><a href="#cb2-495" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">x1</span> <span class="op">+</span> d<span class="op">.</span><span class="at">x2</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
-<span id="cb2-496"><a href="#cb2-496" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">y1</span> <span class="op">+</span> d<span class="op">.</span><span class="at">y2</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
-<span id="cb2-497"><a href="#cb2-497" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">y2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">y1</span>) <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">&amp;&amp;</span> (d<span class="op">.</span><span class="at">x2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">x1</span>) <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">?</span> d<span class="op">.</span><span class="at">label</span> <span class="op">:</span> <span class="st">""</span><span class="op">,</span> </span>
-<span id="cb2-498"><a href="#cb2-498" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">pointerEvents</span><span class="op">:</span> <span class="st">"none"</span> </span>
-<span id="cb2-499"><a href="#cb2-499" aria-hidden="true" tabindex="-1"></a>    })</span>
-<span id="cb2-500"><a href="#cb2-500" aria-hidden="true" tabindex="-1"></a>  ]</span>
-<span id="cb2-501"><a href="#cb2-501" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-459"><a href="#cb2-459" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb2-460"><a href="#cb2-460" aria-hidden="true" tabindex="-1"></a>    <span class="co">// --- PART 1: THE ANNOTATIONS ---</span></span>
+<span id="cb2-461"><a href="#cb2-461" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Fix: Use [1] as dummy data, and arrow functions `() =&gt;` for text strings.</span></span>
+<span id="cb2-462"><a href="#cb2-462" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-463"><a href="#cb2-463" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A. TOP ANNOTATION: Prior P(H)</span></span>
+<span id="cb2-464"><a href="#cb2-464" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">1</span>]<span class="op">,</span> { </span>
+<span id="cb2-465"><a href="#cb2-465" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
+<span id="cb2-466"><a href="#cb2-466" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> prior<span class="op">,</span>  </span>
+<span id="cb2-467"><a href="#cb2-467" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb2-468"><a href="#cb2-468" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb2-469"><a href="#cb2-469" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb2-470"><a href="#cb2-470" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb2-471"><a href="#cb2-471" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> prior <span class="op">/</span> <span class="dv">2</span><span class="op">,</span>      </span>
+<span id="cb2-472"><a href="#cb2-472" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span> <span class="dt">dy</span><span class="op">:</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span></span>
+<span id="cb2-473"><a href="#cb2-473" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`P(A) = </span><span class="sc">${</span>prior<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// &lt;--- Arrow function required</span></span>
+<span id="cb2-474"><a href="#cb2-474" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span></span>
+<span id="cb2-475"><a href="#cb2-475" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb2-476"><a href="#cb2-476" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb2-477"><a href="#cb2-477" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-478"><a href="#cb2-478" aria-hidden="true" tabindex="-1"></a>    <span class="co">// B. LEFT ANNOTATION: P(E|H)</span></span>
+<span id="cb2-479"><a href="#cb2-479" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb2-480"><a href="#cb2-480" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="op">-</span><span class="fl">0.03</span><span class="op">,</span>          </span>
+<span id="cb2-481"><a href="#cb2-481" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> like_alex<span class="op">,</span> </span>
+<span id="cb2-482"><a href="#cb2-482" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#6ecae1"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb2-483"><a href="#cb2-483" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb2-484"><a href="#cb2-484" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb2-485"><a href="#cb2-485" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb2-486"><a href="#cb2-486" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="op">-</span><span class="fl">0.03</span><span class="op">,</span>          </span>
+<span id="cb2-487"><a href="#cb2-487" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> like_alex <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
+<span id="cb2-488"><a href="#cb2-488" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dx</span><span class="op">:</span> <span class="op">-</span><span class="dv">15</span><span class="op">,</span> <span class="co">// Push slightly left away from the line</span></span>
+<span id="cb2-489"><a href="#cb2-489" aria-hidden="true" tabindex="-1"></a>      <span class="dt">rotate</span><span class="op">:</span> <span class="op">-</span><span class="dv">90</span><span class="op">,</span> <span class="co">// &lt;--- Rotates text vertically</span></span>
+<span id="cb2-490"><a href="#cb2-490" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`P(Date|A) = </span><span class="sc">${</span>like_alex<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// Removed \n for cleaner vertical look</span></span>
+<span id="cb2-491"><a href="#cb2-491" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#6ecae1"</span><span class="op">,</span> </span>
+<span id="cb2-492"><a href="#cb2-492" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span> <span class="co">// Centers text on the bar height</span></span>
+<span id="cb2-493"><a href="#cb2-493" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb2-494"><a href="#cb2-494" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb2-495"><a href="#cb2-495" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-496"><a href="#cb2-496" aria-hidden="true" tabindex="-1"></a>    <span class="co">// C. RIGHT ANNOTATION: P(E|¬H)</span></span>
+<span id="cb2-497"><a href="#cb2-497" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb2-498"><a href="#cb2-498" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
+<span id="cb2-499"><a href="#cb2-499" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> like_ben<span class="op">,</span> </span>
+<span id="cb2-500"><a href="#cb2-500" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#2f7e9b"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb2-501"><a href="#cb2-501" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb2-502"><a href="#cb2-502" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb2-503"><a href="#cb2-503" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
+<span id="cb2-504"><a href="#cb2-504" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> like_ben <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
+<span id="cb2-505"><a href="#cb2-505" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dx</span><span class="op">:</span> <span class="dv">15</span><span class="op">,</span> <span class="co">// Push slightly right away from the line</span></span>
+<span id="cb2-506"><a href="#cb2-506" aria-hidden="true" tabindex="-1"></a>      <span class="dt">rotate</span><span class="op">:</span> <span class="op">-</span><span class="dv">90</span><span class="op">,</span> <span class="co">// &lt;--- Rotates text vertically</span></span>
+<span id="cb2-507"><a href="#cb2-507" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`P(Date|B) = </span><span class="sc">${</span>like_ben<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> </span>
+<span id="cb2-508"><a href="#cb2-508" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#2f7e9b"</span><span class="op">,</span> </span>
+<span id="cb2-509"><a href="#cb2-509" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span> </span>
+<span id="cb2-510"><a href="#cb2-510" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb2-511"><a href="#cb2-511" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb2-512"><a href="#cb2-512" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-513"><a href="#cb2-513" aria-hidden="true" tabindex="-1"></a>    <span class="co">// --- PART 2: THE MOSAIC ---</span></span>
+<span id="cb2-514"><a href="#cb2-514" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">rect</span>(rect_data<span class="op">,</span> {</span>
+<span id="cb2-515"><a href="#cb2-515" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> </span>
+<span id="cb2-516"><a href="#cb2-516" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"color"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb2-517"><a href="#cb2-517" aria-hidden="true" tabindex="-1"></a>      <span class="dt">tip</span><span class="op">:</span> {</span>
+<span id="cb2-518"><a href="#cb2-518" aria-hidden="true" tabindex="-1"></a>        <span class="dt">fill</span><span class="op">:</span> <span class="st">"#222"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span></span>
+<span id="cb2-519"><a href="#cb2-519" aria-hidden="true" tabindex="-1"></a>        <span class="dt">maxRadius</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb2-520"><a href="#cb2-520" aria-hidden="true" tabindex="-1"></a>        <span class="dt">title</span><span class="op">:</span> <span class="st">"label"</span><span class="op">,</span></span>
+<span id="cb2-521"><a href="#cb2-521" aria-hidden="true" tabindex="-1"></a>        <span class="dt">channels</span><span class="op">:</span> {</span>
+<span id="cb2-522"><a href="#cb2-522" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Diện tích"</span><span class="op">:</span> d <span class="kw">=&gt;</span> ((d<span class="op">.</span><span class="at">x2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">x1</span>) <span class="op">*</span> (d<span class="op">.</span><span class="at">y2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">y1</span>))<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)</span>
+<span id="cb2-523"><a href="#cb2-523" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
+<span id="cb2-524"><a href="#cb2-524" aria-hidden="true" tabindex="-1"></a>        <span class="dt">format</span><span class="op">:</span> {</span>
+<span id="cb2-525"><a href="#cb2-525" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Diện tích"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">x1</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb2-526"><a href="#cb2-526" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-527"><a href="#cb2-527" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb2-528"><a href="#cb2-528" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb2-529"><a href="#cb2-529" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-530"><a href="#cb2-530" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Labels inside boxes</span></span>
+<span id="cb2-531"><a href="#cb2-531" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>(rect_data<span class="op">,</span> {</span>
+<span id="cb2-532"><a href="#cb2-532" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">x1</span> <span class="op">+</span> d<span class="op">.</span><span class="at">x2</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
+<span id="cb2-533"><a href="#cb2-533" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">y1</span> <span class="op">+</span> d<span class="op">.</span><span class="at">y2</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
+<span id="cb2-534"><a href="#cb2-534" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">y2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">y1</span>) <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">&amp;&amp;</span> (d<span class="op">.</span><span class="at">x2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">x1</span>) <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">?</span> d<span class="op">.</span><span class="at">label</span> <span class="op">:</span> <span class="st">""</span><span class="op">,</span> </span>
+<span id="cb2-535"><a href="#cb2-535" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">pointerEvents</span><span class="op">:</span> <span class="st">"none"</span> </span>
+<span id="cb2-536"><a href="#cb2-536" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb2-537"><a href="#cb2-537" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb2-538"><a href="#cb2-538" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-2-1" data-nodetype="declaration">
@@ -820,35 +852,35 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb3" data-startfrom="507" data-source-offset="-2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 506;"><span id="cb3-507"><a href="#cb3-507" aria-hidden="true" tabindex="-1"></a>area_alex <span class="op">=</span> prior <span class="op">*</span> like_alex</span>
-<span id="cb3-508"><a href="#cb3-508" aria-hidden="true" tabindex="-1"></a>area_ben  <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> prior) <span class="op">*</span> like_ben</span>
-<span id="cb3-509"><a href="#cb3-509" aria-hidden="true" tabindex="-1"></a>total_area <span class="op">=</span> area_alex <span class="op">+</span> area_ben</span>
-<span id="cb3-510"><a href="#cb3-510" aria-hidden="true" tabindex="-1"></a>posterior_alex <span class="op">=</span> area_alex <span class="op">/</span> total_area</span>
-<span id="cb3-511"><a href="#cb3-511" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-512"><a href="#cb3-512" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`</span></span>
-<span id="cb3-513"><a href="#cb3-513" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;div style="display: flex; align-items: center; flex-wrap: wrap;"&gt;</span></span>
-<span id="cb3-514"><a href="#cb3-514" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="font-weight: bold; margin-right: 5px;"&gt;</span></span>
-<span id="cb3-515"><a href="#cb3-515" aria-hidden="true" tabindex="-1"></a><span class="vs">      P(A | Date) = </span></span>
-<span id="cb3-516"><a href="#cb3-516" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
-<span id="cb3-517"><a href="#cb3-517" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-518"><a href="#cb3-518" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;"&gt;</span></span>
-<span id="cb3-519"><a href="#cb3-519" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
-<span id="cb3-520"><a href="#cb3-520" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div style="border-bottom: 2px solid; padding-bottom: 5px; text-align: center; width: 100%;"&gt;</span></span>
-<span id="cb3-521"><a href="#cb3-521" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #6ecae1;"&gt;</span><span class="sc">${</span>area_alex<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt;</span></span>
-<span id="cb3-522"><a href="#cb3-522" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;</span></span>
-<span id="cb3-523"><a href="#cb3-523" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
-<span id="cb3-524"><a href="#cb3-524" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div style="padding-top: 5px; text-align: center;"&gt;</span></span>
-<span id="cb3-525"><a href="#cb3-525" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #6ecae1;"&gt;</span><span class="sc">${</span>area_alex<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt; + </span></span>
-<span id="cb3-526"><a href="#cb3-526" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #2f7e9b;"&gt;</span><span class="sc">${</span>area_ben<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt;</span></span>
-<span id="cb3-527"><a href="#cb3-527" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;</span></span>
-<span id="cb3-528"><a href="#cb3-528" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
-<span id="cb3-529"><a href="#cb3-529" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
-<span id="cb3-530"><a href="#cb3-530" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-531"><a href="#cb3-531" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="font-weight: bold; color: #6ecae1; margin-left: 5px;"&gt;</span></span>
-<span id="cb3-532"><a href="#cb3-532" aria-hidden="true" tabindex="-1"></a><span class="vs">      = </span><span class="sc">${</span>(posterior_alex <span class="op">*</span> <span class="dv">100</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">%</span></span>
-<span id="cb3-533"><a href="#cb3-533" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
-<span id="cb3-534"><a href="#cb3-534" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;/div&gt;</span></span>
-<span id="cb3-535"><a href="#cb3-535" aria-hidden="true" tabindex="-1"></a><span class="vs">`</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb3" data-startfrom="544" data-source-offset="-2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 543;"><span id="cb3-544"><a href="#cb3-544" aria-hidden="true" tabindex="-1"></a>area_alex <span class="op">=</span> prior <span class="op">*</span> like_alex</span>
+<span id="cb3-545"><a href="#cb3-545" aria-hidden="true" tabindex="-1"></a>area_ben  <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> prior) <span class="op">*</span> like_ben</span>
+<span id="cb3-546"><a href="#cb3-546" aria-hidden="true" tabindex="-1"></a>total_area <span class="op">=</span> area_alex <span class="op">+</span> area_ben</span>
+<span id="cb3-547"><a href="#cb3-547" aria-hidden="true" tabindex="-1"></a>posterior_alex <span class="op">=</span> area_alex <span class="op">/</span> total_area</span>
+<span id="cb3-548"><a href="#cb3-548" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-549"><a href="#cb3-549" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`</span></span>
+<span id="cb3-550"><a href="#cb3-550" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;div style="display: flex; align-items: center; flex-wrap: wrap;"&gt;</span></span>
+<span id="cb3-551"><a href="#cb3-551" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="font-weight: bold; margin-right: 5px;"&gt;</span></span>
+<span id="cb3-552"><a href="#cb3-552" aria-hidden="true" tabindex="-1"></a><span class="vs">      P(A | Date) = </span></span>
+<span id="cb3-553"><a href="#cb3-553" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb3-554"><a href="#cb3-554" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-555"><a href="#cb3-555" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;"&gt;</span></span>
+<span id="cb3-556"><a href="#cb3-556" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
+<span id="cb3-557"><a href="#cb3-557" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div style="border-bottom: 2px solid; padding-bottom: 5px; text-align: center; width: 100%;"&gt;</span></span>
+<span id="cb3-558"><a href="#cb3-558" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #6ecae1;"&gt;</span><span class="sc">${</span>area_alex<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt;</span></span>
+<span id="cb3-559"><a href="#cb3-559" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;</span></span>
+<span id="cb3-560"><a href="#cb3-560" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
+<span id="cb3-561"><a href="#cb3-561" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div style="padding-top: 5px; text-align: center;"&gt;</span></span>
+<span id="cb3-562"><a href="#cb3-562" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #6ecae1;"&gt;</span><span class="sc">${</span>area_alex<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt; + </span></span>
+<span id="cb3-563"><a href="#cb3-563" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #2f7e9b;"&gt;</span><span class="sc">${</span>area_ben<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt;</span></span>
+<span id="cb3-564"><a href="#cb3-564" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;</span></span>
+<span id="cb3-565"><a href="#cb3-565" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
+<span id="cb3-566"><a href="#cb3-566" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb3-567"><a href="#cb3-567" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-568"><a href="#cb3-568" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="font-weight: bold; color: #6ecae1; margin-left: 5px;"&gt;</span></span>
+<span id="cb3-569"><a href="#cb3-569" aria-hidden="true" tabindex="-1"></a><span class="vs">      = </span><span class="sc">${</span>(posterior_alex <span class="op">*</span> <span class="dv">100</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">%</span></span>
+<span id="cb3-570"><a href="#cb3-570" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb3-571"><a href="#cb3-571" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;/div&gt;</span></span>
+<span id="cb3-572"><a href="#cb3-572" aria-hidden="true" tabindex="-1"></a><span class="vs">`</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-3-1" data-nodetype="declaration">
@@ -886,8 +918,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="ứng-dụng" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="ứng-dụng"><span class="header-section-number">2.3</span> Ứng dụng</h2>
+<section id="ứng-dụng" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="ứng-dụng"><span class="header-section-number">2.4</span> Ứng dụng</h2>
 <p>Giả sử một bệnh nhân nhận kết quả xét nghiệm dương tính với một căn bệnh. Các thông số của xét nghiệm như sau:</p>
 <ul>
 <li>Độ nhạy (Sensitivity): 95%</li>
@@ -909,172 +941,172 @@ window.Quarto = {
 <li>Phần bị chiếm bởi dương tính thật chính là xác suất thực sự mắc bệnh khi có kết quả dương tính</li>
 </ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb4" data-startfrom="565" data-source-offset="-2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 564;"><span id="cb4-565"><a href="#cb4-565" aria-hidden="true" tabindex="-1"></a>viewof prev <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb4-566"><a href="#cb4-566" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Tỉ lệ bệnh"</span><span class="op">,</span> </span>
-<span id="cb4-567"><a href="#cb4-567" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span> </span>
-<span id="cb4-568"><a href="#cb4-568" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span></span>
-<span id="cb4-569"><a href="#cb4-569" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb4-570"><a href="#cb4-570" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-571"><a href="#cb4-571" aria-hidden="true" tabindex="-1"></a>viewof sens <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb4-572"><a href="#cb4-572" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Độ nhạy"</span><span class="op">,</span> </span>
-<span id="cb4-573"><a href="#cb4-573" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.95</span><span class="op">,</span> </span>
-<span id="cb4-574"><a href="#cb4-574" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span></span>
-<span id="cb4-575"><a href="#cb4-575" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb4-576"><a href="#cb4-576" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-577"><a href="#cb4-577" aria-hidden="true" tabindex="-1"></a>viewof spec <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb4-578"><a href="#cb4-578" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Độ đặc hiệu"</span><span class="op">,</span> </span>
-<span id="cb4-579"><a href="#cb4-579" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.9</span><span class="op">,</span> </span>
-<span id="cb4-580"><a href="#cb4-580" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span></span>
-<span id="cb4-581"><a href="#cb4-581" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb4-582"><a href="#cb4-582" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-583"><a href="#cb4-583" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. THE CALCULATIONS (Reactive Data)</span></span>
-<span id="cb4-584"><a href="#cb4-584" aria-hidden="true" tabindex="-1"></a><span class="co">// This array automatically updates whenever the sliders above move.</span></span>
-<span id="cb4-585"><a href="#cb4-585" aria-hidden="true" tabindex="-1"></a><span class="co">// We define the 4 quadrants of the mosaic.</span></span>
-<span id="cb4-586"><a href="#cb4-586" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-587"><a href="#cb4-587" aria-hidden="true" tabindex="-1"></a>rect_data2 <span class="op">=</span> [</span>
-<span id="cb4-588"><a href="#cb4-588" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- COLUMN 1: ALEX (Left Side) ---</span></span>
-<span id="cb4-589"><a href="#cb4-589" aria-hidden="true" tabindex="-1"></a>  <span class="co">// The Width is determined by the 'prior'</span></span>
-<span id="cb4-590"><a href="#cb4-590" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb4-591"><a href="#cb4-591" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 1. The "Evidence" Box (The bottom colored part)</span></span>
-<span id="cb4-592"><a href="#cb4-592" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb4-593"><a href="#cb4-593" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Dương thật"</span><span class="op">,</span></span>
-<span id="cb4-594"><a href="#cb4-594" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> </span>
-<span id="cb4-595"><a href="#cb4-595" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x2</span><span class="op">:</span> prev<span class="op">,</span> </span>
-<span id="cb4-596"><a href="#cb4-596" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> </span>
-<span id="cb4-597"><a href="#cb4-597" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y2</span><span class="op">:</span> sens<span class="op">,</span> </span>
-<span id="cb4-598"><a href="#cb4-598" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#6ecae1"</span> <span class="co">// Light Blue (Strong Evidence)</span></span>
-<span id="cb4-599"><a href="#cb4-599" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb4-600"><a href="#cb4-600" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb4-601"><a href="#cb4-601" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 2. The "Void" Box (The top dark part)</span></span>
-<span id="cb4-602"><a href="#cb4-602" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb4-603"><a href="#cb4-603" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Âm giả"</span><span class="op">,</span></span>
-<span id="cb4-604"><a href="#cb4-604" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> </span>
-<span id="cb4-605"><a href="#cb4-605" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x2</span><span class="op">:</span> prev<span class="op">,</span> </span>
-<span id="cb4-606"><a href="#cb4-606" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y1</span><span class="op">:</span> sens<span class="op">,</span> </span>
-<span id="cb4-607"><a href="#cb4-607" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
-<span id="cb4-608"><a href="#cb4-608" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#1a1a1a"</span> <span class="co">// Dark Grey</span></span>
-<span id="cb4-609"><a href="#cb4-609" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb4-610"><a href="#cb4-610" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-611"><a href="#cb4-611" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- COLUMN 2: BEN (Right Side) ---</span></span>
-<span id="cb4-612"><a href="#cb4-612" aria-hidden="true" tabindex="-1"></a>  <span class="co">// The Width starts where Alex ends ('prior') and goes to 1</span></span>
-<span id="cb4-613"><a href="#cb4-613" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb4-614"><a href="#cb4-614" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 3. The "Evidence" Box (The bottom colored part)</span></span>
-<span id="cb4-615"><a href="#cb4-615" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb4-616"><a href="#cb4-616" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Dương giả"</span><span class="op">,</span></span>
-<span id="cb4-617"><a href="#cb4-617" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> prev<span class="op">,</span> </span>
-<span id="cb4-618"><a href="#cb4-618" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
-<span id="cb4-619"><a href="#cb4-619" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> </span>
-<span id="cb4-620"><a href="#cb4-620" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span> <span class="op">-</span> spec<span class="op">,</span> </span>
-<span id="cb4-621"><a href="#cb4-621" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#2f7e9b"</span> <span class="co">// Teal (Competing Evidence)</span></span>
-<span id="cb4-622"><a href="#cb4-622" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb4-623"><a href="#cb4-623" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb4-624"><a href="#cb4-624" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 4. The "Void" Box (The top dark part)</span></span>
-<span id="cb4-625"><a href="#cb4-625" aria-hidden="true" tabindex="-1"></a>  {</span>
-<span id="cb4-626"><a href="#cb4-626" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Âm thật"</span><span class="op">,</span></span>
-<span id="cb4-627"><a href="#cb4-627" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> prev<span class="op">,</span> </span>
-<span id="cb4-628"><a href="#cb4-628" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
-<span id="cb4-629"><a href="#cb4-629" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y1</span><span class="op">:</span> <span class="dv">1</span> <span class="op">-</span> spec<span class="op">,</span> </span>
-<span id="cb4-630"><a href="#cb4-630" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
-<span id="cb4-631"><a href="#cb4-631" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#0f0f0f"</span> <span class="co">// Black</span></span>
-<span id="cb4-632"><a href="#cb4-632" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb4-633"><a href="#cb4-633" aria-hidden="true" tabindex="-1"></a>]</span>
-<span id="cb4-634"><a href="#cb4-634" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-635"><a href="#cb4-635" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
-<span id="cb4-636"><a href="#cb4-636" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">550</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span></span>
-<span id="cb4-637"><a href="#cb4-637" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginTop</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
-<span id="cb4-638"><a href="#cb4-638" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
-<span id="cb4-639"><a href="#cb4-639" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginRight</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
-<span id="cb4-640"><a href="#cb4-640" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginBottom</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span></span>
-<span id="cb4-641"><a href="#cb4-641" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-642"><a href="#cb4-642" aria-hidden="true" tabindex="-1"></a>  <span class="dt">style</span><span class="op">:</span> {</span>
-<span id="cb4-643"><a href="#cb4-643" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"black"</span><span class="op">,</span></span>
-<span id="cb4-644"><a href="#cb4-644" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span></span>
-<span id="cb4-645"><a href="#cb4-645" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fontSize</span><span class="op">:</span> <span class="st">"16px"</span> </span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb4" data-startfrom="602" data-source-offset="-2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 601;"><span id="cb4-602"><a href="#cb4-602" aria-hidden="true" tabindex="-1"></a>viewof prev <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-603"><a href="#cb4-603" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Tỉ lệ bệnh"</span><span class="op">,</span> </span>
+<span id="cb4-604"><a href="#cb4-604" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.1</span><span class="op">,</span> </span>
+<span id="cb4-605"><a href="#cb4-605" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span></span>
+<span id="cb4-606"><a href="#cb4-606" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb4-607"><a href="#cb4-607" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-608"><a href="#cb4-608" aria-hidden="true" tabindex="-1"></a>viewof sens <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-609"><a href="#cb4-609" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Độ nhạy"</span><span class="op">,</span> </span>
+<span id="cb4-610"><a href="#cb4-610" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.95</span><span class="op">,</span> </span>
+<span id="cb4-611"><a href="#cb4-611" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span></span>
+<span id="cb4-612"><a href="#cb4-612" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb4-613"><a href="#cb4-613" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-614"><a href="#cb4-614" aria-hidden="true" tabindex="-1"></a>viewof spec <span class="op">=</span> Inputs<span class="op">.</span><span class="fu">range</span>([<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-615"><a href="#cb4-615" aria-hidden="true" tabindex="-1"></a>  <span class="dt">label</span><span class="op">:</span> <span class="st">"Độ đặc hiệu"</span><span class="op">,</span> </span>
+<span id="cb4-616"><a href="#cb4-616" aria-hidden="true" tabindex="-1"></a>  <span class="dt">value</span><span class="op">:</span> <span class="fl">0.9</span><span class="op">,</span> </span>
+<span id="cb4-617"><a href="#cb4-617" aria-hidden="true" tabindex="-1"></a>  <span class="dt">step</span><span class="op">:</span> <span class="fl">0.01</span></span>
+<span id="cb4-618"><a href="#cb4-618" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb4-619"><a href="#cb4-619" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-620"><a href="#cb4-620" aria-hidden="true" tabindex="-1"></a><span class="co">// 2. THE CALCULATIONS (Reactive Data)</span></span>
+<span id="cb4-621"><a href="#cb4-621" aria-hidden="true" tabindex="-1"></a><span class="co">// This array automatically updates whenever the sliders above move.</span></span>
+<span id="cb4-622"><a href="#cb4-622" aria-hidden="true" tabindex="-1"></a><span class="co">// We define the 4 quadrants of the mosaic.</span></span>
+<span id="cb4-623"><a href="#cb4-623" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-624"><a href="#cb4-624" aria-hidden="true" tabindex="-1"></a>rect_data2 <span class="op">=</span> [</span>
+<span id="cb4-625"><a href="#cb4-625" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- COLUMN 1: ALEX (Left Side) ---</span></span>
+<span id="cb4-626"><a href="#cb4-626" aria-hidden="true" tabindex="-1"></a>  <span class="co">// The Width is determined by the 'prior'</span></span>
+<span id="cb4-627"><a href="#cb4-627" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-628"><a href="#cb4-628" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 1. The "Evidence" Box (The bottom colored part)</span></span>
+<span id="cb4-629"><a href="#cb4-629" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb4-630"><a href="#cb4-630" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Dương thật"</span><span class="op">,</span></span>
+<span id="cb4-631"><a href="#cb4-631" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> </span>
+<span id="cb4-632"><a href="#cb4-632" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x2</span><span class="op">:</span> prev<span class="op">,</span> </span>
+<span id="cb4-633"><a href="#cb4-633" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> </span>
+<span id="cb4-634"><a href="#cb4-634" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y2</span><span class="op">:</span> sens<span class="op">,</span> </span>
+<span id="cb4-635"><a href="#cb4-635" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#6ecae1"</span> <span class="co">// Light Blue (Strong Evidence)</span></span>
+<span id="cb4-636"><a href="#cb4-636" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb4-637"><a href="#cb4-637" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-638"><a href="#cb4-638" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 2. The "Void" Box (The top dark part)</span></span>
+<span id="cb4-639"><a href="#cb4-639" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb4-640"><a href="#cb4-640" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Âm giả"</span><span class="op">,</span></span>
+<span id="cb4-641"><a href="#cb4-641" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> </span>
+<span id="cb4-642"><a href="#cb4-642" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x2</span><span class="op">:</span> prev<span class="op">,</span> </span>
+<span id="cb4-643"><a href="#cb4-643" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y1</span><span class="op">:</span> sens<span class="op">,</span> </span>
+<span id="cb4-644"><a href="#cb4-644" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
+<span id="cb4-645"><a href="#cb4-645" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#1a1a1a"</span> <span class="co">// Dark Grey</span></span>
 <span id="cb4-646"><a href="#cb4-646" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
-<span id="cb4-647"><a href="#cb4-647" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb4-648"><a href="#cb4-648" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> { <span class="dt">axis</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>] }<span class="op">,</span></span>
-<span id="cb4-649"><a href="#cb4-649" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> { <span class="dt">axis</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>] }<span class="op">,</span></span>
-<span id="cb4-650"><a href="#cb4-650" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-651"><a href="#cb4-651" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
-<span id="cb4-652"><a href="#cb4-652" aria-hidden="true" tabindex="-1"></a>    <span class="co">// --- PART 1: THE ANNOTATIONS ---</span></span>
-<span id="cb4-653"><a href="#cb4-653" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Fix: Use [1] as dummy data, and arrow functions `() =&gt;` for text strings.</span></span>
-<span id="cb4-654"><a href="#cb4-654" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-655"><a href="#cb4-655" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A. TOP ANNOTATION: Prior P(H)</span></span>
-<span id="cb4-656"><a href="#cb4-656" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">1</span>]<span class="op">,</span> { </span>
-<span id="cb4-657"><a href="#cb4-657" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
-<span id="cb4-658"><a href="#cb4-658" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> prev<span class="op">,</span>  </span>
-<span id="cb4-659"><a href="#cb4-659" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
-<span id="cb4-660"><a href="#cb4-660" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb4-661"><a href="#cb4-661" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb4-662"><a href="#cb4-662" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb4-663"><a href="#cb4-663" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> prev <span class="op">/</span> <span class="dv">2</span><span class="op">,</span>      </span>
-<span id="cb4-664"><a href="#cb4-664" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span> <span class="dt">dy</span><span class="op">:</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span></span>
-<span id="cb4-665"><a href="#cb4-665" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`Tỉ lệ bệnh = </span><span class="sc">${</span>prev<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// &lt;--- Arrow function required</span></span>
-<span id="cb4-666"><a href="#cb4-666" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span></span>
-<span id="cb4-667"><a href="#cb4-667" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb4-668"><a href="#cb4-668" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb4-669"><a href="#cb4-669" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-670"><a href="#cb4-670" aria-hidden="true" tabindex="-1"></a>    <span class="co">// B. LEFT ANNOTATION: P(E|H)</span></span>
-<span id="cb4-671"><a href="#cb4-671" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb4-672"><a href="#cb4-672" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="op">-</span><span class="fl">0.03</span><span class="op">,</span>          </span>
-<span id="cb4-673"><a href="#cb4-673" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> sens<span class="op">,</span> </span>
-<span id="cb4-674"><a href="#cb4-674" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#6ecae1"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
-<span id="cb4-675"><a href="#cb4-675" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb4-676"><a href="#cb4-676" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb4-677"><a href="#cb4-677" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb4-678"><a href="#cb4-678" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="op">-</span><span class="fl">0.03</span><span class="op">,</span>          </span>
-<span id="cb4-679"><a href="#cb4-679" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> sens <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
-<span id="cb4-680"><a href="#cb4-680" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dx</span><span class="op">:</span> <span class="op">-</span><span class="dv">15</span><span class="op">,</span> <span class="co">// Push slightly left away from the line</span></span>
-<span id="cb4-681"><a href="#cb4-681" aria-hidden="true" tabindex="-1"></a>      <span class="dt">rotate</span><span class="op">:</span> <span class="op">-</span><span class="dv">90</span><span class="op">,</span> <span class="co">// &lt;--- Rotates text vertically</span></span>
-<span id="cb4-682"><a href="#cb4-682" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`Độ nhạy = </span><span class="sc">${</span>sens<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// Removed \n for cleaner vertical look</span></span>
-<span id="cb4-683"><a href="#cb4-683" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#6ecae1"</span><span class="op">,</span> </span>
-<span id="cb4-684"><a href="#cb4-684" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span> <span class="co">// Centers text on the bar height</span></span>
-<span id="cb4-685"><a href="#cb4-685" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb4-686"><a href="#cb4-686" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb4-647"><a href="#cb4-647" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-648"><a href="#cb4-648" aria-hidden="true" tabindex="-1"></a>  <span class="co">// --- COLUMN 2: BEN (Right Side) ---</span></span>
+<span id="cb4-649"><a href="#cb4-649" aria-hidden="true" tabindex="-1"></a>  <span class="co">// The Width starts where Alex ends ('prior') and goes to 1</span></span>
+<span id="cb4-650"><a href="#cb4-650" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-651"><a href="#cb4-651" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 3. The "Evidence" Box (The bottom colored part)</span></span>
+<span id="cb4-652"><a href="#cb4-652" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb4-653"><a href="#cb4-653" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Dương giả"</span><span class="op">,</span></span>
+<span id="cb4-654"><a href="#cb4-654" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> prev<span class="op">,</span> </span>
+<span id="cb4-655"><a href="#cb4-655" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
+<span id="cb4-656"><a href="#cb4-656" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> </span>
+<span id="cb4-657"><a href="#cb4-657" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span> <span class="op">-</span> spec<span class="op">,</span> </span>
+<span id="cb4-658"><a href="#cb4-658" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#2f7e9b"</span> <span class="co">// Teal (Competing Evidence)</span></span>
+<span id="cb4-659"><a href="#cb4-659" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb4-660"><a href="#cb4-660" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-661"><a href="#cb4-661" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 4. The "Void" Box (The top dark part)</span></span>
+<span id="cb4-662"><a href="#cb4-662" aria-hidden="true" tabindex="-1"></a>  {</span>
+<span id="cb4-663"><a href="#cb4-663" aria-hidden="true" tabindex="-1"></a>    <span class="dt">label</span><span class="op">:</span> <span class="st">"Âm thật"</span><span class="op">,</span></span>
+<span id="cb4-664"><a href="#cb4-664" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x1</span><span class="op">:</span> prev<span class="op">,</span> </span>
+<span id="cb4-665"><a href="#cb4-665" aria-hidden="true" tabindex="-1"></a>    <span class="dt">x2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
+<span id="cb4-666"><a href="#cb4-666" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y1</span><span class="op">:</span> <span class="dv">1</span> <span class="op">-</span> spec<span class="op">,</span> </span>
+<span id="cb4-667"><a href="#cb4-667" aria-hidden="true" tabindex="-1"></a>    <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
+<span id="cb4-668"><a href="#cb4-668" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"#0f0f0f"</span> <span class="co">// Black</span></span>
+<span id="cb4-669"><a href="#cb4-669" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb4-670"><a href="#cb4-670" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb4-671"><a href="#cb4-671" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-672"><a href="#cb4-672" aria-hidden="true" tabindex="-1"></a>Plot<span class="op">.</span><span class="fu">plot</span>({</span>
+<span id="cb4-673"><a href="#cb4-673" aria-hidden="true" tabindex="-1"></a>  <span class="dt">width</span><span class="op">:</span> <span class="dv">550</span><span class="op">,</span> <span class="dt">height</span><span class="op">:</span> <span class="dv">450</span><span class="op">,</span></span>
+<span id="cb4-674"><a href="#cb4-674" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginTop</span><span class="op">:</span> <span class="dv">50</span><span class="op">,</span></span>
+<span id="cb4-675"><a href="#cb4-675" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginLeft</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
+<span id="cb4-676"><a href="#cb4-676" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginRight</span><span class="op">:</span> <span class="dv">60</span><span class="op">,</span></span>
+<span id="cb4-677"><a href="#cb4-677" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marginBottom</span><span class="op">:</span> <span class="dv">20</span><span class="op">,</span></span>
+<span id="cb4-678"><a href="#cb4-678" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-679"><a href="#cb4-679" aria-hidden="true" tabindex="-1"></a>  <span class="dt">style</span><span class="op">:</span> {</span>
+<span id="cb4-680"><a href="#cb4-680" aria-hidden="true" tabindex="-1"></a>    <span class="dt">background</span><span class="op">:</span> <span class="st">"black"</span><span class="op">,</span></span>
+<span id="cb4-681"><a href="#cb4-681" aria-hidden="true" tabindex="-1"></a>    <span class="dt">color</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span></span>
+<span id="cb4-682"><a href="#cb4-682" aria-hidden="true" tabindex="-1"></a>    <span class="dt">fontSize</span><span class="op">:</span> <span class="st">"16px"</span> </span>
+<span id="cb4-683"><a href="#cb4-683" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb4-684"><a href="#cb4-684" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb4-685"><a href="#cb4-685" aria-hidden="true" tabindex="-1"></a>  <span class="dt">x</span><span class="op">:</span> { <span class="dt">axis</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>] }<span class="op">,</span></span>
+<span id="cb4-686"><a href="#cb4-686" aria-hidden="true" tabindex="-1"></a>  <span class="dt">y</span><span class="op">:</span> { <span class="dt">axis</span><span class="op">:</span> <span class="kw">null</span><span class="op">,</span> <span class="dt">domain</span><span class="op">:</span> [<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>] }<span class="op">,</span></span>
 <span id="cb4-687"><a href="#cb4-687" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-688"><a href="#cb4-688" aria-hidden="true" tabindex="-1"></a>    <span class="co">// C. RIGHT ANNOTATION: P(E|¬H)</span></span>
-<span id="cb4-689"><a href="#cb4-689" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb4-690"><a href="#cb4-690" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
-<span id="cb4-691"><a href="#cb4-691" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y1</span><span class="op">:</span> <span class="dv">1</span> <span class="op">-</span> spec<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
-<span id="cb4-692"><a href="#cb4-692" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb4-693"><a href="#cb4-693" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb4-694"><a href="#cb4-694" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
-<span id="cb4-695"><a href="#cb4-695" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
-<span id="cb4-696"><a href="#cb4-696" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="dv">1</span> <span class="op">-</span> spec <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
-<span id="cb4-697"><a href="#cb4-697" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dx</span><span class="op">:</span> <span class="dv">15</span><span class="op">,</span> <span class="co">// Push slightly right away from the line</span></span>
-<span id="cb4-698"><a href="#cb4-698" aria-hidden="true" tabindex="-1"></a>      <span class="dt">rotate</span><span class="op">:</span> <span class="op">-</span><span class="dv">90</span><span class="op">,</span> <span class="co">// &lt;--- Rotates text vertically</span></span>
-<span id="cb4-699"><a href="#cb4-699" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`Độ đặc hiệu = </span><span class="sc">${</span>spec<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> </span>
-<span id="cb4-700"><a href="#cb4-700" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> </span>
-<span id="cb4-701"><a href="#cb4-701" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span> </span>
-<span id="cb4-702"><a href="#cb4-702" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb4-703"><a href="#cb4-703" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb4-704"><a href="#cb4-704" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-705"><a href="#cb4-705" aria-hidden="true" tabindex="-1"></a>    <span class="co">// --- PART 2: THE MOSAIC ---</span></span>
-<span id="cb4-706"><a href="#cb4-706" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">rect</span>(rect_data2<span class="op">,</span> {</span>
-<span id="cb4-707"><a href="#cb4-707" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> </span>
-<span id="cb4-708"><a href="#cb4-708" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"color"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
-<span id="cb4-709"><a href="#cb4-709" aria-hidden="true" tabindex="-1"></a>      <span class="dt">tip</span><span class="op">:</span> {</span>
-<span id="cb4-710"><a href="#cb4-710" aria-hidden="true" tabindex="-1"></a>        <span class="dt">fill</span><span class="op">:</span> <span class="st">"#222"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span></span>
-<span id="cb4-711"><a href="#cb4-711" aria-hidden="true" tabindex="-1"></a>        <span class="dt">maxRadius</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
-<span id="cb4-712"><a href="#cb4-712" aria-hidden="true" tabindex="-1"></a>        <span class="dt">title</span><span class="op">:</span> <span class="st">"label"</span><span class="op">,</span></span>
-<span id="cb4-713"><a href="#cb4-713" aria-hidden="true" tabindex="-1"></a>        <span class="dt">channels</span><span class="op">:</span> {</span>
-<span id="cb4-714"><a href="#cb4-714" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Diện tích"</span><span class="op">:</span> d <span class="kw">=&gt;</span> ((d<span class="op">.</span><span class="at">x2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">x1</span>) <span class="op">*</span> (d<span class="op">.</span><span class="at">y2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">y1</span>))<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)</span>
-<span id="cb4-715"><a href="#cb4-715" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
-<span id="cb4-716"><a href="#cb4-716" aria-hidden="true" tabindex="-1"></a>        <span class="dt">format</span><span class="op">:</span> {</span>
-<span id="cb4-717"><a href="#cb4-717" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Diện tích"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">x1</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="kw">false</span></span>
-<span id="cb4-718"><a href="#cb4-718" aria-hidden="true" tabindex="-1"></a>        }</span>
-<span id="cb4-719"><a href="#cb4-719" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb4-720"><a href="#cb4-720" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
-<span id="cb4-721"><a href="#cb4-721" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb4-722"><a href="#cb4-722" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Labels inside boxes</span></span>
-<span id="cb4-723"><a href="#cb4-723" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>(rect_data2<span class="op">,</span> {</span>
-<span id="cb4-724"><a href="#cb4-724" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">x1</span> <span class="op">+</span> d<span class="op">.</span><span class="at">x2</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
-<span id="cb4-725"><a href="#cb4-725" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">y1</span> <span class="op">+</span> d<span class="op">.</span><span class="at">y2</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
-<span id="cb4-726"><a href="#cb4-726" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">y2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">y1</span>) <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">&amp;&amp;</span> (d<span class="op">.</span><span class="at">x2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">x1</span>) <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">?</span> d<span class="op">.</span><span class="at">label</span> <span class="op">:</span> <span class="st">""</span><span class="op">,</span> </span>
-<span id="cb4-727"><a href="#cb4-727" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">pointerEvents</span><span class="op">:</span> <span class="st">"none"</span> </span>
-<span id="cb4-728"><a href="#cb4-728" aria-hidden="true" tabindex="-1"></a>    })</span>
-<span id="cb4-729"><a href="#cb4-729" aria-hidden="true" tabindex="-1"></a>  ]</span>
-<span id="cb4-730"><a href="#cb4-730" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-688"><a href="#cb4-688" aria-hidden="true" tabindex="-1"></a>  <span class="dt">marks</span><span class="op">:</span> [</span>
+<span id="cb4-689"><a href="#cb4-689" aria-hidden="true" tabindex="-1"></a>    <span class="co">// --- PART 1: THE ANNOTATIONS ---</span></span>
+<span id="cb4-690"><a href="#cb4-690" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Fix: Use [1] as dummy data, and arrow functions `() =&gt;` for text strings.</span></span>
+<span id="cb4-691"><a href="#cb4-691" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-692"><a href="#cb4-692" aria-hidden="true" tabindex="-1"></a>    <span class="co">// A. TOP ANNOTATION: Prior P(H)</span></span>
+<span id="cb4-693"><a href="#cb4-693" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleY</span>([<span class="dv">1</span>]<span class="op">,</span> { </span>
+<span id="cb4-694"><a href="#cb4-694" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
+<span id="cb4-695"><a href="#cb4-695" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> prev<span class="op">,</span>  </span>
+<span id="cb4-696"><a href="#cb4-696" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb4-697"><a href="#cb4-697" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb4-698"><a href="#cb4-698" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb4-699"><a href="#cb4-699" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-700"><a href="#cb4-700" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> prev <span class="op">/</span> <span class="dv">2</span><span class="op">,</span>      </span>
+<span id="cb4-701"><a href="#cb4-701" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span> <span class="dt">dy</span><span class="op">:</span> <span class="op">-</span><span class="dv">10</span><span class="op">,</span></span>
+<span id="cb4-702"><a href="#cb4-702" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`Tỉ lệ bệnh = </span><span class="sc">${</span>prev<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// &lt;--- Arrow function required</span></span>
+<span id="cb4-703"><a href="#cb4-703" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span></span>
+<span id="cb4-704"><a href="#cb4-704" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb4-705"><a href="#cb4-705" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb4-706"><a href="#cb4-706" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-707"><a href="#cb4-707" aria-hidden="true" tabindex="-1"></a>    <span class="co">// B. LEFT ANNOTATION: P(E|H)</span></span>
+<span id="cb4-708"><a href="#cb4-708" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-709"><a href="#cb4-709" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="op">-</span><span class="fl">0.03</span><span class="op">,</span>          </span>
+<span id="cb4-710"><a href="#cb4-710" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y1</span><span class="op">:</span> <span class="dv">0</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> sens<span class="op">,</span> </span>
+<span id="cb4-711"><a href="#cb4-711" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#6ecae1"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span></span>
+<span id="cb4-712"><a href="#cb4-712" aria-hidden="true" tabindex="-1"></a>      <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb4-713"><a href="#cb4-713" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb4-714"><a href="#cb4-714" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-715"><a href="#cb4-715" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="op">-</span><span class="fl">0.03</span><span class="op">,</span>          </span>
+<span id="cb4-716"><a href="#cb4-716" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> sens <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
+<span id="cb4-717"><a href="#cb4-717" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dx</span><span class="op">:</span> <span class="op">-</span><span class="dv">15</span><span class="op">,</span> <span class="co">// Push slightly left away from the line</span></span>
+<span id="cb4-718"><a href="#cb4-718" aria-hidden="true" tabindex="-1"></a>      <span class="dt">rotate</span><span class="op">:</span> <span class="op">-</span><span class="dv">90</span><span class="op">,</span> <span class="co">// &lt;--- Rotates text vertically</span></span>
+<span id="cb4-719"><a href="#cb4-719" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`Độ nhạy = </span><span class="sc">${</span>sens<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> <span class="co">// Removed \n for cleaner vertical look</span></span>
+<span id="cb4-720"><a href="#cb4-720" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#6ecae1"</span><span class="op">,</span> </span>
+<span id="cb4-721"><a href="#cb4-721" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span> <span class="co">// Centers text on the bar height</span></span>
+<span id="cb4-722"><a href="#cb4-722" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb4-723"><a href="#cb4-723" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb4-724"><a href="#cb4-724" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-725"><a href="#cb4-725" aria-hidden="true" tabindex="-1"></a>    <span class="co">// C. RIGHT ANNOTATION: P(E|¬H)</span></span>
+<span id="cb4-726"><a href="#cb4-726" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">ruleX</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-727"><a href="#cb4-727" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
+<span id="cb4-728"><a href="#cb4-728" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y1</span><span class="op">:</span> <span class="dv">1</span> <span class="op">-</span> spec<span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span> </span>
+<span id="cb4-729"><a href="#cb4-729" aria-hidden="true" tabindex="-1"></a>      <span class="dt">stroke</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">2</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb4-730"><a href="#cb4-730" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb4-731"><a href="#cb4-731" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>([<span class="dv">1</span>]<span class="op">,</span> {</span>
+<span id="cb4-732"><a href="#cb4-732" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> <span class="fl">1.03</span><span class="op">,</span>           </span>
+<span id="cb4-733"><a href="#cb4-733" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> <span class="dv">1</span> <span class="op">-</span> spec <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
+<span id="cb4-734"><a href="#cb4-734" aria-hidden="true" tabindex="-1"></a>      <span class="dt">dx</span><span class="op">:</span> <span class="dv">15</span><span class="op">,</span> <span class="co">// Push slightly right away from the line</span></span>
+<span id="cb4-735"><a href="#cb4-735" aria-hidden="true" tabindex="-1"></a>      <span class="dt">rotate</span><span class="op">:</span> <span class="op">-</span><span class="dv">90</span><span class="op">,</span> <span class="co">// &lt;--- Rotates text vertically</span></span>
+<span id="cb4-736"><a href="#cb4-736" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> () <span class="kw">=&gt;</span> <span class="vs">`Độ đặc hiệu = </span><span class="sc">${</span>spec<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="vs">`</span><span class="op">,</span> </span>
+<span id="cb4-737"><a href="#cb4-737" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"#000"</span><span class="op">,</span> </span>
+<span id="cb4-738"><a href="#cb4-738" aria-hidden="true" tabindex="-1"></a>      <span class="dt">textAnchor</span><span class="op">:</span> <span class="st">"middle"</span><span class="op">,</span> </span>
+<span id="cb4-739"><a href="#cb4-739" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">fontSize</span><span class="op">:</span> <span class="dv">16</span><span class="op">,</span> <span class="dt">clip</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb4-740"><a href="#cb4-740" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb4-741"><a href="#cb4-741" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-742"><a href="#cb4-742" aria-hidden="true" tabindex="-1"></a>    <span class="co">// --- PART 2: THE MOSAIC ---</span></span>
+<span id="cb4-743"><a href="#cb4-743" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">rect</span>(rect_data2<span class="op">,</span> {</span>
+<span id="cb4-744"><a href="#cb4-744" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x1</span><span class="op">:</span> <span class="st">"x1"</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="st">"x2"</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="st">"y1"</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="st">"y2"</span><span class="op">,</span> </span>
+<span id="cb4-745"><a href="#cb4-745" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"color"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span> <span class="dt">strokeWidth</span><span class="op">:</span> <span class="dv">1</span><span class="op">,</span></span>
+<span id="cb4-746"><a href="#cb4-746" aria-hidden="true" tabindex="-1"></a>      <span class="dt">tip</span><span class="op">:</span> {</span>
+<span id="cb4-747"><a href="#cb4-747" aria-hidden="true" tabindex="-1"></a>        <span class="dt">fill</span><span class="op">:</span> <span class="st">"#222"</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span></span>
+<span id="cb4-748"><a href="#cb4-748" aria-hidden="true" tabindex="-1"></a>        <span class="dt">maxRadius</span><span class="op">:</span> <span class="dv">100</span><span class="op">,</span></span>
+<span id="cb4-749"><a href="#cb4-749" aria-hidden="true" tabindex="-1"></a>        <span class="dt">title</span><span class="op">:</span> <span class="st">"label"</span><span class="op">,</span></span>
+<span id="cb4-750"><a href="#cb4-750" aria-hidden="true" tabindex="-1"></a>        <span class="dt">channels</span><span class="op">:</span> {</span>
+<span id="cb4-751"><a href="#cb4-751" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Diện tích"</span><span class="op">:</span> d <span class="kw">=&gt;</span> ((d<span class="op">.</span><span class="at">x2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">x1</span>) <span class="op">*</span> (d<span class="op">.</span><span class="at">y2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">y1</span>))<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)</span>
+<span id="cb4-752"><a href="#cb4-752" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
+<span id="cb4-753"><a href="#cb4-753" aria-hidden="true" tabindex="-1"></a>        <span class="dt">format</span><span class="op">:</span> {</span>
+<span id="cb4-754"><a href="#cb4-754" aria-hidden="true" tabindex="-1"></a>          <span class="st">"Diện tích"</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span> <span class="dt">x</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">fill</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">stroke</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">x1</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y1</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">x2</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">y2</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb4-755"><a href="#cb4-755" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb4-756"><a href="#cb4-756" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb4-757"><a href="#cb4-757" aria-hidden="true" tabindex="-1"></a>    })<span class="op">,</span></span>
+<span id="cb4-758"><a href="#cb4-758" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-759"><a href="#cb4-759" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Labels inside boxes</span></span>
+<span id="cb4-760"><a href="#cb4-760" aria-hidden="true" tabindex="-1"></a>    Plot<span class="op">.</span><span class="fu">text</span>(rect_data2<span class="op">,</span> {</span>
+<span id="cb4-761"><a href="#cb4-761" aria-hidden="true" tabindex="-1"></a>      <span class="dt">x</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">x1</span> <span class="op">+</span> d<span class="op">.</span><span class="at">x2</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
+<span id="cb4-762"><a href="#cb4-762" aria-hidden="true" tabindex="-1"></a>      <span class="dt">y</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">y1</span> <span class="op">+</span> d<span class="op">.</span><span class="at">y2</span>) <span class="op">/</span> <span class="dv">2</span><span class="op">,</span> </span>
+<span id="cb4-763"><a href="#cb4-763" aria-hidden="true" tabindex="-1"></a>      <span class="dt">text</span><span class="op">:</span> d <span class="kw">=&gt;</span> (d<span class="op">.</span><span class="at">y2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">y1</span>) <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">&amp;&amp;</span> (d<span class="op">.</span><span class="at">x2</span> <span class="op">-</span> d<span class="op">.</span><span class="at">x1</span>) <span class="op">&gt;</span> <span class="fl">0.1</span> <span class="op">?</span> d<span class="op">.</span><span class="at">label</span> <span class="op">:</span> <span class="st">""</span><span class="op">,</span> </span>
+<span id="cb4-764"><a href="#cb4-764" aria-hidden="true" tabindex="-1"></a>      <span class="dt">fill</span><span class="op">:</span> <span class="st">"white"</span><span class="op">,</span> <span class="dt">fontWeight</span><span class="op">:</span> <span class="st">"bold"</span><span class="op">,</span> <span class="dt">pointerEvents</span><span class="op">:</span> <span class="st">"none"</span> </span>
+<span id="cb4-765"><a href="#cb4-765" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb4-766"><a href="#cb4-766" aria-hidden="true" tabindex="-1"></a>  ]</span>
+<span id="cb4-767"><a href="#cb4-767" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-4-1" data-nodetype="declaration">
@@ -1112,35 +1144,35 @@ window.Quarto = {
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb5" data-startfrom="736" data-source-offset="-2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 735;"><span id="cb5-736"><a href="#cb5-736" aria-hidden="true" tabindex="-1"></a>area_tpr <span class="op">=</span> prev <span class="op">*</span> sens</span>
-<span id="cb5-737"><a href="#cb5-737" aria-hidden="true" tabindex="-1"></a>area_fpr  <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> prev) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> spec)</span>
-<span id="cb5-738"><a href="#cb5-738" aria-hidden="true" tabindex="-1"></a>total_area_risk <span class="op">=</span> area_tpr <span class="op">+</span> area_fpr</span>
-<span id="cb5-739"><a href="#cb5-739" aria-hidden="true" tabindex="-1"></a>posterior_risk <span class="op">=</span> area_tpr <span class="op">/</span> total_area_risk</span>
-<span id="cb5-740"><a href="#cb5-740" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-741"><a href="#cb5-741" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`</span></span>
-<span id="cb5-742"><a href="#cb5-742" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;div style="display: flex; align-items: center; flex-wrap: wrap;"&gt;</span></span>
-<span id="cb5-743"><a href="#cb5-743" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="font-weight: bold; margin-right: 5px;"&gt;</span></span>
-<span id="cb5-744"><a href="#cb5-744" aria-hidden="true" tabindex="-1"></a><span class="vs">      P(B | D) = </span></span>
-<span id="cb5-745"><a href="#cb5-745" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
-<span id="cb5-746"><a href="#cb5-746" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-747"><a href="#cb5-747" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;"&gt;</span></span>
-<span id="cb5-748"><a href="#cb5-748" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
-<span id="cb5-749"><a href="#cb5-749" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div style="border-bottom: 2px solid; padding-bottom: 5px; text-align: center; width: 100%;"&gt;</span></span>
-<span id="cb5-750"><a href="#cb5-750" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #6ecae1;"&gt;</span><span class="sc">${</span>area_tpr<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt;</span></span>
-<span id="cb5-751"><a href="#cb5-751" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;</span></span>
-<span id="cb5-752"><a href="#cb5-752" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
-<span id="cb5-753"><a href="#cb5-753" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div style="padding-top: 5px; text-align: center;"&gt;</span></span>
-<span id="cb5-754"><a href="#cb5-754" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #6ecae1;"&gt;</span><span class="sc">${</span>area_tpr<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt; + </span></span>
-<span id="cb5-755"><a href="#cb5-755" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #2f7e9b;"&gt;</span><span class="sc">${</span>area_fpr<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt;</span></span>
-<span id="cb5-756"><a href="#cb5-756" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;</span></span>
-<span id="cb5-757"><a href="#cb5-757" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
-<span id="cb5-758"><a href="#cb5-758" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
-<span id="cb5-759"><a href="#cb5-759" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-760"><a href="#cb5-760" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="font-weight: bold; color: #6ecae1; margin-left: 5px;"&gt;</span></span>
-<span id="cb5-761"><a href="#cb5-761" aria-hidden="true" tabindex="-1"></a><span class="vs">      = </span><span class="sc">${</span>(posterior_risk <span class="op">*</span> <span class="dv">100</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">%</span></span>
-<span id="cb5-762"><a href="#cb5-762" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
-<span id="cb5-763"><a href="#cb5-763" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;/div&gt;</span></span>
-<span id="cb5-764"><a href="#cb5-764" aria-hidden="true" tabindex="-1"></a><span class="vs">`</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb5" data-startfrom="773" data-source-offset="-2"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 772;"><span id="cb5-773"><a href="#cb5-773" aria-hidden="true" tabindex="-1"></a>area_tpr <span class="op">=</span> prev <span class="op">*</span> sens</span>
+<span id="cb5-774"><a href="#cb5-774" aria-hidden="true" tabindex="-1"></a>area_fpr  <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> prev) <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> spec)</span>
+<span id="cb5-775"><a href="#cb5-775" aria-hidden="true" tabindex="-1"></a>total_area_risk <span class="op">=</span> area_tpr <span class="op">+</span> area_fpr</span>
+<span id="cb5-776"><a href="#cb5-776" aria-hidden="true" tabindex="-1"></a>posterior_risk <span class="op">=</span> area_tpr <span class="op">/</span> total_area_risk</span>
+<span id="cb5-777"><a href="#cb5-777" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-778"><a href="#cb5-778" aria-hidden="true" tabindex="-1"></a><span class="fu">html</span><span class="vs">`</span></span>
+<span id="cb5-779"><a href="#cb5-779" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;div style="display: flex; align-items: center; flex-wrap: wrap;"&gt;</span></span>
+<span id="cb5-780"><a href="#cb5-780" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="font-weight: bold; margin-right: 5px;"&gt;</span></span>
+<span id="cb5-781"><a href="#cb5-781" aria-hidden="true" tabindex="-1"></a><span class="vs">      P(B | D) = </span></span>
+<span id="cb5-782"><a href="#cb5-782" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb5-783"><a href="#cb5-783" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-784"><a href="#cb5-784" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;"&gt;</span></span>
+<span id="cb5-785"><a href="#cb5-785" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
+<span id="cb5-786"><a href="#cb5-786" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div style="border-bottom: 2px solid; padding-bottom: 5px; text-align: center; width: 100%;"&gt;</span></span>
+<span id="cb5-787"><a href="#cb5-787" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #6ecae1;"&gt;</span><span class="sc">${</span>area_tpr<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt;</span></span>
+<span id="cb5-788"><a href="#cb5-788" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;</span></span>
+<span id="cb5-789"><a href="#cb5-789" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
+<span id="cb5-790"><a href="#cb5-790" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;div style="padding-top: 5px; text-align: center;"&gt;</span></span>
+<span id="cb5-791"><a href="#cb5-791" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #6ecae1;"&gt;</span><span class="sc">${</span>area_tpr<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt; + </span></span>
+<span id="cb5-792"><a href="#cb5-792" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;span style="color: #2f7e9b;"&gt;</span><span class="sc">${</span>area_fpr<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>)<span class="sc">}</span><span class="vs">&lt;/span&gt;</span></span>
+<span id="cb5-793"><a href="#cb5-793" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/div&gt;</span></span>
+<span id="cb5-794"><a href="#cb5-794" aria-hidden="true" tabindex="-1"></a><span class="vs">      </span></span>
+<span id="cb5-795"><a href="#cb5-795" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb5-796"><a href="#cb5-796" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-797"><a href="#cb5-797" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div style="font-weight: bold; color: #6ecae1; margin-left: 5px;"&gt;</span></span>
+<span id="cb5-798"><a href="#cb5-798" aria-hidden="true" tabindex="-1"></a><span class="vs">      = </span><span class="sc">${</span>(posterior_risk <span class="op">*</span> <span class="dv">100</span>)<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">%</span></span>
+<span id="cb5-799"><a href="#cb5-799" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb5-800"><a href="#cb5-800" aria-hidden="true" tabindex="-1"></a><span class="vs">  &lt;/div&gt;</span></span>
+<span id="cb5-801"><a href="#cb5-801" aria-hidden="true" tabindex="-1"></a><span class="vs">`</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <div id="ojs-cell-5-1" data-nodetype="declaration">
