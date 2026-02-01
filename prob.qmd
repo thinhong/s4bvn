@@ -62,7 +62,7 @@ $$\text{Xác suất} = \frac{\text{Số lần sự kiện xảy ra}}{\text{Tổn
 
 ## Các khái niệm cơ bản
 
-### Phép thử ngẫu nhiên (random experiment)
+## Phép thử ngẫu nhiên (random experiment)
 
 Là một thử nghiệm mà chúng ta không biết trước kết quả cho đến khi nó thực sự diễn ra.
 
@@ -100,13 +100,13 @@ Biến cố $A$ được gọi là xảy ra (occurs) nếu chúng ta quan sát �
 
 ### Ví dụ
 
-- Phép thử ngẫu nhiên: "Tung một đồng xu hai lần"
+-   Phép thử ngẫu nhiên: "Tung một đồng xu hai lần"
 
-- Không gian mẫu: $\Omega = \{ SS, SN, NS, NN \}$
+-   Không gian mẫu: $\Omega = \{ SS, SN, NS, NN \}$
 
-- Biến cố "có đúng một mặt ngửa": $A = \{ SN, NS \}$
+-   Biến cố "có đúng một mặt ngửa": $A = \{ SN, NS \}$
 
-- Chúng ta thực sự tiến hành phép thử ngẫu nhiên:
+-   Chúng ta thực sự tiến hành phép thử ngẫu nhiên:
 
 ```{r}
 set.seed(27)
@@ -115,18 +115,16 @@ coin <- c("S", "N")
 sample(coin, size = 2, replace = TRUE)
 ```
 
-- Kết quả thu được là $SN$, là phần tử của $A = \{ SN, NS \}$, vậy ta nói lần thử này biến cố $A$ có xảy ra
+-   Kết quả thu được là $SN$, là phần tử của $A = \{ SN, NS \}$, vậy ta nói lần thử này biến cố $A$ có xảy ra
 
-- Xác suất là con số thể hiện khả năng xảy ra của từng điểm mẫu hay biến cố trong $\Omega$
+-   Xác suất là con số thể hiện khả năng xảy ra của từng điểm mẫu hay biến cố trong $\Omega$
 
 Xác suất luôn gắn liền với không gian mẫu. Xác suất sẽ thay đổi trong các không gian mẫu khác nhau.
 
-::: {.callout-note}
-
+::: callout-note
 ## Bài tập
 
 Tìm một ví dụ phép thử ngẫu nhiên khác và mô tả lại các định nghĩa này.
-
 :::
 
 ### Rời rạc (discrete)
@@ -134,6 +132,12 @@ Tìm một ví dụ phép thử ngẫu nhiên khác và mô tả lại các đ�
 Là khi có "khoảng trống" giữa các giá trị.
 
 Ví dụ: 1, 2, 3...
+
+### Liên tục (continuous)
+
+Là khi không có khoảng trống giữa các giá trị.
+
+Ví dụ: $[0,1]$
 
 ```{ojs}
 //| echo: false
@@ -231,178 +235,67 @@ Plot.plot({
 })
 ```
 
-### Liên tục (continuous)
+### Quan hệ giữa hai biến cố
 
-Là khi không có khoảng trống giữa các giá trị.
+#### Xung khắc (mutually exclusive)
 
-Ví dụ: $[0,1]$
+Hai biến cố $A$ và $B$ được gọi là xung khắc (mutually exclusive) khi không có điểm chung nào ($A \cap B = \emptyset$). Chúng không thể cùng xảy ra tại một thời điểm.
 
+$$\mathbb{P}(A \cap B) = 0$$
 
+Nếu $A$ xảy ra thì chắc chắn $B$ không xảy ra (và ngược lại).
 
-### Xung khắc (mutually exclusive)
+$$\mathbb{P}(A | B) = 0$$
 
-Hai biến cố $A$ và $B$ được gọi là xung khắc (mutually exclusive) nếu giao của chúng là tập rỗng:
+$$\mathbb{P}(B | A) = 0$$
 
-$$A \cap B = \emptyset$$
+#### Phụ thuộc (dependent)
 
-Nghĩa là biến cố $A$ và $B$ không thể cùng xảy ra. Nếu $A$ xảy ra thì $B$ không thể xảy ra, và ngược lại.
+Hai biến cố $A$ và $B$ phụ thuộc nhau khi chúng có mối liên hệ với nhau ($A \cap B \neq \emptyset$). Việc biết biến cố này xảy ra sẽ làm thay đổi xác suất của biến cố kia.
 
-```{ojs}
-//| echo: false
+$$\mathbb{P}(A | B) \neq \mathbb{P}(A)$$
 
-// 1. INPUTS (Allow full range 0-1 to prevent resetting)
-viewof input_a_me = Inputs.range([0, 1], {
-  value: 0.05,
-  step: 0.01,
-  label: "P(A)"
-})
+$$\mathbb{P}(B | A) \neq \mathbb{P}(B)$$
 
-viewof input_b_me = Inputs.range([0, 1], {
-  value: 0.05,
-  step: 0.01,
-  label: "P(B)"
-})
+Đây là trường hợp phổ biến nhất trong thực tế.
 
-// 2. LOGIC (Clamp the values here)
-// This calculates the "Actual" probability used in the plot.
-// If A+B > 1, we squeeze B to fit the remaining space.
-prob_a_safe = input_a_me
-prob_b_safe = Math.min(input_b_me, 1 - input_a_me)
+#### Độc lập (independent)
 
-// 1. CONFIGURATION
-sim_config_me2 = ({
-  N: 1500,                    
-  centerA: {x: 0.3, y: 0.5}, 
-  centerB: {x: 0.7, y: 0.5}  
-})
+Hai biến cố $A$ và $B$ độc lập nghĩa là việc biết $B$ xảy ra không cung cấp thêm thông tin gì về khả năng xảy ra của $A$ và ngược lại.
 
-// 2. GENERATE POINTS (Static)
-substratePoints_me2 = {
-  const rng = d3.randomLcg(42); 
-  const points = [];
-  for(let i = 0; i < sim_config_me2.N; i++) {
-    const px = rng();
-    const py = rng();
-    const dA = (px - sim_config_me2.centerA.x)**2 + (py - sim_config_me2.centerA.y)**2;
-    const dB = (px - sim_config_me2.centerB.x)**2 + (py - sim_config_me2.centerB.y)**2;
-    points.push({id: i, x: px, y: py, distA: dA, distB: dB});
-  }
-  return points;
-}
+$$\mathbb{P}(A | B) = \mathbb{P}(A)$$
 
-// 3. CLASSIFY LOGIC (Uses Safe/Clamped Probabilities)
-classifiedPoints_me2 = {
-  const targetCountA = Math.round(sim_config_me2.N * prob_a_safe);
-  const targetCountB = Math.round(sim_config_me2.N * prob_b_safe);
+$$\mathbb{P}(B | A) = \mathbb{P}(B)$$
 
-  // --- SELECT A ---
-  const sortedByA = substratePoints_me2.slice().sort((a, b) => a.distA - b.distA);
-  const idsA = new Set(sortedByA.slice(0, targetCountA).map(d => d.id));
+Khi hai biến cố là độc lập, ta có thể nhân xác suất:
 
-  // --- SELECT B (Mutually Exclusive) ---
-  const availableForB = substratePoints_me2.filter(p => !idsA.has(p.id));
-  availableForB.sort((a, b) => a.distB - b.distB);
-  const idsB = new Set(availableForB.slice(0, targetCountB).map(d => d.id));
+$$\mathbb{P}(A \cap B) = \mathbb{P}(A) \times \mathbb{P}(B)$$
 
-  // --- ASSIGN STATUS ---
-  return substratePoints_me2.map(p => {
-    let status = "Ω";
-    if (idsA.has(p.id)) status = "A";
-    else if (idsB.has(p.id)) status = "B";
-
-    return { 
-      ...p, 
-      status,
-      isA: status === "A",
-      isB: status === "B"
-    };
-  });
-}
-
-// 4. THE PLOT
-Plot.plot({
-  width: 500,
-  height: 500,
-  x: {axis: null, domain: [0,1]},
-  y: {axis: null, domain: [0,1]},
-  
-  marks: [
-    Plot.frame({stroke: "#ccc"}),
-
-    // --- DENSITY LAYER A ---
-    Plot.density(classifiedPoints_me2, {
-      x: "x", y: "y",
-      fill: "#6ecae1",
-      fillOpacity: 0.3,
-      thresholds: [0.1],
-      bandwidth: 15,
-      weight: d => d.isA ? 1 : (d.isB ? -1 : 0)
-    }),
-
-    // --- DENSITY LAYER B ---
-    Plot.density(classifiedPoints_me2, {
-      x: "x", y: "y",
-      fill: "#f7941d",
-      fillOpacity: 0.3,
-      thresholds: [0.1],
-      bandwidth: 15,
-      weight: d => d.isB ? 1 : (d.isA ? -1 : 0)
-    }),
-    
-    // Use 'prob_a_safe' for the label so it matches the plot
-    Plot.text([sim_config_me2.centerA], {
-      x: "x", y: "y", text: [`P(A) = ${prob_a_safe.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
-    }),
-    Plot.text([sim_config_me2.centerB], {
-      x: "x", y: "y", text: [`P(B) = ${prob_b_safe.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
-    }),
-
-    Plot.text(["Ω"], {frameAnchor: "top-right", dx: -10, dy: 10, fill: "#999", fontSize: 20, fontWeight: "bold"}),
-    
-    // Total & Warning Label
-    Plot.text([prob_a_safe + prob_b_safe], {
-       frameAnchor: "bottom", dy: -10,
-       text: d => {
-         const isCapped = (input_a_me + input_b_me > 1.001);
-         return `P(A ⋃ B) = ${d.toFixed(2)} ${isCapped ? "(Capped!)" : ""}`
-       },
-       fontSize: 16, 
-       fontWeight: "bold", 
-       fill: (input_a_me + input_b_me > 1.001) ? "#d32f2f" : "#555", // Red if capped
-       stroke: "white", 
-       strokeWidth: 4
-    })
-  ]
-})
-```
-
-
+Quan hệ giữa hai biến cố có thể được minh họa bằng biểu đồ Venn như sau:
 
 ```{ojs}
 //| echo: false
 
 viewof prob_a_ov = Inputs.range([0, 1], {
-  value: 0.30,
+  value: 0.05,
   step: 0.01,
   label: "P(A)"
 })
 
 viewof prob_b_ov = Inputs.range([0, 1], {
-  value: 0.20,
+  value: 0.05,
   step: 0.01,
   label: "P(B)"
 })
 
-// 1. CONFIGURATION (Same as before)
+// 1. CONFIGURATION
 sim_config_dens = ({
   N: 5000,                    
   centerA: {x: 0.3, y: 0.5}, 
   centerB: {x: 0.7, y: 0.5}  
 })
 
-// 2. GENERATE POINTS (Same as before)
+// 2. GENERATE POINTS
 substratePoints_dens = {
   const rng = d3.randomLcg(42); 
   const points = [];
@@ -416,7 +309,7 @@ substratePoints_dens = {
   return points;
 }
 
-// 3. CLASSIFY LOGIC (Same "Overlap" Logic)
+// 3. CLASSIFY LOGIC
 classifiedPoints_dens = {
   const targetCountA = Math.round(sim_config_dens.N * prob_a_ov);
   const targetCountB = Math.round(sim_config_dens.N * prob_b_ov);
@@ -429,35 +322,61 @@ classifiedPoints_dens = {
   const sortedByB = substratePoints_dens.slice().sort((a, b) => a.distB - b.distB);
   const idsB = new Set(sortedByB.slice(0, targetCountB).map(d => d.id));
 
-  // --- FIX: Count Total Overlap FIRST ---
+  // Count Overlap
   let totalOverlapCount = 0;
   substratePoints_dens.forEach(p => {
     if (idsA.has(p.id) && idsB.has(p.id)) totalOverlapCount++;
   });
   
-  // Calculate the probability once
-  const finalOverlapProb = totalOverlapCount / sim_config_dens.N;
+  // --- MATH CALCULATIONS ---
+  const N = sim_config_dens.N;
+  const countA = idsA.size;
+  const countB = idsB.size;
+  
+  const probIntersection = totalOverlapCount / N;    // P(A and B)
+  const probProduct = prob_a_ov * prob_b_ov;         // P(A)*P(B)
+  
+  // Conditional Probabilities
+  const probAgivenB = countB === 0 ? 0 : totalOverlapCount / countB; // P(A|B)
+  const probBgivenA = countA === 0 ? 0 : totalOverlapCount / countA; // P(B|A)
 
-  // Now create the array for the plot
+  // --- RELATIONSHIP LOGIC ---
+  const epsilon = 0.001; 
+  let relationship = "";
+  let relColor = "";
+
+  if (probIntersection === 0) {
+      relationship = "Xung khắc";
+      relColor = "#e15759"; // Red
+  } else if (Math.abs(probIntersection - probProduct) <= epsilon) {
+      relationship = "Độc lập";
+      relColor = "#59a14f"; // Green
+  } else {
+      relationship = "Phụ thuộc";
+      relColor = "#76b7b2"; // Teal/Blue
+  }
+
+  // Create final array
   const finalPoints = substratePoints_dens.map(p => {
     const inA = idsA.has(p.id);
     const inB = idsB.has(p.id);
-    
-    let status = "Ω";
-    if (inA && inB) status = "A & B";
-    else if (inA) status = "A Only";
-    else if (inB) status = "B Only";
-    
-    return { ...p, inA, inB, status };
+    return { ...p, inA, inB };
   });
 
-  // Attach the calculated probability to the array itself so the Plot can read it
-  finalPoints.overlapProb = finalOverlapProb;
+  // Attach Stats
+  finalPoints.stats = {
+      p_int: probIntersection,
+      p_prod: probProduct,
+      p_AgB: probAgivenB,
+      p_BgA: probBgivenA,
+      rel: relationship,
+      col: relColor
+  };
   
   return finalPoints;
 }
 
-// 4. THE PLOT (New Density Style)
+// 4. THE PLOT
 Plot.plot({
   width: 500,
   height: 500,
@@ -467,28 +386,17 @@ Plot.plot({
   marks: [
     Plot.frame({stroke: "#ccc"}),
 
-    // --- DENSITY LAYER A (Blue) ---
+    // Density Layers
     Plot.density(classifiedPoints_dens, {
-      x: "x", y: "y",
-      fill: "#6ecae1",
-      fillOpacity: 0.3, 
-      thresholds: [0.1], 
-      bandwidth: 15,      
-      // Points in A are +1, Points ONLY in B are -1 (Repulsive)
+      x: "x", y: "y", fill: "#6ecae1", fillOpacity: 0.3, thresholds: [0.1], bandwidth: 15,
       weight: d => d.inA ? 1 : (d.inB ? -1 : 0)
     }),
-
-    // --- DENSITY LAYER B (Orange) ---
     Plot.density(classifiedPoints_dens, {
-      x: "x", y: "y",
-      fill: "#f7941d",
-      fillOpacity: 0.3,
-      thresholds: [0.1],
-      bandwidth: 15,
-      // Points in B are +1, Points ONLY in A are -1
+      x: "x", y: "y", fill: "#f7941d", fillOpacity: 0.3, thresholds: [0.1], bandwidth: 15,
       weight: d => d.inB ? 1 : (d.inA ? -1 : 0)
     }),
     
+    // Labels P(A) & P(B) on blobs (2 decimals)
     Plot.text([sim_config_dens.centerA], {
       x: "x", y: "y", text: [`P(A) = ${prob_a_ov.toFixed(2)}`], 
       fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
@@ -498,20 +406,43 @@ Plot.plot({
       fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
     }),
 
-    Plot.text(["Ω"], {frameAnchor: "top-right", dx: -10, dy: 10, fill: "#999", fontSize: 20, fontWeight: "bold"}),
-    
-    // --- FIX: Read the attached property from the data array ---
+    // Top Status Text
     Plot.text([0.5], {
-       frameAnchor: "bottom", dy: -10,
-       text: [`P(A ⋂ B) = ${classifiedPoints_dens.overlapProb.toFixed(3)}`],
-       fontSize: 16, fontWeight: "bold", fill: "#5D4037", stroke: "white", strokeWidth: 4
+        frameAnchor: "top", dy: 20,
+        text: [`${classifiedPoints_dens.stats.rel}`],
+        fontSize: 24, fontWeight: "bold", fill: classifiedPoints_dens.stats.col, stroke: "white", strokeWidth: 4
+    }),
+    
+    // --- BOTTOM LEFT: Conditional Probabilities (2 decimals) ---
+    Plot.text([0], {
+       frameAnchor: "bottom-left", dx: 10, dy: -30,
+       text: [`P(A | B) = ${classifiedPoints_dens.stats.p_AgB.toFixed(2)}`],
+       fontSize: 14, fontWeight: "bold", fill: "#2563eb", stroke: "white", strokeWidth: 3, textAnchor: "start"
+    }),
+    Plot.text([0], {
+       frameAnchor: "bottom-left", dx: 10, dy: -10,
+       text: [`P(B | A) = ${classifiedPoints_dens.stats.p_BgA.toFixed(2)}`],
+       fontSize: 14, fontWeight: "bold", fill: "#d97706", stroke: "white", strokeWidth: 3, textAnchor: "start"
+    }),
+
+    // --- BOTTOM RIGHT: Intersection & Product (2 decimals) ---
+    Plot.text([1], {
+       frameAnchor: "bottom-right", dx: -10, dy: -30,
+       text: [`P(A ∩ B) = ${classifiedPoints_dens.stats.p_int.toFixed(2)}`],
+       fontSize: 14, fontWeight: "bold", fill: "#333", stroke: "white", strokeWidth: 3, textAnchor: "end"
+    }),
+    Plot.text([1], {
+       frameAnchor: "bottom-right", dx: -10, dy: -10,
+       text: [`P(A)×P(B) = ${classifiedPoints_dens.stats.p_prod.toFixed(2)}`],
+       fontSize: 14, fontWeight: "bold", fill: "#555", stroke: "white", strokeWidth: 3, textAnchor: "end"
+    }),
+    Plot.text(["Ω"], {
+      frameAnchor: "top-right", dx: -15, dy: 15, 
+      fontSize: 30, fontWeight: "bold", fill: "#999"
     })
   ]
 })
 ```
-
-
-
 
 ### Phân phối xác suất (probability distribution)
 
@@ -519,15 +450,15 @@ Là một hàm số (function) thể hiện xác suất của mọi tập hợp 
 
 Phân phối xác suất bắt buộc phải thỏa 3 điều kiện sau:
 
-- $\mathbb{P}(\Omega) = 1$
+-   $\mathbb{P}(\Omega) = 1$
 
-- $0 \leq \mathbb{P}(A) \leq 1$ với mọi biến cố $A$
+-   $0 \leq \mathbb{P}(A) \leq 1$ với mọi biến cố $A$
 
-- Nếu các biến số $A_1$, $A_2$, ..., $A_n$ xung khắc, thì:
+-   Nếu các biến số $A_1$, $A_2$, ..., $A_n$ xung khắc, thì:
 
 $$\mathbb{P}(A_1 \cup A_2 \cup \cdots \cup A_n) = \mathbb{P}(A_1) + \mathbb{P}(A_2) + \cdots + \mathbb{P}(A_n)$$
 
-### Biến ngẫu nhiên (random variable)
+## Biến ngẫu nhiên (random variable)
 
 một biến thực có thể nhận các giá trị khác nhau với các xác suất khác nhau
 
@@ -535,4 +466,29 @@ Là một hàm số (function) gán một **số thực** cho mỗi điểm mẫ
 
 $$X: \Omega \rightarrow \mathbb{R}$$
 
+## Đo lường biến ngẫu nhiên
+
+Biến ngẫu nhiên được chia thành 4 loại dựa theo loại phép tính được thực hiện mà không làm sai lệch ý nghĩa của dữ liệu [@stevens1946;@daniel2018].
+
+| Biến | Phép toán cơ bản | Ý nghĩa thống kê | Ví dụ |
+|------------------|------------------|------------------|------------------|
+| Danh định (nominal) | Xác định sự bằng nhau $=, \ne$ | Phân loại | Giới tính, nhóm máu |
+| Thứ bậc (ordinal) | Xác định lớn hơn, nhỏ hơn $>, <$ | Xếp hạng | Mức độ đau, thang Likert |
+| Khoảng (interval) | Xác định khoảng cách chênh lệch $+, -$ | Chênh lệch | Nhiệt độ, điểm IQ |
+| Tỉ số (ratio) | Xác định gấp bao nhiêu lần $\times, \div$ | Gấp lần | Số lượng bạch cầu, cân nặng, chiều cao |
+
+Thang đo cao hơn sẽ giữ lại tất cả đặc tính của thang đo thấp hơn và thêm vào đặc tính mới. Ví dụ: Khoảng thời gian là biến tỉ số, người A chạy mất 30 phút, người B chạy mất 10 phút:
+
+- 30 phút $\neq$ 10 phút (danh định)
+- 30 phút $>$ 10 phút (thứ bậc)
+- A chạy chậm hơn B 20 phút (khoảng)
+- A chạy chậm gấp 3 lần B (tỉ số)
+
+Vì biến cấp cao hơn chứa mọi đặc tính của biến cấp thấp hơn, nên luôn có thể hạ cấp dữ liệu (biến đổi từ cao xuống thấp), nhưng không thể làm ngược lại.
+
+::: {.callout-important}
+Luôn thu thập dữ liệu ở thang đo cao nhất có thể (tỉ số hoặc khoảng), vì từ thang cao có thể quy đổi xuống thấp tùy thích, nhưng không làm ngược lại được.
+:::
+
+Ví dụ: Thu thập tuổi thay vì chia thành nhóm tuổi (0-5, 5-10, >10), hay danh định (trẻ em, người lớn).
 

@@ -32,7 +32,7 @@ Biết rằng học sinh được chọn ở Lớp A. Tính xác suất học si
 
 Thông tin "Học sinh Lớp A" đã làm thu nhỏ không gian mẫu. Không gian mẫu lúc này chỉ là Học sinh lớp A thôi.
 
-$$\mathbb{P}(\text{Nữ} | \text{Lớp A}) = \frac{\overbrace{10}^{\text{Số Nữ trong Lớp C}}}{\underbrace{40}_{\text{Tổng sĩ số Lớp A}}} = 25.0\%$$
+$$\mathbb{P}(\text{Nữ} | \text{Lớp A}) = \frac{\overbrace{10}^{\text{Số Nữ trong Lớp A}}}{\underbrace{40}_{\text{Tổng sĩ số Lớp A}}} = 25.0\%$$
 
 ```{ojs}
 //| echo: false
@@ -800,3 +800,7 @@ html`
   </div>
 `
 ```
+
+## Xấp xỉ lưới
+
+
