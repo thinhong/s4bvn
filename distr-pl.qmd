@@ -1,0 +1,12 @@
+---
+title: "Phân phối quy tắc lũy thừa"
+format: html
+---
+
+
+
+$$p(x) = Cx^{-\alpha}$$
+
+[@clauset2009]
+
+

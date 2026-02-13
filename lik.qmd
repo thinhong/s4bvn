@@ -1,5 +1,910 @@
 ---
 title: "Hàm hợp lý"
 format: html
+execute: 
+  echo: false
 ---
+
+```{ojs}
+import { createSlider, createButton, injectStyle } from "./_slider.js"
+```
+
+## Định nghĩa
+
+$$\mathcal{L}(\theta \mid x) = \mathbb{P}(x \mid \theta)$$
+
+Hàm hợp lý (Likelihood function) là xác suất quan sát được dữ liệu $x$ nếu mô hình với tham số $\theta$ là đúng.
+
+Likelihood được sử dụng khi chúng ta **đã có dữ liệu** $x$, và muốn tìm $\theta$ hợp lý nhất với dữ liệu này.
+
+$\mathcal{L}$ không phải là một phân phối xác suất. Chúng ta chỉ có 1 bộ dữ liệu $x$, nhưng có nhiều giả thiết tham số $\theta$ khác nhau. Như chúng ta đã học, xác suất có điều kiện thực chất là thu nhỏ không gian mẫu.
+
+$$\begin{aligned}
+\sum_{\theta} \mathcal{L}(\theta \mid x) &= \sum_{\theta} \mathbb{P}(x \mid \theta) \\
+&= \mathbb{P}(x \mid \theta_1) + \mathbb{P}(x \mid \theta_2) + \dots + \mathbb{P}(x \mid \theta_n) \\
+&\neq 1
+\end{aligned}$$
+
+Mỗi số hạng $\mathbb{P}(x \mid \theta_i)$ có mẫu số khác nhau, nên tổng không thể bằng 1.
+
+::: callout-important
+-   Tổng xác suất của mọi dữ liệu $x$ trên một tham số $\theta$ cố định thì bằng 1 ($\sum_x \mathbb{P}(x \mid \theta) = 1$).
+-   Nhưng tổng Likelihood của mọi tham số $\theta$ trên một dữ liệu $x$ cố định thì không bằng 1 ($\sum_\theta \mathcal{L}(\theta \mid x) \neq 1$).
+:::
+
+```{ojs}
+viewof pdf_vs_lik_large = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. MATH
+  // ══════════════════════════════════════════════════════
+  function lnComb(n, k) {
+    if (k < 0 || k > n) return -Infinity;
+    if (k === 0 || k === n) return 0;
+    let s = 0;
+    for (let i = 0; i < k; i++) s += Math.log(n - i) - Math.log(i + 1);
+    return s;
+  }
+  function binomPMF(k, n, p) {
+    if (p <= 0) return k === 0 ? 1 : 0;
+    if (p >= 1) return k === n ? 1 : 0;
+    return Math.exp(lnComb(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p));
+  }
+  function binomLogLik(k, n, p) {
+    if (p <= 0) return k === 0 ? 0 : -Infinity;
+    if (p >= 1) return k === n ? 0 : -Infinity;
+    return lnComb(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p);
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  wrapper.appendChild(injectStyle());
+
+  // Colors: p = blue, k = red — EVERYWHERE
+  const CP = "#3b82f6"; // p color
+  const CK = "#dc2626"; // k color
+
+  // ══════════════════════════════════════════════════════
+  // 3. FORMULA BOX (Reverted to smaller size)
+  // ══════════════════════════════════════════════════════
+  const formulaBox = document.createElement("div");
+  formulaBox.style.cssText = `
+    width:100%;padding:16px 20px;border-radius:12px;margin-bottom:14px;
+    background:#f8fafc;border:1px solid #e2e8f0;text-align:center;
+    font-size:16px;line-height:1.9;color:#334155;
+    font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  `;
+  wrapper.appendChild(formulaBox);
+
+  // ══════════════════════════════════════════════════════
+  // 4. CONTROLS
+  // ══════════════════════════════════════════════════════
+  const SL = {};
+  SL.n = createSlider("n (trials)", 1, 30, 1, 10, "#1e293b", "dark");
+  SL.p = createSlider("p (probability)", 0.01, 0.99, 0.01, 0.60, CP, "blue");
+  SL.k = createSlider("k (observed successes)", 0, 30, 1, 6, CK, "red");
+
+  const r1 = document.createElement("div"); r1.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:10px;";
+  r1.appendChild(SL.n.el);
+  wrapper.appendChild(r1);
+  const r2 = document.createElement("div"); r2.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:12px;";
+  r2.appendChild(SL.p.el); r2.appendChild(SL.k.el);
+  wrapper.appendChild(r2);
+
+  // NLL toggle
+  let showNLL = false;
+  const toggleRow = document.createElement("div");
+  toggleRow.style.cssText = "display:flex;gap:12px;width:100%;margin-bottom:14px;align-items:center;";
+  const toggleLabel = document.createElement("span");
+  toggleLabel.style.cssText = "font-size:13px;font-weight:600;color:#64748b;";
+  toggleLabel.textContent = "Likelihood panel:";
+  const btnLik = document.createElement("button");
+  const btnNLL = document.createElement("button");
+  function styleToggle(btn, active, color) {
+    btn.style.cssText = `padding:6px 16px;border-radius:8px;font-size:13px;font-weight:700;
+      font-family:inherit;cursor:pointer;transition:all 0.15s;
+      border:2px solid ${color};
+      background:${active ? color : "#fff"};color:${active ? "#fff" : color};`;
+  }
+  btnLik.textContent = "L(p | k)";
+  btnNLL.textContent = "\u2212log L(p | k)";
+  toggleRow.appendChild(toggleLabel); toggleRow.appendChild(btnLik); toggleRow.appendChild(btnNLL);
+  wrapper.appendChild(toggleRow);
+
+  btnLik.addEventListener("click", () => { showNLL = false; updateAll(); });
+  btnNLL.addEventListener("click", () => { showNLL = true; updateAll(); });
+
+  // ══════════════════════════════════════════════════════
+  // 5. SVG PANELS
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const PW = 460, PH = 400; // Increased height
+  // Increased margins significantly to fit larger fonts
+  const mg_ = { t: 80, r: 25, b: 80, l: 75 };
+  const pw_ = PW - mg_.l - mg_.r, ph_ = PH - mg_.t - mg_.b;
+
+  function mkEl(tag, a) {
+    const e = document.createElementNS(NS, tag);
+    if (a) for (const [k,v] of Object.entries(a)) e.setAttribute(k,v);
+    return e;
+  }
+
+  function createPanel() {
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${PW} ${PH}`);
+    svg.style.cssText = "flex:1;min-width:0;border-radius:12px;border:1px solid #e2e8f0;background:#fff;";
+
+    // HUGE FONTS
+    const title = mkEl("text", { x: String(PW / 2), y: "34", "text-anchor": "middle", "font-size": "26", "font-weight": "700" });
+    svg.appendChild(title);
+    const sub = mkEl("text", { x: String(PW / 2), y: "60", "text-anchor": "middle", "font-size": "18", fill: "#64748b" });
+    svg.appendChild(sub);
+
+    const grids = []; for (let i = 0; i <= 4; i++) { svg.appendChild(mkEl("line", { stroke: "#f1f5f9", "stroke-width": "1" })); grids.push(svg.lastChild); }
+    // Y-Tick Font 16
+    const yLbls = []; for (let i = 0; i <= 4; i++) { svg.appendChild(mkEl("text", { "text-anchor": "end", fill: "#94a3b8", "font-size": "16", "font-family": "'SF Mono',monospace" })); yLbls.push(svg.lastChild); }
+
+    const bars = []; for (let i = 0; i < 31; i++) { const r = mkEl("rect", { rx: "2" }); r.style.display = "none"; svg.appendChild(r); bars.push(r); }
+
+    const pathFill = mkEl("path", { "stroke-width": "0" }); pathFill.style.display = "none"; svg.appendChild(pathFill);
+    const path = mkEl("path", { fill: "none", "stroke-width": "3" }); path.style.display = "none"; svg.appendChild(path);
+
+    svg.appendChild(mkEl("line", { x1: String(mg_.l), x2: String(mg_.l), y1: String(mg_.t), y2: String(mg_.t + ph_), stroke: "#cbd5e1" }));
+    const xAx = mkEl("line", { stroke: "#cbd5e1" }); svg.appendChild(xAx);
+    
+    // X-Tick Font 16
+    const xTicks = []; for (let i = 0; i < 31; i++) { const t = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "16", "font-family": "'SF Mono',monospace" }); t.style.display = "none"; svg.appendChild(t); xTicks.push(t); }
+    
+    // Axis Label Font 18
+    const xLabel = mkEl("text", { x: String(mg_.l + pw_ / 2), y: String(PH - 12), "text-anchor": "middle", fill: "#64748b", "font-size": "18", "font-weight": "600" });
+    svg.appendChild(xLabel);
+
+    // Y-axis label (rotated) - Font 18
+    const yLabel = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "18", "font-weight": "600" });
+    svg.appendChild(yLabel);
+
+    // Highlight elements (hidden by default)
+    const hlLine = mkEl("line", { "stroke-width": "2", "stroke-dasharray": "5,3" }); hlLine.style.display = "none"; svg.appendChild(hlLine);
+    const hlDot = mkEl("circle", { r: "7", stroke: "#fff", "stroke-width": "2.5" }); hlDot.style.display = "none"; svg.appendChild(hlDot);
+    const hlLabel = mkEl("text", { "text-anchor": "middle", "font-size": "16", "font-weight": "700" }); hlLabel.style.display = "none"; svg.appendChild(hlLabel);
+
+    return { svg, title, sub, grids, yLbls, bars, path, pathFill, xAx, xTicks, xLabel, yLabel, hlLine, hlDot, hlLabel };
+  }
+
+  const panelPDF = createPanel();
+  const panelLik = createPanel();
+
+  const chartRow = document.createElement("div");
+  chartRow.style.cssText = "display:flex;gap:12px;width:100%;";
+  chartRow.appendChild(panelPDF.svg); chartRow.appendChild(panelLik.svg);
+  wrapper.appendChild(chartRow);
+
+  // ══════════════════════════════════════════════════════
+  // 6. RENDER
+  // ══════════════════════════════════════════════════════
+  function fmtY(v) { if (v === 0) return "0"; if (Math.abs(v) > 100) return v.toFixed(0); if (Math.abs(v) >= 10) return v.toFixed(1); if (Math.abs(v) >= 1) return v.toFixed(2); if (Math.abs(v) < 0.01) return v.toFixed(3); return v.toFixed(2); }
+
+  function setYLabel(panel, text, color) {
+    const lx = 24, ly = mg_.t + ph_ / 2; // Adjusted lx for larger font
+    panel.yLabel.setAttribute("x", lx); panel.yLabel.setAttribute("y", ly);
+    panel.yLabel.setAttribute("transform", `rotate(-90,${lx},${ly})`);
+    panel.yLabel.setAttribute("fill", color);
+    panel.yLabel.textContent = text;
+  }
+
+  function renderPDF(panel, n, p, k) {
+    panel.title.textContent = "PDF:  P( k | p )";
+    panel.title.setAttribute("fill", CP);
+    panel.sub.textContent = `Fix p = ${p.toFixed(2)}, vary k = 0, 1, \u2026, ${n}`;
+    setYLabel(panel, "P(k)", CP);
+
+    const vals = [];
+    for (let ki = 0; ki <= n; ki++) vals.push(binomPMF(ki, n, p));
+    const maxVal = Math.max(...vals) * 1.25 || 0.1;
+
+    const baseline = mg_.t + ph_;
+    const sx = ki => mg_.l + (ki + 0.5) / (n + 1) * pw_;
+    const sy = v => mg_.t + ph_ - (v / maxVal) * ph_;
+    const barW = Math.max(4, Math.min(28, pw_ / (n + 1) * 0.7));
+
+    for (let i = 0; i <= 4; i++) {
+      const v = (maxVal / 4) * i, yy = sy(v);
+      panel.grids[i].setAttribute("x1", mg_.l); panel.grids[i].setAttribute("x2", PW - mg_.r);
+      panel.grids[i].setAttribute("y1", yy); panel.grids[i].setAttribute("y2", yy);
+      panel.yLbls[i].setAttribute("x", mg_.l - 10); panel.yLbls[i].setAttribute("y", yy + 6);
+      panel.yLbls[i].textContent = fmtY(v);
+    }
+
+    for (let i = 0; i < 31; i++) {
+      if (i <= n) {
+        const bx = sx(i) - barW / 2, by = sy(vals[i]);
+        panel.bars[i].setAttribute("x", bx); panel.bars[i].setAttribute("y", by);
+        panel.bars[i].setAttribute("width", barW);
+        panel.bars[i].setAttribute("height", Math.max(0, baseline - by));
+        panel.bars[i].setAttribute("fill", "#93c5fd");
+        panel.bars[i].setAttribute("stroke", "#60a5fa");
+        panel.bars[i].setAttribute("stroke-width", "0.5");
+        panel.bars[i].setAttribute("opacity", "0.55");
+        panel.bars[i].style.display = "";
+      } else { panel.bars[i].style.display = "none"; }
+    }
+
+    for (let i = 0; i < 31; i++) {
+      if (i <= n) {
+        const step = n > 20 ? 5 : n > 10 ? 2 : 1;
+        panel.xTicks[i].setAttribute("x", sx(i)); panel.xTicks[i].setAttribute("y", baseline + 24);
+        panel.xTicks[i].textContent = i % step === 0 ? i : "";
+        panel.xTicks[i].setAttribute("fill", "#64748b");
+        panel.xTicks[i].setAttribute("font-weight", "400");
+        panel.xTicks[i].style.display = "";
+      } else { panel.xTicks[i].style.display = "none"; }
+    }
+
+    panel.xAx.setAttribute("x1", mg_.l); panel.xAx.setAttribute("x2", PW - mg_.r);
+    panel.xAx.setAttribute("y1", baseline); panel.xAx.setAttribute("y2", baseline);
+    panel.xLabel.textContent = "k (number of successes)";
+    panel.xLabel.setAttribute("fill", CK);
+
+    panel.hlDot.style.display = "none"; panel.hlLabel.style.display = "none";
+    panel.hlLine.style.display = "none";
+    panel.path.style.display = "none"; panel.pathFill.style.display = "none";
+  }
+
+  function renderLik(panel, n, p, k) {
+    const nll = showNLL;
+    panel.title.textContent = nll ? "Neg Log-Lik:  \u2212ln L( p | k )" : "Likelihood:  L( p | k )";
+    panel.title.setAttribute("fill", CK);
+    panel.sub.textContent = `Fix k = ${k}, vary p \u2208 [0, 1]`;
+    setYLabel(panel, nll ? "\u2212ln L(p)" : "L(p)", CK);
+
+    const NPTS = 200;
+    const curve = [];
+    for (let i = 0; i <= NPTS; i++) {
+      const pi = Math.max(0.001, Math.min(0.999, i / NPTS));
+      curve.push({ p: pi, v: nll ? -binomLogLik(k, n, pi) : binomPMF(k, n, pi) });
+    }
+
+    let minVal, maxVal;
+    if (nll) {
+      minVal = Math.min(...curve.map(c => c.v));
+      maxVal = Math.max(...curve.filter(c => isFinite(c.v)).map(c => c.v));
+      const range = maxVal - minVal || 1;
+      maxVal = minVal + range * 1.2;
+    } else {
+      minVal = 0;
+      maxVal = Math.max(...curve.map(c => c.v)) * 1.25 || 0.1;
+    }
+
+    const baseline = mg_.t + ph_;
+    const sx = pi => mg_.l + pi * pw_;
+    const sy = v => mg_.t + ph_ - ((v - minVal) / ((maxVal - minVal) || 1)) * ph_;
+
+    for (let i = 0; i <= 4; i++) {
+      const v = minVal + ((maxVal - minVal) / 4) * i, yy = sy(v);
+      panel.grids[i].setAttribute("x1", mg_.l); panel.grids[i].setAttribute("x2", PW - mg_.r);
+      panel.grids[i].setAttribute("y1", yy); panel.grids[i].setAttribute("y2", yy);
+      panel.yLbls[i].setAttribute("x", mg_.l - 10); panel.yLbls[i].setAttribute("y", yy + 6);
+      panel.yLbls[i].textContent = fmtY(v);
+    }
+
+    let d = "", dFill = "";
+    if (!nll) dFill = `M${sx(0).toFixed(1)},${baseline}`;
+    for (let i = 0; i <= NPTS; i++) {
+      const px = sx(curve[i].p), py = sy(curve[i].v);
+      d += (i === 0 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1);
+      if (!nll) dFill += `L${px.toFixed(1)},${py.toFixed(1)}`;
+    }
+
+    if (!nll) {
+      dFill += `L${sx(1).toFixed(1)},${baseline}Z`;
+      panel.pathFill.setAttribute("d", dFill); panel.pathFill.setAttribute("fill", "#fecaca");
+      panel.pathFill.setAttribute("opacity", "0.3"); panel.pathFill.style.display = "";
+    } else { panel.pathFill.style.display = "none"; }
+    panel.path.setAttribute("d", d); panel.path.setAttribute("stroke", CK);
+    panel.path.style.display = "";
+
+    for (let i = 0; i < 31; i++) {
+      if (i <= 10) {
+        const pi = i / 10;
+        panel.xTicks[i].setAttribute("x", sx(pi)); panel.xTicks[i].setAttribute("y", baseline + 24);
+        panel.xTicks[i].textContent = i % 2 === 0 ? pi.toFixed(1) : "";
+        panel.xTicks[i].setAttribute("fill", "#64748b"); panel.xTicks[i].setAttribute("font-weight", "400");
+        panel.xTicks[i].style.display = "";
+      } else { panel.xTicks[i].style.display = "none"; }
+    }
+
+    panel.xAx.setAttribute("x1", mg_.l); panel.xAx.setAttribute("x2", PW - mg_.r);
+    panel.xAx.setAttribute("y1", baseline); panel.xAx.setAttribute("y2", baseline);
+    panel.xLabel.textContent = "p (probability parameter)";
+    panel.xLabel.setAttribute("fill", CP);
+
+    panel.hlLine.style.display = "none";
+    panel.hlDot.style.display = "none";
+    panel.hlLabel.style.display = "none";
+
+    for (let i = 0; i < 31; i++) panel.bars[i].style.display = "none";
+  }
+
+  function updateFormula(n, p, k) {
+    const nmk = n - k;
+    const omp = (1 - p).toFixed(2);
+
+    // REVERTED to smaller formula font sizes
+    formulaBox.innerHTML = `
+      <div style="margin-bottom:6px;font-size:13px;color:#64748b;">Same formula — different perspective:</div>
+      <div style="font-size:18px;margin-bottom:12px;">
+        f(<span style="color:${CK};font-weight:700">k</span>, <span style="color:${CP};font-weight:700">p</span>)
+        = C(n, <span style="color:${CK}">k</span>)
+        \u00D7 <span style="color:${CP}">p</span><sup style="color:${CK}">k</sup>
+        \u00D7 (1 \u2212 <span style="color:${CP}">p</span>)<sup style="color:${CK}">n\u2212k</sup>
+      </div>
+      <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;">
+        <div style="text-align:center;padding:10px 18px;border-radius:8px;background:#eff6ff;border:1px solid #bfdbfe;">
+          <div style="font-size:13px;color:${CP};font-weight:700;margin-bottom:6px;">PDF: fix <span style="color:${CP}">p = ${p.toFixed(2)}</span>, vary <span style="color:${CK}">k</span></div>
+          <div style="font-size:16px;color:#334155;">
+            P(<span style="color:${CK};font-weight:700">k</span>)
+            = C(${n}, <span style="color:${CK};font-weight:700">k</span>)
+            \u00D7 ${p.toFixed(2)}<sup style="color:${CK};font-weight:700">k</sup>
+            \u00D7 ${omp}<sup style="font-size:13px">${n}\u2212<span style="color:${CK};font-weight:700">k</span></sup>
+          </div>
+        </div>
+        <div style="text-align:center;padding:10px 18px;border-radius:8px;background:#fef2f2;border:1px solid #fecaca;">
+          <div style="font-size:13px;color:${CK};font-weight:700;margin-bottom:6px;">Likelihood: fix <span style="color:${CK}">k = ${k}</span>, vary <span style="color:${CP}">p</span></div>
+          <div style="font-size:16px;color:#334155;">
+            L(<span style="color:${CP};font-weight:700">p</span>)
+            = C(${n}, ${k})
+            \u00D7 <span style="color:${CP};font-weight:700">p</span><sup>${k}</sup>
+            \u00D7 (1\u2212<span style="color:${CP};font-weight:700">p</span>)<sup>${nmk}</sup>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateAll() {
+    const n = SL.n.val();
+    const p = SL.p.val();
+    let k = SL.k.val();
+    if (k > n) { SL.k.input.value = n; SL.k.sync(); k = n; }
+
+    styleToggle(btnLik, !showNLL, CK);
+    styleToggle(btnNLL, showNLL, CK);
+
+    updateFormula(n, p, k);
+    renderPDF(panelPDF, n, p, k);
+    renderLik(panelLik, n, p, k);
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 7. EVENTS
+  // ══════════════════════════════════════════════════════
+  function onInput() { SL.n.sync(); SL.p.sync(); SL.k.sync(); updateAll(); }
+  SL.n.input.addEventListener("input", onInput);
+  SL.p.input.addEventListener("input", onInput);
+  SL.k.input.addEventListener("input", onInput);
+  updateAll();
+
+  invalidation.then(() => {
+    SL.n.input.removeEventListener("input", onInput);
+    SL.p.input.removeEventListener("input", onInput);
+    SL.k.input.removeEventListener("input", onInput);
+  });
+
+  wrapper.value = {};
+  return wrapper;
+})()
+```
+
+## Đường cong hợp lý
+
+## Tỉ số hợp lý
+
+Giả sử ta có các mô hình $\theta_1, \theta_2 \dots$ và một bộ dữ liệu $x$. Để xác định mô hình nào giải thích dữ liệu tốt hơn, ta so sánh khả năng sinh ra dữ liệu $x$ của từng mô hình.
+
+Tỉ số hợp lý (likelihood ratio) được tính bằng cách chia các giá trị likelihood này cho nhau, nhằm định lượng mức độ ủng hộ của dữ liệu đối với mô hình này so với mô hình kia [@bolker2008].
+
+$$LR = \frac{\mathcal{L}(\theta_1 \mid x)}{\mathcal{L}(\theta_2 \mid x)}$$
+
+-   $LR > 1$: dữ liệu $x$ cho thấy $\theta_1$ hợp lý hơn
+-   $LR < 1$: dữ liệu $x$ cho thấy $\theta_2$ hợp lý hơn
+
+## Phép kiểm tỉ số hợp lý
+
+Phép kiểm tỉ số hợp lý (Likelihood Ratio Test, LRT) is a procedure to compare two models.
+
+$$2 \left[ \text{neglog}(\mathcal{L}_2) - \text{neglog}(\mathcal{L}_1) \right] \sim \chi^2_r$$
+
+Với $r$ là số parameter đang ước lượng.
+
+## Khoảng tin cậy
+
+Nguyên lý: Tìm tập hợp các giá trị tham số sao cho mô hình fit dữ liệu kém hơn mức tối ưu, nhưng nằm trong giới hạn chấp nhận được.
+
+Theo định lý Wilks, sự chênh lệch log-likelihood tuân theo phân phối Chi-bình phương ($\chi^2$).
+
+$$2 \left[ \text{NLL}(\theta) - \text{NLL}_{\min} \right] \le \chi^2_k(1-\alpha)$$
+
+Với $\text{NLL}_\text{min}$ là điểm cực tiểu của $NLL$ tìm được bằng MLE.
+
+$$\text{NLL}_{\text{cutoff}} = \text{NLL}_{\min} + \frac{\chi^2_k(1-\alpha)}{2}$$
+
+```{ojs}
+viewof ci_nll_clipped = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. MATH
+  // ══════════════════════════════════════════════════════
+  function lnComb(n, k) {
+    if (k < 0 || k > n) return -Infinity;
+    if (k === 0 || k === n) return 0;
+    let s = 0;
+    for (let i = 0; i < k; i++) s += Math.log(n - i) - Math.log(i + 1);
+    return s;
+  }
+  function binomLogLik(k, n, p) {
+    if (p <= 0) return k === 0 ? 0 : -Infinity;
+    if (p >= 1) return k === n ? 0 : -Infinity;
+    return lnComb(n, k) + k * Math.log(p) + (n - k) * Math.log(1 - p);
+  }
+
+  // Chi-square PDF (df=1)
+  function chi2PDF(x) {
+    if (x <= 0) return 0;
+    return Math.exp(-0.5 * x - 0.5 * Math.log(x) - 0.5 * Math.log(2 * Math.PI));
+  }
+
+  // Chi-square quantile (df=1)
+  function normCDF(z) {
+    const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429, pp = 0.3275911;
+    const sign = z < 0 ? -1 : 1;
+    z = Math.abs(z) / Math.SQRT2;
+    const t = 1.0 / (1.0 + pp * z);
+    const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-z * z);
+    return 0.5 * (1.0 + sign * y);
+  }
+  function chi2CDF(x) {
+    if (x <= 0) return 0;
+    return 2 * normCDF(Math.sqrt(x)) - 1;
+  }
+  function chi2Quantile(cl) {
+    let lo = 0, hi = 30;
+    for (let i = 0; i < 80; i++) {
+      const mid = (lo + hi) / 2;
+      if (chi2CDF(mid) < cl) lo = mid; else hi = mid;
+    }
+    return (lo + hi) / 2;
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  wrapper.appendChild(injectStyle());
+
+  const COL = { nll: "#7c3aed", chi: "#dc2626", ci: "#16a34a", mle: "#3b82f6" };
+
+  // ══════════════════════════════════════════════════════
+  // 4. CONTROLS
+  // ══════════════════════════════════════════════════════
+  const SL = {};
+  SL.n  = createSlider("n (trials)", 5, 100, 1, 20, "#1e293b", "dark");
+  SL.k  = createSlider("k (successes)", 0, 100, 1, 6, "#1e293b", "dark");
+  SL.cl = createSlider("Confidence level", 0.50, 0.99, 0.01, 0.95, COL.ci, "green");
+
+  const r1 = document.createElement("div"); r1.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:10px;";
+  r1.appendChild(SL.n.el); r1.appendChild(SL.k.el);
+  wrapper.appendChild(r1);
+  const r2 = document.createElement("div"); r2.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:16px;";
+  r2.appendChild(SL.cl.el);
+  const sp = document.createElement("div"); sp.style.cssText = "flex:1;";
+  r2.appendChild(sp);
+  wrapper.appendChild(r2);
+
+  // ══════════════════════════════════════════════════════
+  // 5. SVG PANELS
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const PW = 460, PH = 400; // Increased Height
+  // Increased Margins for larger text
+  const mg_ = { t: 90, r: 30, b: 80, l: 80 };
+  const pw_ = PW - mg_.l - mg_.r, ph_ = PH - mg_.t - mg_.b;
+
+  function mkEl(tag, a) {
+    const e = document.createElementNS(NS, tag);
+    if (a) for (const [k,v] of Object.entries(a)) e.setAttribute(k,v);
+    return e;
+  }
+
+  function createPanel(bg) {
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${PW} ${PH}`);
+    svg.style.cssText = `flex:1;min-width:0;border-radius:12px;border:1px solid #e2e8f0;background:${bg || "#fff"};`;
+
+    // 1. DEFINE CLIP PATH (To fix the horizontal line issue)
+    // This allows the curve to go "off screen" mathematically, but visually cut at the border.
+    const defs = document.createElementNS(NS, "defs");
+    const clipId = "chart-clip-" + Math.random().toString(36).substr(2,9);
+    const clipPath = document.createElementNS(NS, "clipPath");
+    clipPath.setAttribute("id", clipId);
+    const clipRect = document.createElementNS(NS, "rect");
+    clipRect.setAttribute("x", mg_.l);
+    clipRect.setAttribute("y", mg_.t);
+    clipRect.setAttribute("width", pw_);
+    clipRect.setAttribute("height", ph_);
+    clipPath.appendChild(clipRect);
+    defs.appendChild(clipPath);
+    svg.appendChild(defs);
+
+    // Title Font Size 24
+    const title = mkEl("text", { x: String(PW / 2), y: "32", "text-anchor": "middle", "font-size": "24", "font-weight": "700" });
+    svg.appendChild(title);
+    // Subtitle Font Size 18
+    const sub = mkEl("text", { x: String(PW / 2), y: "58", "text-anchor": "middle", "font-size": "18", fill: "#64748b" });
+    svg.appendChild(sub);
+
+    const grids = [];
+    for (let i = 0; i <= 5; i++) { svg.appendChild(mkEl("line", { stroke: "#f1f5f9", "stroke-width": "1" })); grids.push(svg.lastChild); }
+    // Y-Labels Font Size 15
+    const yLbls = [];
+    for (let i = 0; i <= 5; i++) { svg.appendChild(mkEl("text", { "text-anchor": "end", fill: "#94a3b8", "font-size": "15", "font-family": "'SF Mono',monospace" })); yLbls.push(svg.lastChild); }
+
+    // Apply Clip Path to curves and fills
+    const fillPath = mkEl("path", { "stroke-width": "0", "clip-path": `url(#${clipId})` }); 
+    fillPath.style.display = "none"; svg.appendChild(fillPath);
+    
+    const curvePath = mkEl("path", { fill: "none", "stroke-width": "3", "stroke-linejoin": "round", "clip-path": `url(#${clipId})` }); 
+    svg.appendChild(curvePath);
+
+    svg.appendChild(mkEl("line", { x1: String(mg_.l), x2: String(mg_.l), y1: String(mg_.t), y2: String(mg_.t + ph_), stroke: "#cbd5e1" }));
+    const xAx = mkEl("line", { stroke: "#cbd5e1" }); svg.appendChild(xAx);
+
+    // X-Ticks Font Size 15
+    const xTicks = [];
+    for (let i = 0; i < 20; i++) { const t = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "15", "font-family": "'SF Mono',monospace" }); t.style.display = "none"; svg.appendChild(t); xTicks.push(t); }
+    
+    // Axis Label Font Size 18
+    const xLabel = mkEl("text", { x: String(mg_.l + pw_ / 2), y: String(PH - 12), "text-anchor": "middle", fill: "#64748b", "font-size": "18", "font-weight": "600" });
+    svg.appendChild(xLabel);
+    
+    // Y Axis Label Font Size 18
+    const yLabel = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "18", "font-weight": "600" });
+    svg.appendChild(yLabel);
+
+    return { svg, title, sub, grids, yLbls, fillPath, curvePath, xAx, xTicks, xLabel, yLabel, clipId };
+  }
+
+  const pNLL = createPanel("#fff");
+  const pChi = createPanel("#fff");
+
+  const chartRow = document.createElement("div");
+  chartRow.style.cssText = "display:flex;gap:12px;width:100%;margin-bottom:14px;";
+  chartRow.appendChild(pNLL.svg); chartRow.appendChild(pChi.svg);
+  wrapper.appendChild(chartRow);
+
+  // ══════════════════════════════════════════════════════
+  // 6. RENDER HELPERS
+  // ══════════════════════════════════════════════════════
+  function setYLabel(panel, text, color) {
+    const lx = 24, ly = mg_.t + ph_ / 2;
+    panel.yLabel.setAttribute("x", lx); panel.yLabel.setAttribute("y", ly);
+    panel.yLabel.setAttribute("transform", `rotate(-90,${lx},${ly})`);
+    panel.yLabel.setAttribute("fill", color);
+    panel.yLabel.textContent = text;
+  }
+
+  function setGrid(panel, minV, maxV, nGrid) {
+    for (let i = 0; i <= nGrid; i++) {
+      const v = minV + (maxV - minV) / nGrid * i;
+      const yy = mg_.t + ph_ - ((v - minV) / ((maxV - minV) || 1)) * ph_;
+      if (i < panel.grids.length) {
+        panel.grids[i].setAttribute("x1", mg_.l); panel.grids[i].setAttribute("x2", PW - mg_.r);
+        panel.grids[i].setAttribute("y1", yy); panel.grids[i].setAttribute("y2", yy);
+        panel.grids[i].style.display = "";
+        panel.yLbls[i].setAttribute("x", mg_.l - 10); panel.yLbls[i].setAttribute("y", yy + 5);
+        const fmt = Math.abs(v) > 10 ? v.toFixed(1) : v.toFixed(2);
+        panel.yLbls[i].textContent = fmt;
+        panel.yLbls[i].style.display = "";
+      }
+    }
+    for (let i = nGrid + 1; i < panel.grids.length; i++) { panel.grids[i].style.display = "none"; panel.yLbls[i].style.display = "none"; }
+  }
+
+  function setXAxis(panel) {
+    const baseline = mg_.t + ph_;
+    panel.xAx.setAttribute("x1", mg_.l); panel.xAx.setAttribute("x2", PW - mg_.r);
+    panel.xAx.setAttribute("y1", baseline); panel.xAx.setAttribute("y2", baseline);
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 7. RENDER NLL (left)
+  // ══════════════════════════════════════════════════════
+  const nllHLine = mkEl("line", { "stroke-width": "2", "stroke-dasharray": "6,4" });
+  pNLL.svg.appendChild(nllHLine);
+  
+  // Apply clip-path to the CI Fill area too
+  const nllCIFill = mkEl("path", { "stroke-width": "0", "clip-path": `url(#${pNLL.clipId})` }); 
+  pNLL.svg.appendChild(nllCIFill);
+  
+  const nllMLELine = mkEl("line", { "stroke-width": "2", "stroke-dasharray": "4,3" }); pNLL.svg.appendChild(nllMLELine);
+  const nllMLEDot = mkEl("circle", { r: "6", stroke: "#fff", "stroke-width": "2" }); pNLL.svg.appendChild(nllMLEDot);
+  // Annotations 16px
+  const nllMLELabel = mkEl("text", { "text-anchor": "middle", "font-size": "16", "font-weight": "700" }); pNLL.svg.appendChild(nllMLELabel);
+  const nllCILLine = mkEl("line", { "stroke-width": "2", "stroke-dasharray": "4,3" }); pNLL.svg.appendChild(nllCILLine);
+  const nllCIRLine = mkEl("line", { "stroke-width": "2", "stroke-dasharray": "4,3" }); pNLL.svg.appendChild(nllCIRLine);
+  const nllCILLabel = mkEl("text", { "text-anchor": "middle", "font-size": "16", "font-weight": "700" }); pNLL.svg.appendChild(nllCILLabel);
+  const nllCIRLabel = mkEl("text", { "text-anchor": "middle", "font-size": "16", "font-weight": "700" }); pNLL.svg.appendChild(nllCIRLabel);
+  const nllCutLabel = mkEl("text", { "text-anchor": "start", "font-size": "16", "font-weight": "600" }); pNLL.svg.appendChild(nllCutLabel);
+  const nllBracket = mkEl("line", { "stroke-width": "3", "stroke-linecap": "round" }); pNLL.svg.appendChild(nllBracket);
+  const nllBracketLabel = mkEl("text", { "text-anchor": "middle", "font-size": "16", "font-weight": "700" }); pNLL.svg.appendChild(nllBracketLabel);
+
+  function renderNLL(n, k, cl) {
+    const chiQ = chi2Quantile(cl);
+    const cutoff = chiQ / 2;
+    const mle = n > 0 ? k / n : 0.5;
+
+    pNLL.title.textContent = "Negative Log-Likelihood";
+    pNLL.title.setAttribute("fill", COL.nll);
+    pNLL.sub.textContent = `n = ${n},  k = ${k},  p\u0302 = ${mle.toFixed(3)}`;
+    setYLabel(pNLL, "\u2212ln L(p) + const", COL.nll);
+    pNLL.xLabel.textContent = "p"; pNLL.xLabel.setAttribute("fill", COL.nll);
+    setXAxis(pNLL);
+
+    const NPTS = 300;
+    const curve = [];
+    const pMin = 0.001, pMax = 0.999;
+    const nllMLE = -binomLogLik(k, n, mle);
+    for (let i = 0; i <= NPTS; i++) {
+      const p = pMin + (pMax - pMin) * i / NPTS;
+      const nll = -binomLogLik(k, n, p) - nllMLE;
+      curve.push({ p, nll });
+    }
+
+    const yMax = Math.max(cutoff * 2.5, 4);
+    const yMin = 0;
+
+    setGrid(pNLL, yMin, yMax, 5);
+
+    const baseline = mg_.t + ph_;
+    const sx = p => mg_.l + ((p - pMin) / (pMax - pMin)) * pw_;
+    const sy = v => mg_.t + ph_ - ((v - yMin) / (yMax - yMin)) * ph_;
+
+    for (let i = 0; i < 20; i++) {
+      if (i <= 10) {
+        const v = i / 10;
+        pNLL.xTicks[i].setAttribute("x", sx(v)); pNLL.xTicks[i].setAttribute("y", baseline + 24);
+        pNLL.xTicks[i].textContent = i % 2 === 0 ? v.toFixed(1) : "";
+        pNLL.xTicks[i].style.display = "";
+      } else { pNLL.xTicks[i].style.display = "none"; }
+    }
+
+    // DRAW CURVE (No Math.min clamping, rely on ClipPath)
+    let d = "";
+    for (let i = 0; i <= NPTS; i++) {
+      const px = sx(curve[i].p);
+      const py = sy(curve[i].nll); // Just plot the true value!
+      d += (i === 0 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1);
+    }
+    pNLL.curvePath.setAttribute("d", d); pNLL.curvePath.setAttribute("stroke", COL.nll);
+    pNLL.fillPath.style.display = "none";
+
+    const mleX = sx(mle), mleY = sy(0);
+    nllMLELine.setAttribute("x1", mleX); nllMLELine.setAttribute("x2", mleX);
+    nllMLELine.setAttribute("y1", sy(0)); nllMLELine.setAttribute("y2", baseline);
+    nllMLELine.setAttribute("stroke", COL.mle);
+    nllMLEDot.setAttribute("cx", mleX); nllMLEDot.setAttribute("cy", mleY);
+    nllMLEDot.setAttribute("fill", COL.mle);
+    nllMLELabel.setAttribute("x", mleX); nllMLELabel.setAttribute("y", mleY - 16);
+    nllMLELabel.setAttribute("fill", COL.mle);
+    nllMLELabel.textContent = `p\u0302 = ${mle.toFixed(3)}`;
+
+    const cutY = sy(cutoff);
+    nllHLine.setAttribute("x1", mg_.l); nllHLine.setAttribute("x2", PW - mg_.r);
+    nllHLine.setAttribute("y1", cutY); nllHLine.setAttribute("y2", cutY);
+    nllHLine.setAttribute("stroke", COL.ci);
+
+    nllCutLabel.setAttribute("x", PW - mg_.r - 2); nllCutLabel.setAttribute("y", cutY - 8);
+    nllCutLabel.setAttribute("text-anchor", "end");
+    nllCutLabel.setAttribute("fill", COL.ci);
+    nllCutLabel.textContent = `\u03C7\u00B2 / 2 = ${cutoff.toFixed(3)}`;
+
+    let ciLo = pMin, ciHi = pMax;
+    {
+      let lo = pMin, hi = mle;
+      for (let iter = 0; iter < 80; iter++) {
+        const mid = (lo + hi) / 2;
+        const nll = -binomLogLik(k, n, mid) - nllMLE;
+        if (nll > cutoff) lo = mid; else hi = mid;
+      }
+      ciLo = (lo + hi) / 2;
+    }
+    {
+      let lo = mle, hi = pMax;
+      for (let iter = 0; iter < 80; iter++) {
+        const mid = (lo + hi) / 2;
+        const nll = -binomLogLik(k, n, mid) - nllMLE;
+        if (nll > cutoff) hi = mid; else lo = mid;
+      }
+      ciHi = (lo + hi) / 2;
+    }
+
+    let dFill = `M${sx(ciLo).toFixed(1)},${baseline}`;
+    for (let i = 0; i <= NPTS; i++) {
+      if (curve[i].p >= ciLo && curve[i].p <= ciHi) {
+        // Use true value, let clip-path handle the cutoff top
+        dFill += `L${sx(curve[i].p).toFixed(1)},${sy(curve[i].nll).toFixed(1)}`;
+      }
+    }
+    dFill += `L${sx(ciHi).toFixed(1)},${baseline}Z`;
+    nllCIFill.setAttribute("d", dFill);
+    nllCIFill.setAttribute("fill", COL.ci); nllCIFill.setAttribute("opacity", "0.12");
+    nllCIFill.style.display = "";
+
+    const cLoX = sx(ciLo), cHiX = sx(ciHi);
+    nllCILLine.setAttribute("x1", cLoX); nllCILLine.setAttribute("x2", cLoX);
+    nllCILLine.setAttribute("y1", cutY); nllCILLine.setAttribute("y2", baseline);
+    nllCILLine.setAttribute("stroke", COL.ci);
+    nllCIRLine.setAttribute("x1", cHiX); nllCIRLine.setAttribute("x2", cHiX);
+    nllCIRLine.setAttribute("y1", cutY); nllCIRLine.setAttribute("y2", baseline);
+    nllCIRLine.setAttribute("stroke", COL.ci);
+
+    // 95% CI text above the line, increase the number to make it go down
+    nllCILLabel.setAttribute("x", cLoX); nllCILLabel.setAttribute("y", baseline + 40);
+    nllCILLabel.setAttribute("fill", COL.ci); nllCILLabel.textContent = ciLo.toFixed(3);
+    nllCIRLabel.setAttribute("x", cHiX); nllCIRLabel.setAttribute("y", baseline + 40);
+    nllCIRLabel.setAttribute("fill", COL.ci); nllCIRLabel.textContent = ciHi.toFixed(3);
+
+    const bracketY = baseline + 48;
+    nllBracket.setAttribute("x1", cLoX); nllBracket.setAttribute("x2", cHiX);
+    nllBracket.setAttribute("y1", bracketY); nllBracket.setAttribute("y2", bracketY);
+    nllBracket.setAttribute("stroke", COL.ci);
+    nllBracketLabel.setAttribute("x", (cLoX + cHiX) / 2); nllBracketLabel.setAttribute("y", bracketY + 18);
+    nllBracketLabel.setAttribute("fill", COL.ci);
+    nllBracketLabel.textContent = `${(cl * 100).toFixed(0)}% CI`;
+
+    return { ciLo, ciHi, mle, chiQ, cutoff };
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 8. RENDER CHI-SQUARE (right)
+  // ══════════════════════════════════════════════════════
+  const chiCritLine = mkEl("line", { "stroke-width": "2.5" }); pChi.svg.appendChild(chiCritLine);
+  const chiCritDot = mkEl("circle", { r: "6", stroke: "#fff", "stroke-width": "2" }); pChi.svg.appendChild(chiCritDot);
+  const chiCritLabel = mkEl("text", { "text-anchor": "middle", "font-size": "16", "font-weight": "700" }); pChi.svg.appendChild(chiCritLabel);
+  const chiAreaLabel = mkEl("text", { "text-anchor": "middle", "font-size": "16", "font-weight": "600" }); pChi.svg.appendChild(chiAreaLabel);
+  // Apply clip path to shade too
+  const chiShade = mkEl("path", { "stroke-width": "0", "clip-path": `url(#${pChi.clipId})` }); 
+  pChi.svg.insertBefore(chiShade, pChi.curvePath);
+
+  function renderChi(cl, chiQ) {
+    pChi.title.textContent = "Chi-Squared Distribution (df = 1)";
+    pChi.title.setAttribute("fill", COL.chi);
+    pChi.sub.textContent = `Critical value at ${(cl * 100).toFixed(0)}% level`;
+    setYLabel(pChi, "f(x)", COL.chi);
+    pChi.xLabel.textContent = "x"; pChi.xLabel.setAttribute("fill", COL.chi);
+    setXAxis(pChi);
+
+    const xMax = Math.max(chiQ * 2, 6);
+    const NPTS = 300;
+    const curve = [];
+    for (let i = 0; i <= NPTS; i++) {
+      const x = 0.01 + (xMax - 0.01) * i / NPTS;
+      curve.push({ x, y: chi2PDF(x) });
+    }
+    const yMax = Math.min(2.0, Math.max(...curve.map(c => c.y)) * 1.1);
+    const yMin = 0;
+
+    setGrid(pChi, yMin, yMax, 5);
+
+    const baseline = mg_.t + ph_;
+    const sxC = x => mg_.l + (x / xMax) * pw_;
+    const syC = y => mg_.t + ph_ - ((y - yMin) / ((yMax - yMin) || 1)) * ph_;
+
+    const xStep = xMax > 10 ? 2 : 1;
+    for (let i = 0; i < 20; i++) {
+      const v = i * xStep;
+      if (v <= xMax) {
+        pChi.xTicks[i].setAttribute("x", sxC(v)); pChi.xTicks[i].setAttribute("y", baseline + 24);
+        pChi.xTicks[i].textContent = v;
+        pChi.xTicks[i].style.display = "";
+      } else { pChi.xTicks[i].style.display = "none"; }
+    }
+
+    let d = "";
+    for (let i = 0; i <= NPTS; i++) {
+      const px = sxC(curve[i].x), py = syC(curve[i].y);
+      d += (i === 0 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1);
+    }
+    pChi.curvePath.setAttribute("d", d); pChi.curvePath.setAttribute("stroke", COL.chi);
+
+    let dShade = "";
+    let started = false;
+    for (let i = 0; i <= NPTS; i++) {
+      if (curve[i].x >= chiQ) {
+        const px = sxC(curve[i].x), py = syC(curve[i].y);
+        if (!started) { dShade = `M${px.toFixed(1)},${baseline}`; started = true; }
+        dShade += `L${px.toFixed(1)},${py.toFixed(1)}`;
+      }
+    }
+    dShade += `L${sxC(xMax).toFixed(1)},${baseline}Z`;
+    chiShade.setAttribute("d", dShade); chiShade.setAttribute("fill", COL.chi);
+    chiShade.setAttribute("opacity", "0.15"); chiShade.style.display = "";
+
+    let dBody = `M${sxC(0.01).toFixed(1)},${baseline}`;
+    for (let i = 0; i <= NPTS; i++) {
+      if (curve[i].x <= chiQ) {
+        const px = sxC(curve[i].x), py = syC(curve[i].y);
+        dBody += `L${px.toFixed(1)},${py.toFixed(1)}`;
+      }
+    }
+    dBody += `L${sxC(chiQ).toFixed(1)},${baseline}Z`;
+    pChi.fillPath.setAttribute("d", dBody); pChi.fillPath.setAttribute("fill", COL.ci);
+    pChi.fillPath.setAttribute("opacity", "0.1"); pChi.fillPath.style.display = "";
+
+    const critX = sxC(chiQ), critY = syC(Math.min(chi2PDF(chiQ), yMax));
+    chiCritLine.setAttribute("x1", critX); chiCritLine.setAttribute("x2", critX);
+    chiCritLine.setAttribute("y1", critY); chiCritLine.setAttribute("y2", baseline);
+    chiCritLine.setAttribute("stroke", COL.ci);
+    chiCritDot.setAttribute("cx", critX); chiCritDot.setAttribute("cy", critY);
+    chiCritDot.setAttribute("fill", COL.ci);
+
+    chiCritLabel.setAttribute("x", critX); chiCritLabel.setAttribute("y", critY - 16);
+    chiCritLabel.setAttribute("fill", COL.ci);
+    chiCritLabel.textContent = `\u03C7\u00B2 = ${chiQ.toFixed(3)}`;
+
+    const bodyMidX = sxC(chiQ * 0.4);
+    chiAreaLabel.setAttribute("x", bodyMidX); chiAreaLabel.setAttribute("y", baseline - 10);
+    chiAreaLabel.setAttribute("fill", COL.ci);
+    chiAreaLabel.textContent = `${(cl * 100).toFixed(0)}%`;
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 9. UPDATE
+  // ══════════════════════════════════════════════════════
+  function updateAll() {
+    const n = SL.n.val();
+    let k = SL.k.val();
+    if (k > n) { SL.k.input.value = n; SL.k.sync(); k = n; }
+    const cl = SL.cl.val();
+
+    const { ciLo, ciHi, mle, chiQ, cutoff } = renderNLL(n, k, cl);
+    renderChi(cl, chiQ);
+  }
+
+  function onInput() { SL.n.sync(); SL.k.sync(); SL.cl.sync(); updateAll(); }
+  SL.n.input.addEventListener("input", onInput);
+  SL.k.input.addEventListener("input", onInput);
+  SL.cl.input.addEventListener("input", onInput);
+  updateAll();
+
+  invalidation.then(() => {
+    SL.n.input.removeEventListener("input", onInput);
+    SL.k.input.removeEventListener("input", onInput);
+    SL.cl.input.removeEventListener("input", onInput);
+  });
+
+  wrapper.value = {};
+  return wrapper;
+})()
+```
+
+Khoảng tin cậy đo lường mức độ không chắc chắn của tham số ước lượng. Khoảng tin cậy 95%  $[\theta_{\text{lower}}, \theta_{\text{upper}}]$ của 1 tham số ước lượng $\hat{\theta}$ được diễn giải là: giá trị thực $\theta^*$ nằm trong $[\theta_{\text{lower}}, \theta_{\text{upper}}]$ với xác suất là 95% [@raue2010].
+
+## Tính định danh
+
+Tính định danh (identifiability) của một tham số $\theta_i$ được định nghĩa như sau [@raue2010]:
+
+- Tính định danh cấu trúc (structurally identifiable): nếu ước lượng $\hat{\theta}_i$ của nó là cực tiểu duy nhất của hàm $\chi^2(\theta)$.
+
+- Tính định danh thực tế (practically identifiable) nếu khoảng tin cậy của ước lượng đó là hữu hạn.
+
+- Không định danh được (nonidentifiable) khi khoảng tin cậy của nó là vô hạn.
+
+
+
 

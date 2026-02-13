@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; Phân phối Poisson – Statistics for babies</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./distr-c.html" rel="next">
+<link href="./distr-bin.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-832c273f0af7a47d06e59912ec7b3523.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-N2T5TFNFY7"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-N2T5TFNFY7', { 'anonymize_ip': true});
+</script>
+<script type="module" src="site_libs/quarto-ojs/quarto-ojs-runtime.js"></script>
+<link href="site_libs/quarto-ojs/quarto-ojs.css" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-d.html">Phân phối rời rạc</a></li><li class="breadcrumb-item"><a href="./distr-pois.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối Poisson</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Statistics for babies</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./prob.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Xác suất</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Phân phối xác suất</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./distr-d.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Phân phối rời rạc</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distr-bin.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Phân phối nhị thức</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distr-pois.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối Poisson</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./distr-c.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Phân phối liên tục</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distr-exp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối mũ</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distr-pl.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối quy tắc lũy thừa</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lik.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./bayes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./thanks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lời cảm ơn</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Tài liệu tham khảo</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-d.html">Phân phối rời rạc</a></li><li class="breadcrumb-item"><a href="./distr-pois.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối Poisson</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối Poisson</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb1" data-startfrom="7" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 6;"><span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> { createSlider<span class="op">,</span> createButton<span class="op">,</span> injectStyle } <span class="im">from</span> <span class="st">"./_slider.js"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-1" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="14" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 13;"><span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>viewof binom_poisson <span class="op">=</span> (() <span class="kw">=&gt;</span> {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 1. MATH</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> lcCache<span class="op">=</span><span class="kw">new</span> <span class="bu">Map</span>()<span class="op">;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">lc</span>(n<span class="op">,</span>k){</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(k<span class="op">&lt;</span><span class="dv">0</span><span class="op">||</span>k<span class="op">&gt;</span>n)<span class="cf">return</span> <span class="op">-</span><span class="kw">Infinity</span><span class="op">;</span><span class="cf">if</span>(k<span class="op">&gt;</span>n<span class="op">-</span>k)k<span class="op">=</span>n<span class="op">-</span>k<span class="op">;</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> key<span class="op">=</span>(n<span class="op">&lt;&lt;</span><span class="dv">16</span>)<span class="op">|</span>k<span class="op">;</span><span class="cf">if</span>(lcCache<span class="op">.</span><span class="fu">has</span>(key))<span class="cf">return</span> lcCache<span class="op">.</span><span class="fu">get</span>(key)<span class="op">;</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> r<span class="op">=</span><span class="dv">0</span><span class="op">;</span><span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span>k<span class="op">;</span>i<span class="op">++</span>)r<span class="op">+=</span><span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(n<span class="op">-</span>i)<span class="op">-</span><span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(i<span class="op">+</span><span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    lcCache<span class="op">.</span><span class="fu">set</span>(key<span class="op">,</span>r)<span class="op">;</span><span class="cf">return</span> r<span class="op">;</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">binPMF</span>(x<span class="op">,</span>n<span class="op">,</span>p){</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(x<span class="op">&lt;</span><span class="dv">0</span><span class="op">||</span>x<span class="op">&gt;</span>n)<span class="cf">return</span> <span class="dv">0</span><span class="op">;</span><span class="cf">if</span>(p<span class="op">&lt;=</span><span class="dv">0</span>)<span class="cf">return</span> x<span class="op">===</span><span class="dv">0</span><span class="op">?</span><span class="dv">1</span><span class="op">:</span><span class="dv">0</span><span class="op">;</span><span class="cf">if</span>(p<span class="op">&gt;=</span><span class="dv">1</span>)<span class="cf">return</span> x<span class="op">===</span>n<span class="op">?</span><span class="dv">1</span><span class="op">:</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(<span class="fu">lc</span>(n<span class="op">,</span>x)<span class="op">+</span>x<span class="op">*</span><span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(p)<span class="op">+</span>(n<span class="op">-</span>x)<span class="op">*</span><span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(<span class="dv">1</span><span class="op">-</span>p))<span class="op">;</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">poisPMF</span>(k<span class="op">,</span>lam){</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span>(k<span class="op">&lt;</span><span class="dv">0</span><span class="op">||</span>lam<span class="op">&lt;=</span><span class="dv">0</span>)<span class="cf">return</span> k<span class="op">===</span><span class="dv">0</span><span class="op">?</span><span class="dv">1</span><span class="op">:</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> logP<span class="op">=-</span>lam<span class="op">;</span><span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">1</span><span class="op">;</span>i<span class="op">&lt;=</span>k<span class="op">;</span>i<span class="op">++</span>)logP<span class="op">+=</span><span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(lam)<span class="op">-</span><span class="bu">Math</span><span class="op">.</span><span class="fu">log</span>(i)<span class="op">;</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">Math</span><span class="op">.</span><span class="fu">exp</span>(logP)<span class="op">;</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 2. WRAPPER + STYLE</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> wrapper<span class="op">=</span><span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="vs">    display:flex;flex-direction:column;align-items:center;</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="vs">    width:100%;max-width:900px;margin:0 auto;</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Load slider</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(<span class="fu">injectStyle</span>())<span class="op">;</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> SL<span class="op">=</span>{}<span class="op">;</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>  SL<span class="op">.</span><span class="at">lam</span><span class="op">=</span><span class="fu">createSlider</span>(<span class="st">"</span><span class="sc">\u03BB</span><span class="st"> (messages/hour)"</span><span class="op">,</span><span class="fl">0.5</span><span class="op">,</span><span class="dv">8</span><span class="op">,</span><span class="fl">0.5</span><span class="op">,</span><span class="dv">3</span><span class="op">,</span><span class="st">"#7c3aed"</span><span class="op">,</span><span class="st">"purple"</span>)<span class="op">;</span></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>  SL<span class="op">.</span><span class="at">n</span><span class="op">=</span><span class="fu">createSlider</span>(<span class="st">"n (time slices)"</span><span class="op">,</span><span class="dv">2</span><span class="op">,</span><span class="dv">200</span><span class="op">,</span><span class="dv">1</span><span class="op">,</span><span class="dv">5</span><span class="op">,</span><span class="st">"#3b82f6"</span><span class="op">,</span><span class="st">"blue"</span>)<span class="op">;</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> ctrlRow<span class="op">=</span><span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>  ctrlRow<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="st">"display:flex;gap:28px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;"</span><span class="op">;</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>  ctrlRow<span class="op">.</span><span class="fu">appendChild</span>(SL<span class="op">.</span><span class="at">lam</span><span class="op">.</span><span class="at">el</span>)<span class="op">;</span>ctrlRow<span class="op">.</span><span class="fu">appendChild</span>(SL<span class="op">.</span><span class="at">n</span><span class="op">.</span><span class="at">el</span>)<span class="op">;</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(ctrlRow)<span class="op">;</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Info box</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> infoBox<span class="op">=</span><span class="bu">document</span><span class="op">.</span><span class="fu">createElement</span>(<span class="st">"div"</span>)<span class="op">;</span></span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>  infoBox<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`</span></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="vs">    width:100%;padding:10px 16px;border-radius:8px;margin-bottom:14px;</span></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="vs">    background:#faf5ff;border:1px solid #e9d5ff;</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-size:14px;color:#4c1d95;line-height:1.6;</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="vs">    font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span><span class="op">;</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(infoBox)<span class="op">;</span></span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 4. TIMELINE SVG</span></span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> NS<span class="op">=</span><span class="st">"http://www.w3.org/2000/svg"</span><span class="op">;</span></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> TW<span class="op">=</span><span class="dv">760</span><span class="op">,</span>TH<span class="op">=</span><span class="dv">100</span><span class="op">;</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tmg<span class="op">=</span>{<span class="dt">l</span><span class="op">:</span><span class="dv">50</span><span class="op">,</span><span class="dt">r</span><span class="op">:</span><span class="dv">20</span><span class="op">,</span><span class="dt">t</span><span class="op">:</span><span class="dv">14</span><span class="op">,</span><span class="dt">b</span><span class="op">:</span><span class="dv">32</span>}<span class="op">;</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tcw<span class="op">=</span>TW<span class="op">-</span>tmg<span class="op">.</span><span class="at">l</span><span class="op">-</span>tmg<span class="op">.</span><span class="at">r</span><span class="op">;</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tSvg<span class="op">=</span><span class="bu">document</span><span class="op">.</span><span class="fu">createElementNS</span>(NS<span class="op">,</span><span class="st">"svg"</span>)<span class="op">;</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>  tSvg<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"viewBox"</span><span class="op">,</span><span class="vs">`0 0 </span><span class="sc">${</span>TW<span class="sc">}</span><span class="vs"> </span><span class="sc">${</span>TH<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>  tSvg<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`width:100%;max-width:</span><span class="sc">${</span>TW<span class="sc">}</span><span class="vs">px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:14px;`</span><span class="op">;</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">el</span>(tag<span class="op">,</span>a){<span class="kw">const</span> e<span class="op">=</span><span class="bu">document</span><span class="op">.</span><span class="fu">createElementNS</span>(NS<span class="op">,</span>tag)<span class="op">;</span><span class="cf">if</span>(a)<span class="cf">for</span>(<span class="kw">const</span>[k<span class="op">,</span>v]<span class="kw">of</span> <span class="bu">Object</span><span class="op">.</span><span class="fu">entries</span>(a))e<span class="op">.</span><span class="fu">setAttribute</span>(k<span class="op">,</span>v)<span class="op">;</span><span class="cf">return</span> e<span class="op">;</span>}</span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Slot pool</span></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> TPOOL<span class="op">=</span><span class="dv">200</span><span class="op">;</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tSlots<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span>TPOOL<span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> r<span class="op">=</span><span class="fu">el</span>(<span class="st">"rect"</span><span class="op">,</span>{<span class="dt">y</span><span class="op">:</span><span class="bu">String</span>(tmg<span class="op">.</span><span class="at">t</span>)<span class="op">,</span><span class="dt">rx</span><span class="op">:</span><span class="st">"1"</span>})<span class="op">;</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>tSvg<span class="op">.</span><span class="fu">appendChild</span>(r)<span class="op">;</span>tSlots<span class="op">.</span><span class="fu">push</span>(r)<span class="op">;</span></span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Axis</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tAxisLine<span class="op">=</span><span class="fu">el</span>(<span class="st">"line"</span><span class="op">,</span>{<span class="dt">stroke</span><span class="op">:</span><span class="st">"#94a3b8"</span><span class="op">,</span><span class="st">"stroke-width"</span><span class="op">:</span><span class="st">"1"</span>})<span class="op">;</span></span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a>  tSvg<span class="op">.</span><span class="fu">appendChild</span>(tAxisLine)<span class="op">;</span></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tLabelStart<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="st">"text-anchor"</span><span class="op">:</span><span class="st">"middle"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#475569"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"13"</span><span class="op">,</span><span class="st">"font-weight"</span><span class="op">:</span><span class="st">"600"</span><span class="op">,</span><span class="st">"font-family"</span><span class="op">:</span><span class="st">"'SF Mono',monospace"</span>})<span class="op">;</span></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a>  tLabelStart<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"0"</span><span class="op">;</span></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tLabelEnd<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="st">"text-anchor"</span><span class="op">:</span><span class="st">"middle"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#475569"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"13"</span><span class="op">,</span><span class="st">"font-weight"</span><span class="op">:</span><span class="st">"600"</span><span class="op">,</span><span class="st">"font-family"</span><span class="op">:</span><span class="st">"'SF Mono',monospace"</span>})<span class="op">;</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>  tLabelEnd<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"1 hour"</span><span class="op">;</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>  tSvg<span class="op">.</span><span class="fu">appendChild</span>(tLabelStart)<span class="op">;</span>tSvg<span class="op">.</span><span class="fu">appendChild</span>(tLabelEnd)<span class="op">;</span></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Tick labels</span></span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> tTickPool<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span><span class="dv">20</span><span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> t<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="st">"text-anchor"</span><span class="op">:</span><span class="st">"middle"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#94a3b8"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"11"</span><span class="op">,</span><span class="st">"font-family"</span><span class="op">:</span><span class="st">"'SF Mono',monospace"</span>})<span class="op">;</span></span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>tSvg<span class="op">.</span><span class="fu">appendChild</span>(t)<span class="op">;</span>tTickPool<span class="op">.</span><span class="fu">push</span>(t)<span class="op">;</span></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Message icons</span></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> msgPool<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span><span class="dv">30</span><span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> t<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="st">"text-anchor"</span><span class="op">:</span><span class="st">"middle"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"16"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#7c3aed"</span>})<span class="op">;</span></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>    t<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"</span><span class="sc">\uD83D\uDCAC</span><span class="st">"</span><span class="op">;</span>t<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>tSvg<span class="op">.</span><span class="fu">appendChild</span>(t)<span class="op">;</span>msgPool<span class="op">.</span><span class="fu">push</span>(t)<span class="op">;</span></span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(tSvg)<span class="op">;</span></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 5. DISTRIBUTION CHART SVG</span></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> CW<span class="op">=</span><span class="dv">760</span><span class="op">,</span>CH<span class="op">=</span><span class="dv">340</span><span class="op">;</span></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> cmg<span class="op">=</span>{<span class="dt">t</span><span class="op">:</span><span class="dv">24</span><span class="op">,</span><span class="dt">r</span><span class="op">:</span><span class="dv">20</span><span class="op">,</span><span class="dt">b</span><span class="op">:</span><span class="dv">52</span><span class="op">,</span><span class="dt">l</span><span class="op">:</span><span class="dv">60</span>}<span class="op">;</span></span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> ccw<span class="op">=</span>CW<span class="op">-</span>cmg<span class="op">.</span><span class="at">l</span><span class="op">-</span>cmg<span class="op">.</span><span class="at">r</span><span class="op">,</span>cch<span class="op">=</span>CH<span class="op">-</span>cmg<span class="op">.</span><span class="at">t</span><span class="op">-</span>cmg<span class="op">.</span><span class="at">b</span><span class="op">;</span></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> cSvg<span class="op">=</span><span class="bu">document</span><span class="op">.</span><span class="fu">createElementNS</span>(NS<span class="op">,</span><span class="st">"svg"</span>)<span class="op">;</span></span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a>  cSvg<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"viewBox"</span><span class="op">,</span><span class="vs">`0 0 </span><span class="sc">${</span>CW<span class="sc">}</span><span class="vs"> </span><span class="sc">${</span>CH<span class="sc">}</span><span class="vs">`</span>)<span class="op">;</span></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a>  cSvg<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">cssText</span><span class="op">=</span><span class="vs">`width:100%;max-width:</span><span class="sc">${</span>CW<span class="sc">}</span><span class="vs">px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;`</span><span class="op">;</span></span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Grid</span></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> gridLines<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;=</span><span class="dv">4</span><span class="op">;</span>i<span class="op">++</span>){<span class="kw">const</span> l<span class="op">=</span><span class="fu">el</span>(<span class="st">"line"</span><span class="op">,</span>{<span class="dt">stroke</span><span class="op">:</span><span class="st">"#e2e8f0"</span><span class="op">,</span><span class="st">"stroke-width"</span><span class="op">:</span><span class="st">"0.7"</span>})<span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(l)<span class="op">;</span>gridLines<span class="op">.</span><span class="fu">push</span>(l)<span class="op">;</span>}</span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> yLabels<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;=</span><span class="dv">4</span><span class="op">;</span>i<span class="op">++</span>){<span class="kw">const</span> t<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="st">"text-anchor"</span><span class="op">:</span><span class="st">"end"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#94a3b8"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"12"</span><span class="op">,</span><span class="st">"font-family"</span><span class="op">:</span><span class="st">"'SF Mono',monospace"</span>})<span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(t)<span class="op">;</span>yLabels<span class="op">.</span><span class="fu">push</span>(t)<span class="op">;</span>}</span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Binomial bars</span></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> BPOOL<span class="op">=</span><span class="dv">30</span><span class="op">;</span></span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> bBars<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span>BPOOL<span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> r<span class="op">=</span><span class="fu">el</span>(<span class="st">"rect"</span><span class="op">,</span>{<span class="dt">rx</span><span class="op">:</span><span class="st">"2"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#3b82f6"</span><span class="op">,</span><span class="dt">opacity</span><span class="op">:</span><span class="st">"0.55"</span><span class="op">,</span><span class="dt">stroke</span><span class="op">:</span><span class="st">"#2563eb"</span><span class="op">,</span><span class="st">"stroke-width"</span><span class="op">:</span><span class="st">"0.5"</span>})<span class="op">;</span></span>
+<span id="cb2-137"><a href="#cb2-137" aria-hidden="true" tabindex="-1"></a>    r<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(r)<span class="op">;</span>bBars<span class="op">.</span><span class="fu">push</span>(r)<span class="op">;</span></span>
+<span id="cb2-138"><a href="#cb2-138" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-139"><a href="#cb2-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-140"><a href="#cb2-140" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Poisson line + dots</span></span>
+<span id="cb2-141"><a href="#cb2-141" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> pPath<span class="op">=</span><span class="fu">el</span>(<span class="st">"path"</span><span class="op">,</span>{<span class="dt">fill</span><span class="op">:</span><span class="st">"none"</span><span class="op">,</span><span class="dt">stroke</span><span class="op">:</span><span class="st">"#7c3aed"</span><span class="op">,</span><span class="st">"stroke-width"</span><span class="op">:</span><span class="st">"2.5"</span><span class="op">,</span><span class="dt">opacity</span><span class="op">:</span><span class="st">"0.9"</span>})<span class="op">;</span></span>
+<span id="cb2-142"><a href="#cb2-142" aria-hidden="true" tabindex="-1"></a>  cSvg<span class="op">.</span><span class="fu">appendChild</span>(pPath)<span class="op">;</span></span>
+<span id="cb2-143"><a href="#cb2-143" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> pDots<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-144"><a href="#cb2-144" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span>BPOOL<span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-145"><a href="#cb2-145" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> c<span class="op">=</span><span class="fu">el</span>(<span class="st">"circle"</span><span class="op">,</span>{<span class="dt">r</span><span class="op">:</span><span class="st">"5"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#7c3aed"</span><span class="op">,</span><span class="dt">stroke</span><span class="op">:</span><span class="st">"#fff"</span><span class="op">,</span><span class="st">"stroke-width"</span><span class="op">:</span><span class="st">"1.5"</span>})<span class="op">;</span></span>
+<span id="cb2-146"><a href="#cb2-146" aria-hidden="true" tabindex="-1"></a>    c<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(c)<span class="op">;</span>pDots<span class="op">.</span><span class="fu">push</span>(c)<span class="op">;</span></span>
+<span id="cb2-147"><a href="#cb2-147" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-148"><a href="#cb2-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-149"><a href="#cb2-149" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Axes</span></span>
+<span id="cb2-150"><a href="#cb2-150" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> xAx<span class="op">=</span><span class="fu">el</span>(<span class="st">"line"</span><span class="op">,</span>{<span class="dt">stroke</span><span class="op">:</span><span class="st">"#94a3b8"</span>})<span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(xAx)<span class="op">;</span></span>
+<span id="cb2-151"><a href="#cb2-151" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> xTickPool<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-152"><a href="#cb2-152" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span><span class="dv">20</span><span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-153"><a href="#cb2-153" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> ln<span class="op">=</span><span class="fu">el</span>(<span class="st">"line"</span><span class="op">,</span>{<span class="dt">stroke</span><span class="op">:</span><span class="st">"#94a3b8"</span><span class="op">,</span><span class="dt">y2</span><span class="op">:</span><span class="st">"5"</span>})<span class="op">;</span>ln<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(ln)<span class="op">;</span></span>
+<span id="cb2-154"><a href="#cb2-154" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> t<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="st">"text-anchor"</span><span class="op">:</span><span class="st">"middle"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#475569"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"13"</span><span class="op">,</span><span class="st">"font-family"</span><span class="op">:</span><span class="st">"'SF Mono',monospace"</span><span class="op">,</span><span class="dt">dy</span><span class="op">:</span><span class="st">"18"</span>})<span class="op">;</span>t<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(t)<span class="op">;</span></span>
+<span id="cb2-155"><a href="#cb2-155" aria-hidden="true" tabindex="-1"></a>    xTickPool<span class="op">.</span><span class="fu">push</span>({ln<span class="op">,</span>t})<span class="op">;</span></span>
+<span id="cb2-156"><a href="#cb2-156" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-157"><a href="#cb2-157" aria-hidden="true" tabindex="-1"></a>  cSvg<span class="op">.</span><span class="fu">appendChild</span>(<span class="fu">el</span>(<span class="st">"line"</span><span class="op">,</span>{<span class="dt">x1</span><span class="op">:</span><span class="bu">String</span>(cmg<span class="op">.</span><span class="at">l</span>)<span class="op">,</span><span class="dt">x2</span><span class="op">:</span><span class="bu">String</span>(cmg<span class="op">.</span><span class="at">l</span>)<span class="op">,</span><span class="dt">y1</span><span class="op">:</span><span class="bu">String</span>(cmg<span class="op">.</span><span class="at">t</span>)<span class="op">,</span><span class="dt">y2</span><span class="op">:</span><span class="bu">String</span>(cmg<span class="op">.</span><span class="at">t</span><span class="op">+</span>cch)<span class="op">,</span><span class="dt">stroke</span><span class="op">:</span><span class="st">"#94a3b8"</span>}))<span class="op">;</span></span>
+<span id="cb2-158"><a href="#cb2-158" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> xLbl<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="st">"text-anchor"</span><span class="op">:</span><span class="st">"middle"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#475569"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"14"</span><span class="op">,</span><span class="dt">y</span><span class="op">:</span><span class="bu">String</span>(CH<span class="op">-</span><span class="dv">6</span>)})<span class="op">;</span></span>
+<span id="cb2-159"><a href="#cb2-159" aria-hidden="true" tabindex="-1"></a>  xLbl<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"Number of messages (k)"</span><span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(xLbl)<span class="op">;</span></span>
+<span id="cb2-160"><a href="#cb2-160" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> yLbl<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="st">"text-anchor"</span><span class="op">:</span><span class="st">"middle"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#475569"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"14"</span><span class="op">,</span><span class="dt">x</span><span class="op">:</span><span class="st">"16"</span><span class="op">,</span><span class="dt">y</span><span class="op">:</span><span class="bu">String</span>(cmg<span class="op">.</span><span class="at">t</span><span class="op">+</span>cch<span class="op">/</span><span class="dv">2</span>)<span class="op">,</span><span class="dt">transform</span><span class="op">:</span><span class="vs">`rotate(-90,16,</span><span class="sc">${</span>cmg<span class="op">.</span><span class="at">t</span><span class="op">+</span>cch<span class="op">/</span><span class="dv">2</span><span class="sc">}</span><span class="vs">)`</span>})<span class="op">;</span></span>
+<span id="cb2-161"><a href="#cb2-161" aria-hidden="true" tabindex="-1"></a>  yLbl<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"P(X = k)"</span><span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(yLbl)<span class="op">;</span></span>
+<span id="cb2-162"><a href="#cb2-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-163"><a href="#cb2-163" aria-hidden="true" tabindex="-1"></a>  <span class="co">// Legend</span></span>
+<span id="cb2-164"><a href="#cb2-164" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> legR<span class="op">=</span><span class="fu">el</span>(<span class="st">"rect"</span><span class="op">,</span>{<span class="dt">x</span><span class="op">:</span><span class="bu">String</span>(CW<span class="op">-</span><span class="dv">200</span>)<span class="op">,</span><span class="dt">y</span><span class="op">:</span><span class="st">"10"</span><span class="op">,</span><span class="dt">width</span><span class="op">:</span><span class="st">"16"</span><span class="op">,</span><span class="dt">height</span><span class="op">:</span><span class="st">"12"</span><span class="op">,</span><span class="dt">rx</span><span class="op">:</span><span class="st">"2"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#3b82f6"</span><span class="op">,</span><span class="dt">opacity</span><span class="op">:</span><span class="st">"0.55"</span>})<span class="op">;</span></span>
+<span id="cb2-165"><a href="#cb2-165" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> legT1<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="dt">x</span><span class="op">:</span><span class="bu">String</span>(CW<span class="op">-</span><span class="dv">178</span>)<span class="op">,</span><span class="dt">y</span><span class="op">:</span><span class="st">"21"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#475569"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"13"</span><span class="op">,</span><span class="st">"font-weight"</span><span class="op">:</span><span class="st">"600"</span>})<span class="op">;</span>legT1<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"Binomial"</span><span class="op">;</span></span>
+<span id="cb2-166"><a href="#cb2-166" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> legC<span class="op">=</span><span class="fu">el</span>(<span class="st">"circle"</span><span class="op">,</span>{<span class="dt">cx</span><span class="op">:</span><span class="bu">String</span>(CW<span class="op">-</span><span class="dv">192</span>)<span class="op">,</span><span class="dt">cy</span><span class="op">:</span><span class="st">"36"</span><span class="op">,</span><span class="dt">r</span><span class="op">:</span><span class="st">"5"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#7c3aed"</span>})<span class="op">;</span></span>
+<span id="cb2-167"><a href="#cb2-167" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> legL<span class="op">=</span><span class="fu">el</span>(<span class="st">"line"</span><span class="op">,</span>{<span class="dt">x1</span><span class="op">:</span><span class="bu">String</span>(CW<span class="op">-</span><span class="dv">200</span>)<span class="op">,</span><span class="dt">x2</span><span class="op">:</span><span class="bu">String</span>(CW<span class="op">-</span><span class="dv">184</span>)<span class="op">,</span><span class="dt">y1</span><span class="op">:</span><span class="st">"36"</span><span class="op">,</span><span class="dt">y2</span><span class="op">:</span><span class="st">"36"</span><span class="op">,</span><span class="dt">stroke</span><span class="op">:</span><span class="st">"#7c3aed"</span><span class="op">,</span><span class="st">"stroke-width"</span><span class="op">:</span><span class="st">"2.5"</span>})<span class="op">;</span></span>
+<span id="cb2-168"><a href="#cb2-168" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> legT2<span class="op">=</span><span class="fu">el</span>(<span class="st">"text"</span><span class="op">,</span>{<span class="dt">x</span><span class="op">:</span><span class="bu">String</span>(CW<span class="op">-</span><span class="dv">178</span>)<span class="op">,</span><span class="dt">y</span><span class="op">:</span><span class="st">"40"</span><span class="op">,</span><span class="dt">fill</span><span class="op">:</span><span class="st">"#475569"</span><span class="op">,</span><span class="st">"font-size"</span><span class="op">:</span><span class="st">"13"</span><span class="op">,</span><span class="st">"font-weight"</span><span class="op">:</span><span class="st">"600"</span>})<span class="op">;</span>legT2<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"Poisson"</span><span class="op">;</span></span>
+<span id="cb2-169"><a href="#cb2-169" aria-hidden="true" tabindex="-1"></a>  cSvg<span class="op">.</span><span class="fu">appendChild</span>(legR)<span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(legT1)<span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(legL)<span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(legC)<span class="op">;</span>cSvg<span class="op">.</span><span class="fu">appendChild</span>(legT2)<span class="op">;</span></span>
+<span id="cb2-170"><a href="#cb2-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-171"><a href="#cb2-171" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="fu">appendChild</span>(cSvg)<span class="op">;</span></span>
+<span id="cb2-172"><a href="#cb2-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-173"><a href="#cb2-173" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-174"><a href="#cb2-174" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 6. SEEDED RNG</span></span>
+<span id="cb2-175"><a href="#cb2-175" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-176"><a href="#cb2-176" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> rngState<span class="op">=</span><span class="dv">42</span><span class="op">;</span></span>
+<span id="cb2-177"><a href="#cb2-177" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">seedRng</span>(s){rngState<span class="op">=</span>s<span class="op">;</span>}</span>
+<span id="cb2-178"><a href="#cb2-178" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">rng</span>(){rngState<span class="op">=</span>(rngState<span class="op">*</span><span class="dv">16807</span>)<span class="op">%</span><span class="dv">2147483647</span><span class="op">;</span><span class="cf">return</span>(rngState<span class="op">-</span><span class="dv">1</span>)<span class="op">/</span><span class="dv">2147483646</span><span class="op">;</span>}</span>
+<span id="cb2-179"><a href="#cb2-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-180"><a href="#cb2-180" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-181"><a href="#cb2-181" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 7. RENDER</span></span>
+<span id="cb2-182"><a href="#cb2-182" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-183"><a href="#cb2-183" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">render</span>(){</span>
+<span id="cb2-184"><a href="#cb2-184" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> lam<span class="op">=</span>SL<span class="op">.</span><span class="at">lam</span><span class="op">.</span><span class="fu">val</span>()<span class="op">;</span></span>
+<span id="cb2-185"><a href="#cb2-185" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> n<span class="op">=</span>SL<span class="op">.</span><span class="at">n</span><span class="op">.</span><span class="fu">val</span>()<span class="op">;</span></span>
+<span id="cb2-186"><a href="#cb2-186" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> p<span class="op">=</span><span class="bu">Math</span><span class="op">.</span><span class="fu">min</span>(lam<span class="op">/</span>n<span class="op">,</span><span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb2-187"><a href="#cb2-187" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-188"><a href="#cb2-188" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Info</span></span>
+<span id="cb2-189"><a href="#cb2-189" aria-hidden="true" tabindex="-1"></a>    infoBox<span class="op">.</span><span class="at">innerHTML</span><span class="op">=</span></span>
+<span id="cb2-190"><a href="#cb2-190" aria-hidden="true" tabindex="-1"></a>      <span class="vs">`Divide &lt;b&gt;1 hour&lt;/b&gt; into &lt;b style="color:#3b82f6"&gt;n = </span><span class="sc">${</span>n<span class="sc">}</span><span class="vs">&lt;/b&gt; intervals. `</span><span class="op">+</span></span>
+<span id="cb2-191"><a href="#cb2-191" aria-hidden="true" tabindex="-1"></a>      <span class="vs">`Each has &lt;b&gt;p = </span><span class="sc">\u03BB</span><span class="vs">/n = </span><span class="sc">${</span>lam<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">/</span><span class="sc">${</span>n<span class="sc">}</span><span class="vs"> = </span><span class="sc">${</span>p<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="vs">&lt;/b&gt; chance of a message.&lt;br&gt;`</span><span class="op">+</span></span>
+<span id="cb2-192"><a href="#cb2-192" aria-hidden="true" tabindex="-1"></a>      <span class="vs">`&lt;b style="color:#3b82f6"&gt;Binom(</span><span class="sc">${</span>n<span class="sc">}</span><span class="vs">, </span><span class="sc">${</span>p<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">4</span>)<span class="sc">}</span><span class="vs">)&lt;/b&gt; approximates `</span><span class="op">+</span></span>
+<span id="cb2-193"><a href="#cb2-193" aria-hidden="true" tabindex="-1"></a>      <span class="vs">`&lt;b style="color:#7c3aed"&gt;Poisson(</span><span class="sc">\u03BB</span><span class="vs"> = </span><span class="sc">${</span>lam<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="sc">}</span><span class="vs">)&lt;/b&gt;.`</span><span class="op">;</span></span>
+<span id="cb2-194"><a href="#cb2-194" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-195"><a href="#cb2-195" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ── Timeline ──</span></span>
+<span id="cb2-196"><a href="#cb2-196" aria-hidden="true" tabindex="-1"></a>    <span class="fu">seedRng</span>(<span class="dv">12345</span>)<span class="op">;</span></span>
+<span id="cb2-197"><a href="#cb2-197" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> slotW<span class="op">=</span>tcw<span class="op">/</span>n<span class="op">;</span></span>
+<span id="cb2-198"><a href="#cb2-198" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barH<span class="op">=</span><span class="dv">40</span><span class="op">;</span></span>
+<span id="cb2-199"><a href="#cb2-199" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> axisY<span class="op">=</span>tmg<span class="op">.</span><span class="at">t</span><span class="op">+</span>barH<span class="op">+</span><span class="dv">8</span><span class="op">;</span></span>
+<span id="cb2-200"><a href="#cb2-200" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> mi<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-201"><a href="#cb2-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-202"><a href="#cb2-202" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span>TPOOL<span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-203"><a href="#cb2-203" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(i<span class="op">&lt;</span>n){</span>
+<span id="cb2-204"><a href="#cb2-204" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> isMsg<span class="op">=</span><span class="fu">rng</span>()<span class="op">&lt;</span>p<span class="op">;</span></span>
+<span id="cb2-205"><a href="#cb2-205" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> x<span class="op">=</span>tmg<span class="op">.</span><span class="at">l</span><span class="op">+</span>i<span class="op">*</span>slotW<span class="op">;</span></span>
+<span id="cb2-206"><a href="#cb2-206" aria-hidden="true" tabindex="-1"></a>        tSlots[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>x)<span class="op">;</span></span>
+<span id="cb2-207"><a href="#cb2-207" aria-hidden="true" tabindex="-1"></a>        tSlots[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y"</span><span class="op">,</span>tmg<span class="op">.</span><span class="at">t</span>)<span class="op">;</span></span>
+<span id="cb2-208"><a href="#cb2-208" aria-hidden="true" tabindex="-1"></a>        tSlots[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"width"</span><span class="op">,</span><span class="bu">Math</span><span class="op">.</span><span class="fu">max</span>(<span class="fl">0.5</span><span class="op">,</span>slotW<span class="op">-</span><span class="bu">Math</span><span class="op">.</span><span class="fu">min</span>(<span class="fl">1.5</span><span class="op">,</span>slotW<span class="op">*</span><span class="fl">0.1</span>)))<span class="op">;</span></span>
+<span id="cb2-209"><a href="#cb2-209" aria-hidden="true" tabindex="-1"></a>        tSlots[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"height"</span><span class="op">,</span>barH)<span class="op">;</span></span>
+<span id="cb2-210"><a href="#cb2-210" aria-hidden="true" tabindex="-1"></a>        tSlots[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"fill"</span><span class="op">,</span>isMsg<span class="op">?</span><span class="st">"#7c3aed"</span><span class="op">:</span><span class="st">"#e2e8f0"</span>)<span class="op">;</span></span>
+<span id="cb2-211"><a href="#cb2-211" aria-hidden="true" tabindex="-1"></a>        tSlots[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"opacity"</span><span class="op">,</span>isMsg<span class="op">?</span><span class="st">"0.8"</span><span class="op">:</span><span class="st">"0.5"</span>)<span class="op">;</span></span>
+<span id="cb2-212"><a href="#cb2-212" aria-hidden="true" tabindex="-1"></a>        tSlots[i]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">""</span><span class="op">;</span></span>
+<span id="cb2-213"><a href="#cb2-213" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span>(isMsg<span class="op">&amp;&amp;</span>mi<span class="op">&lt;</span><span class="dv">30</span>){</span>
+<span id="cb2-214"><a href="#cb2-214" aria-hidden="true" tabindex="-1"></a>          msgPool[mi]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>x<span class="op">+</span>slotW<span class="op">/</span><span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb2-215"><a href="#cb2-215" aria-hidden="true" tabindex="-1"></a>          msgPool[mi]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y"</span><span class="op">,</span>tmg<span class="op">.</span><span class="at">t</span><span class="op">-</span><span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb2-216"><a href="#cb2-216" aria-hidden="true" tabindex="-1"></a>          msgPool[mi]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span>slotW<span class="op">&gt;</span><span class="dv">8</span><span class="op">?</span><span class="st">""</span><span class="op">:</span><span class="st">"none"</span><span class="op">;</span></span>
+<span id="cb2-217"><a href="#cb2-217" aria-hidden="true" tabindex="-1"></a>          mi<span class="op">++;</span></span>
+<span id="cb2-218"><a href="#cb2-218" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-219"><a href="#cb2-219" aria-hidden="true" tabindex="-1"></a>      }<span class="cf">else</span>{tSlots[i]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>}</span>
+<span id="cb2-220"><a href="#cb2-220" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-221"><a href="#cb2-221" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="op">;</span>mi<span class="op">&lt;</span><span class="dv">30</span><span class="op">;</span>mi<span class="op">++</span>)msgPool[mi]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span></span>
+<span id="cb2-222"><a href="#cb2-222" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-223"><a href="#cb2-223" aria-hidden="true" tabindex="-1"></a>    tAxisLine<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x1"</span><span class="op">,</span>tmg<span class="op">.</span><span class="at">l</span>)<span class="op">;</span>tAxisLine<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x2"</span><span class="op">,</span>tmg<span class="op">.</span><span class="at">l</span><span class="op">+</span>tcw)<span class="op">;</span></span>
+<span id="cb2-224"><a href="#cb2-224" aria-hidden="true" tabindex="-1"></a>    tAxisLine<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y1"</span><span class="op">,</span>axisY)<span class="op">;</span>tAxisLine<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y2"</span><span class="op">,</span>axisY)<span class="op">;</span></span>
+<span id="cb2-225"><a href="#cb2-225" aria-hidden="true" tabindex="-1"></a>    tLabelStart<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>tmg<span class="op">.</span><span class="at">l</span>)<span class="op">;</span>tLabelStart<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y"</span><span class="op">,</span>axisY<span class="op">+</span><span class="dv">18</span>)<span class="op">;</span></span>
+<span id="cb2-226"><a href="#cb2-226" aria-hidden="true" tabindex="-1"></a>    tLabelEnd<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>tmg<span class="op">.</span><span class="at">l</span><span class="op">+</span>tcw)<span class="op">;</span>tLabelEnd<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y"</span><span class="op">,</span>axisY<span class="op">+</span><span class="dv">18</span>)<span class="op">;</span></span>
+<span id="cb2-227"><a href="#cb2-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-228"><a href="#cb2-228" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> tStep<span class="op">=</span>n<span class="op">&lt;=</span><span class="dv">10</span><span class="op">?</span><span class="dv">1</span><span class="op">:</span>n<span class="op">&lt;=</span><span class="dv">30</span><span class="op">?</span><span class="dv">5</span><span class="op">:</span>n<span class="op">&lt;=</span><span class="dv">60</span><span class="op">?</span><span class="dv">10</span><span class="op">:</span><span class="dv">20</span><span class="op">;</span></span>
+<span id="cb2-229"><a href="#cb2-229" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> tti<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-230"><a href="#cb2-230" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span>tStep<span class="op">;</span>i<span class="op">&lt;</span>n<span class="op">&amp;&amp;</span>tti<span class="op">&lt;</span><span class="dv">20</span><span class="op">;</span>i<span class="op">+=</span>tStep){</span>
+<span id="cb2-231"><a href="#cb2-231" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> x<span class="op">=</span>tmg<span class="op">.</span><span class="at">l</span><span class="op">+</span>i<span class="op">*</span>slotW<span class="op">;</span></span>
+<span id="cb2-232"><a href="#cb2-232" aria-hidden="true" tabindex="-1"></a>      tTickPool[tti]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>x)<span class="op">;</span></span>
+<span id="cb2-233"><a href="#cb2-233" aria-hidden="true" tabindex="-1"></a>      tTickPool[tti]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y"</span><span class="op">,</span>axisY<span class="op">+</span><span class="dv">16</span>)<span class="op">;</span></span>
+<span id="cb2-234"><a href="#cb2-234" aria-hidden="true" tabindex="-1"></a>      tTickPool[tti]<span class="op">.</span><span class="at">textContent</span><span class="op">=</span>i<span class="op">;</span></span>
+<span id="cb2-235"><a href="#cb2-235" aria-hidden="true" tabindex="-1"></a>      tTickPool[tti]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">""</span><span class="op">;</span></span>
+<span id="cb2-236"><a href="#cb2-236" aria-hidden="true" tabindex="-1"></a>      tti<span class="op">++;</span></span>
+<span id="cb2-237"><a href="#cb2-237" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-238"><a href="#cb2-238" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="op">;</span>tti<span class="op">&lt;</span><span class="dv">20</span><span class="op">;</span>tti<span class="op">++</span>)tTickPool[tti]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span></span>
+<span id="cb2-239"><a href="#cb2-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-240"><a href="#cb2-240" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ── Distribution chart ──</span></span>
+<span id="cb2-241"><a href="#cb2-241" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> hiK<span class="op">=</span><span class="bu">Math</span><span class="op">.</span><span class="fu">max</span>(<span class="bu">Math</span><span class="op">.</span><span class="fu">ceil</span>(lam<span class="op">+</span><span class="dv">4</span><span class="op">*</span><span class="bu">Math</span><span class="op">.</span><span class="fu">sqrt</span>(lam))<span class="op">,</span><span class="dv">8</span>)<span class="op">;</span></span>
+<span id="cb2-242"><a href="#cb2-242" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> maxY<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-243"><a href="#cb2-243" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> bVals<span class="op">=</span>[]<span class="op">,</span>pVals<span class="op">=</span>[]<span class="op">;</span></span>
+<span id="cb2-244"><a href="#cb2-244" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="kw">let</span> k<span class="op">=</span><span class="dv">0</span><span class="op">;</span>k<span class="op">&lt;=</span>hiK<span class="op">;</span>k<span class="op">++</span>){</span>
+<span id="cb2-245"><a href="#cb2-245" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> bv<span class="op">=</span><span class="fu">binPMF</span>(k<span class="op">,</span>n<span class="op">,</span>p)<span class="op">,</span>pv<span class="op">=</span><span class="fu">poisPMF</span>(k<span class="op">,</span>lam)<span class="op">;</span></span>
+<span id="cb2-246"><a href="#cb2-246" aria-hidden="true" tabindex="-1"></a>      bVals<span class="op">.</span><span class="fu">push</span>(bv)<span class="op">;</span>pVals<span class="op">.</span><span class="fu">push</span>(pv)<span class="op">;</span></span>
+<span id="cb2-247"><a href="#cb2-247" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(bv<span class="op">&gt;</span>maxY)maxY<span class="op">=</span>bv<span class="op">;</span><span class="cf">if</span>(pv<span class="op">&gt;</span>maxY)maxY<span class="op">=</span>pv<span class="op">;</span></span>
+<span id="cb2-248"><a href="#cb2-248" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-249"><a href="#cb2-249" aria-hidden="true" tabindex="-1"></a>    maxY<span class="op">*=</span><span class="fl">1.18</span><span class="op">;</span><span class="cf">if</span>(maxY<span class="op">&lt;</span><span class="fl">0.01</span>)maxY<span class="op">=</span><span class="fl">0.1</span><span class="op">;</span></span>
+<span id="cb2-250"><a href="#cb2-250" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-251"><a href="#cb2-251" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> sx<span class="op">=</span>k<span class="kw">=&gt;</span>cmg<span class="op">.</span><span class="at">l</span><span class="op">+</span>(k<span class="op">/</span>hiK)<span class="op">*</span>ccw<span class="op">;</span></span>
+<span id="cb2-252"><a href="#cb2-252" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> sy<span class="op">=</span>y<span class="kw">=&gt;</span>cmg<span class="op">.</span><span class="at">t</span><span class="op">+</span>cch<span class="op">-</span>(y<span class="op">/</span>maxY)<span class="op">*</span>cch<span class="op">;</span></span>
+<span id="cb2-253"><a href="#cb2-253" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> barW<span class="op">=</span><span class="bu">Math</span><span class="op">.</span><span class="fu">max</span>(<span class="dv">2</span><span class="op">,</span><span class="bu">Math</span><span class="op">.</span><span class="fu">min</span>(<span class="dv">28</span><span class="op">,</span>ccw<span class="op">/</span>hiK<span class="op">*</span><span class="fl">0.6</span>))<span class="op">;</span></span>
+<span id="cb2-254"><a href="#cb2-254" aria-hidden="true" tabindex="-1"></a>    <span class="kw">const</span> baseline<span class="op">=</span><span class="fu">sy</span>(<span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb2-255"><a href="#cb2-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-256"><a href="#cb2-256" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;=</span><span class="dv">4</span><span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-257"><a href="#cb2-257" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> v<span class="op">=</span>(maxY<span class="op">/</span><span class="dv">4</span>)<span class="op">*</span>i<span class="op">,</span>yy<span class="op">=</span><span class="fu">sy</span>(v)<span class="op">;</span></span>
+<span id="cb2-258"><a href="#cb2-258" aria-hidden="true" tabindex="-1"></a>      gridLines[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x1"</span><span class="op">,</span>cmg<span class="op">.</span><span class="at">l</span>)<span class="op">;</span>gridLines[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x2"</span><span class="op">,</span>CW<span class="op">-</span>cmg<span class="op">.</span><span class="at">r</span>)<span class="op">;</span></span>
+<span id="cb2-259"><a href="#cb2-259" aria-hidden="true" tabindex="-1"></a>      gridLines[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y1"</span><span class="op">,</span>yy)<span class="op">;</span>gridLines[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y2"</span><span class="op">,</span>yy)<span class="op">;</span></span>
+<span id="cb2-260"><a href="#cb2-260" aria-hidden="true" tabindex="-1"></a>      yLabels[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>cmg<span class="op">.</span><span class="at">l</span><span class="op">-</span><span class="dv">8</span>)<span class="op">;</span>yLabels[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y"</span><span class="op">,</span>yy<span class="op">+</span><span class="dv">4</span>)<span class="op">;</span></span>
+<span id="cb2-261"><a href="#cb2-261" aria-hidden="true" tabindex="-1"></a>      yLabels[i]<span class="op">.</span><span class="at">textContent</span><span class="op">=</span>v<span class="op">.</span><span class="fu">toFixed</span>(v<span class="op">&lt;</span><span class="fl">0.01</span><span class="op">?</span><span class="dv">3</span><span class="op">:</span><span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb2-262"><a href="#cb2-262" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-263"><a href="#cb2-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-264"><a href="#cb2-264" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="kw">let</span> i<span class="op">=</span><span class="dv">0</span><span class="op">;</span>i<span class="op">&lt;</span>BPOOL<span class="op">;</span>i<span class="op">++</span>){</span>
+<span id="cb2-265"><a href="#cb2-265" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(i<span class="op">&lt;=</span>hiK){</span>
+<span id="cb2-266"><a href="#cb2-266" aria-hidden="true" tabindex="-1"></a>        <span class="kw">const</span> bx<span class="op">=</span><span class="fu">sx</span>(i)<span class="op">-</span>barW<span class="op">/</span><span class="dv">2</span><span class="op">,</span>by<span class="op">=</span><span class="fu">sy</span>(bVals[i])<span class="op">;</span></span>
+<span id="cb2-267"><a href="#cb2-267" aria-hidden="true" tabindex="-1"></a>        bBars[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>bx)<span class="op">;</span>bBars[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y"</span><span class="op">,</span>by)<span class="op">;</span></span>
+<span id="cb2-268"><a href="#cb2-268" aria-hidden="true" tabindex="-1"></a>        bBars[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"width"</span><span class="op">,</span>barW)<span class="op">;</span></span>
+<span id="cb2-269"><a href="#cb2-269" aria-hidden="true" tabindex="-1"></a>        bBars[i]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"height"</span><span class="op">,</span><span class="bu">Math</span><span class="op">.</span><span class="fu">max</span>(<span class="dv">0</span><span class="op">,</span>baseline<span class="op">-</span>by))<span class="op">;</span></span>
+<span id="cb2-270"><a href="#cb2-270" aria-hidden="true" tabindex="-1"></a>        bBars[i]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">""</span><span class="op">;</span></span>
+<span id="cb2-271"><a href="#cb2-271" aria-hidden="true" tabindex="-1"></a>      }<span class="cf">else</span>{bBars[i]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>}</span>
+<span id="cb2-272"><a href="#cb2-272" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-273"><a href="#cb2-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-274"><a href="#cb2-274" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> d<span class="op">=</span><span class="st">""</span><span class="op">;</span></span>
+<span id="cb2-275"><a href="#cb2-275" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="kw">let</span> k<span class="op">=</span><span class="dv">0</span><span class="op">;</span>k<span class="op">&lt;=</span>hiK<span class="op">;</span>k<span class="op">++</span>){</span>
+<span id="cb2-276"><a href="#cb2-276" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> px<span class="op">=</span><span class="fu">sx</span>(k)<span class="op">,</span>py<span class="op">=</span><span class="fu">sy</span>(pVals[k])<span class="op">;</span></span>
+<span id="cb2-277"><a href="#cb2-277" aria-hidden="true" tabindex="-1"></a>      d<span class="op">+=</span>(k<span class="op">===</span><span class="dv">0</span><span class="op">?</span><span class="st">"M"</span><span class="op">:</span><span class="st">"L"</span>)<span class="op">+</span>px<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="op">+</span><span class="st">","</span><span class="op">+</span>py<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb2-278"><a href="#cb2-278" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span>(k<span class="op">&lt;</span>BPOOL){pDots[k]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"cx"</span><span class="op">,</span>px)<span class="op">;</span>pDots[k]<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"cy"</span><span class="op">,</span>py)<span class="op">;</span>pDots[k]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">""</span><span class="op">;</span>}</span>
+<span id="cb2-279"><a href="#cb2-279" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-280"><a href="#cb2-280" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="kw">let</span> k<span class="op">=</span>hiK<span class="op">+</span><span class="dv">1</span><span class="op">;</span>k<span class="op">&lt;</span>BPOOL<span class="op">;</span>k<span class="op">++</span>)pDots[k]<span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span></span>
+<span id="cb2-281"><a href="#cb2-281" aria-hidden="true" tabindex="-1"></a>    pPath<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"d"</span><span class="op">,</span>d)<span class="op">;</span></span>
+<span id="cb2-282"><a href="#cb2-282" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-283"><a href="#cb2-283" aria-hidden="true" tabindex="-1"></a>    xAx<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x1"</span><span class="op">,</span>cmg<span class="op">.</span><span class="at">l</span>)<span class="op">;</span>xAx<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x2"</span><span class="op">,</span>CW<span class="op">-</span>cmg<span class="op">.</span><span class="at">r</span>)<span class="op">;</span></span>
+<span id="cb2-284"><a href="#cb2-284" aria-hidden="true" tabindex="-1"></a>    xAx<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y1"</span><span class="op">,</span>baseline)<span class="op">;</span>xAx<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y2"</span><span class="op">,</span>baseline)<span class="op">;</span></span>
+<span id="cb2-285"><a href="#cb2-285" aria-hidden="true" tabindex="-1"></a>    xLbl<span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>cmg<span class="op">.</span><span class="at">l</span><span class="op">+</span>ccw<span class="op">/</span><span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb2-286"><a href="#cb2-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-287"><a href="#cb2-287" aria-hidden="true" tabindex="-1"></a>    <span class="kw">let</span> ti<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-288"><a href="#cb2-288" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="kw">let</span> k<span class="op">=</span><span class="dv">0</span><span class="op">;</span>k<span class="op">&lt;=</span>hiK<span class="op">&amp;&amp;</span>ti<span class="op">&lt;</span><span class="dv">20</span><span class="op">;</span>k<span class="op">++</span>){</span>
+<span id="cb2-289"><a href="#cb2-289" aria-hidden="true" tabindex="-1"></a>      <span class="kw">const</span> xx<span class="op">=</span><span class="fu">sx</span>(k)<span class="op">;</span></span>
+<span id="cb2-290"><a href="#cb2-290" aria-hidden="true" tabindex="-1"></a>      xTickPool[ti]<span class="op">.</span><span class="at">ln</span><span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x1"</span><span class="op">,</span>xx)<span class="op">;</span>xTickPool[ti]<span class="op">.</span><span class="at">ln</span><span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x2"</span><span class="op">,</span>xx)<span class="op">;</span></span>
+<span id="cb2-291"><a href="#cb2-291" aria-hidden="true" tabindex="-1"></a>      xTickPool[ti]<span class="op">.</span><span class="at">ln</span><span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y1"</span><span class="op">,</span>baseline)<span class="op">;</span>xTickPool[ti]<span class="op">.</span><span class="at">ln</span><span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y2"</span><span class="op">,</span>baseline<span class="op">+</span><span class="dv">5</span>)<span class="op">;</span></span>
+<span id="cb2-292"><a href="#cb2-292" aria-hidden="true" tabindex="-1"></a>      xTickPool[ti]<span class="op">.</span><span class="at">ln</span><span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">""</span><span class="op">;</span></span>
+<span id="cb2-293"><a href="#cb2-293" aria-hidden="true" tabindex="-1"></a>      xTickPool[ti]<span class="op">.</span><span class="at">t</span><span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"x"</span><span class="op">,</span>xx)<span class="op">;</span>xTickPool[ti]<span class="op">.</span><span class="at">t</span><span class="op">.</span><span class="fu">setAttribute</span>(<span class="st">"y"</span><span class="op">,</span>baseline<span class="op">+</span><span class="dv">5</span>)<span class="op">;</span></span>
+<span id="cb2-294"><a href="#cb2-294" aria-hidden="true" tabindex="-1"></a>      xTickPool[ti]<span class="op">.</span><span class="at">t</span><span class="op">.</span><span class="at">textContent</span><span class="op">=</span>k<span class="op">;</span>xTickPool[ti]<span class="op">.</span><span class="at">t</span><span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">""</span><span class="op">;</span></span>
+<span id="cb2-295"><a href="#cb2-295" aria-hidden="true" tabindex="-1"></a>      ti<span class="op">++;</span></span>
+<span id="cb2-296"><a href="#cb2-296" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb2-297"><a href="#cb2-297" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(<span class="op">;</span>ti<span class="op">&lt;</span><span class="dv">20</span><span class="op">;</span>ti<span class="op">++</span>){xTickPool[ti]<span class="op">.</span><span class="at">ln</span><span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>xTickPool[ti]<span class="op">.</span><span class="at">t</span><span class="op">.</span><span class="at">style</span><span class="op">.</span><span class="at">display</span><span class="op">=</span><span class="st">"none"</span><span class="op">;</span>}</span>
+<span id="cb2-298"><a href="#cb2-298" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-299"><a href="#cb2-299" aria-hidden="true" tabindex="-1"></a>    legT1<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"Binom("</span><span class="op">+</span>n<span class="op">+</span><span class="st">", "</span><span class="op">+</span>(p<span class="op">&lt;</span><span class="fl">0.01</span><span class="op">?</span>p<span class="op">.</span><span class="fu">toExponential</span>(<span class="dv">1</span>)<span class="op">:</span>p<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">3</span>))<span class="op">+</span><span class="st">")"</span><span class="op">;</span></span>
+<span id="cb2-300"><a href="#cb2-300" aria-hidden="true" tabindex="-1"></a>    legT2<span class="op">.</span><span class="at">textContent</span><span class="op">=</span><span class="st">"Poisson("</span><span class="op">+</span>lam<span class="op">.</span><span class="fu">toFixed</span>(<span class="dv">1</span>)<span class="op">+</span><span class="st">")"</span><span class="op">;</span></span>
+<span id="cb2-301"><a href="#cb2-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-302"><a href="#cb2-302" aria-hidden="true" tabindex="-1"></a>    wrapper<span class="op">.</span><span class="at">value</span><span class="op">=</span>{lam<span class="op">,</span>n<span class="op">,</span>p}<span class="op">;</span></span>
+<span id="cb2-303"><a href="#cb2-303" aria-hidden="true" tabindex="-1"></a>    wrapper<span class="op">.</span><span class="fu">dispatchEvent</span>(<span class="kw">new</span> <span class="bu">Event</span>(<span class="st">"input"</span><span class="op">,</span>{<span class="dt">bubbles</span><span class="op">:</span><span class="kw">true</span>}))<span class="op">;</span></span>
+<span id="cb2-304"><a href="#cb2-304" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb2-305"><a href="#cb2-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-306"><a href="#cb2-306" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-307"><a href="#cb2-307" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 8. EVENTS</span></span>
+<span id="cb2-308"><a href="#cb2-308" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
+<span id="cb2-309"><a href="#cb2-309" aria-hidden="true" tabindex="-1"></a>  <span class="kw">let</span> rafId<span class="op">=</span><span class="dv">0</span><span class="op">;</span></span>
+<span id="cb2-310"><a href="#cb2-310" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">schedule</span>(){<span class="fu">cancelAnimationFrame</span>(rafId)<span class="op">;</span>rafId<span class="op">=</span><span class="fu">requestAnimationFrame</span>(render)<span class="op">;</span>}</span>
+<span id="cb2-311"><a href="#cb2-311" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">onLam</span>(){SL<span class="op">.</span><span class="at">lam</span><span class="op">.</span><span class="fu">sync</span>()<span class="op">;</span><span class="fu">schedule</span>()<span class="op">;</span>}</span>
+<span id="cb2-312"><a href="#cb2-312" aria-hidden="true" tabindex="-1"></a>  <span class="kw">function</span> <span class="fu">onN</span>(){SL<span class="op">.</span><span class="at">n</span><span class="op">.</span><span class="fu">sync</span>()<span class="op">;</span><span class="fu">schedule</span>()<span class="op">;</span>}</span>
+<span id="cb2-313"><a href="#cb2-313" aria-hidden="true" tabindex="-1"></a>  SL<span class="op">.</span><span class="at">lam</span><span class="op">.</span><span class="at">input</span><span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"input"</span><span class="op">,</span>onLam)<span class="op">;</span></span>
+<span id="cb2-314"><a href="#cb2-314" aria-hidden="true" tabindex="-1"></a>  SL<span class="op">.</span><span class="at">n</span><span class="op">.</span><span class="at">input</span><span class="op">.</span><span class="fu">addEventListener</span>(<span class="st">"input"</span><span class="op">,</span>onN)<span class="op">;</span></span>
+<span id="cb2-315"><a href="#cb2-315" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-316"><a href="#cb2-316" aria-hidden="true" tabindex="-1"></a>  <span class="fu">render</span>()<span class="op">;</span></span>
+<span id="cb2-317"><a href="#cb2-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-318"><a href="#cb2-318" aria-hidden="true" tabindex="-1"></a>  invalidation<span class="op">.</span><span class="fu">then</span>(()<span class="kw">=&gt;</span>{</span>
+<span id="cb2-319"><a href="#cb2-319" aria-hidden="true" tabindex="-1"></a>    <span class="fu">cancelAnimationFrame</span>(rafId)<span class="op">;</span></span>
+<span id="cb2-320"><a href="#cb2-320" aria-hidden="true" tabindex="-1"></a>    SL<span class="op">.</span><span class="at">lam</span><span class="op">.</span><span class="at">input</span><span class="op">.</span><span class="fu">removeEventListener</span>(<span class="st">"input"</span><span class="op">,</span>onLam)<span class="op">;</span></span>
+<span id="cb2-321"><a href="#cb2-321" aria-hidden="true" tabindex="-1"></a>    SL<span class="op">.</span><span class="at">n</span><span class="op">.</span><span class="at">input</span><span class="op">.</span><span class="fu">removeEventListener</span>(<span class="st">"input"</span><span class="op">,</span>onN)<span class="op">;</span></span>
+<span id="cb2-322"><a href="#cb2-322" aria-hidden="true" tabindex="-1"></a>    lcCache<span class="op">.</span><span class="fu">clear</span>()<span class="op">;</span></span>
+<span id="cb2-323"><a href="#cb2-323" aria-hidden="true" tabindex="-1"></a>  })<span class="op">;</span></span>
+<span id="cb2-324"><a href="#cb2-324" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-325"><a href="#cb2-325" aria-hidden="true" tabindex="-1"></a>  wrapper<span class="op">.</span><span class="at">value</span><span class="op">=</span>{}<span class="op">;</span></span>
+<span id="cb2-326"><a href="#cb2-326" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> wrapper<span class="op">;</span></span>
+<span id="cb2-327"><a href="#cb2-327" aria-hidden="true" tabindex="-1"></a>})()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div id="ojs-cell-2" data-nodetype="declaration">
+
+</div>
+</div>
+</div>
+
+
+
+</main> <!-- /main -->
+<script type="ojs-module-contents">
+eyJjb250ZW50cyI6W3sibWV0aG9kTmFtZSI6ImludGVycHJldCIsImNlbGxOYW1lIjoib2pzLWNlbGwtMSIsImlubGluZSI6ZmFsc2UsInNvdXJjZSI6ImltcG9ydCB7IGNyZWF0ZVNsaWRlciwgY3JlYXRlQnV0dG9uLCBpbmplY3RTdHlsZSB9IGZyb20gXCIuL19zbGlkZXIuanNcIlxyXG4ifSx7Im1ldGhvZE5hbWUiOiJpbnRlcnByZXQiLCJjZWxsTmFtZSI6Im9qcy1jZWxsLTIiLCJpbmxpbmUiOmZhbHNlLCJzb3VyY2UiOiJcclxudmlld29mIGJpbm9tX3BvaXNzb24gPSAoKCkgPT4ge1xyXG4gIC8vIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkFxyXG4gIC8vIDEuIE1BVEhcclxuICAvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuICBjb25zdCBsY0NhY2hlPW5ldyBNYXAoKTtcclxuICBmdW5jdGlvbiBsYyhuLGspe1xyXG4gICAgaWYoazwwfHxrPm4pcmV0dXJuIC1JbmZpbml0eTtpZihrPm4taylrPW4taztcclxuICAgIGNvbnN0IGtleT0objw8MTYpfGs7aWYobGNDYWNoZS5oYXMoa2V5KSlyZXR1cm4gbGNDYWNoZS5nZXQoa2V5KTtcclxuICAgIGxldCByPTA7Zm9yKGxldCBpPTA7aTxrO2krKylyKz1NYXRoLmxvZyhuLWkpLU1hdGgubG9nKGkrMSk7XHJcbiAgICBsY0NhY2hlLnNldChrZXkscik7cmV0dXJuIHI7XHJcbiAgfVxyXG4gIGZ1bmN0aW9uIGJpblBNRih4LG4scCl7XHJcbiAgICBpZih4PDB8fHg+bilyZXR1cm4gMDtpZihwPD0wKXJldHVybiB4PT09MD8xOjA7aWYocD49MSlyZXR1cm4geD09PW4/MTowO1xyXG4gICAgcmV0dXJuIE1hdGguZXhwKGxjKG4seCkreCpNYXRoLmxvZyhwKSsobi14KSpNYXRoLmxvZygxLXApKTtcclxuICB9XHJcbiAgZnVuY3Rpb24gcG9pc1BNRihrLGxhbSl7XHJcbiAgICBpZihrPDB8fGxhbTw9MClyZXR1cm4gaz09PTA/MTowO1xyXG4gICAgbGV0IGxvZ1A9LWxhbTtmb3IobGV0IGk9MTtpPD1rO2krKylsb2dQKz1NYXRoLmxvZyhsYW0pLU1hdGgubG9nKGkpO1xyXG4gICAgcmV0dXJuIE1hdGguZXhwKGxvZ1ApO1xyXG4gIH1cclxuXHJcbiAgLy8g4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQXHJcbiAgLy8gMi4gV1JBUFBFUiArIFNUWUxFXHJcbiAgLy8g4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQXHJcbiAgY29uc3Qgd3JhcHBlcj1kb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiZGl2XCIpO1xyXG4gIHdyYXBwZXIuc3R5bGUuY3NzVGV4dD1gXHJcbiAgICBkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2FsaWduLWl0ZW1zOmNlbnRlcjtcclxuICAgIGZvbnQtZmFtaWx5Oi1hcHBsZS1zeXN0ZW0sQmxpbmtNYWNTeXN0ZW1Gb250LFwiU2Vnb2UgVUlcIixSb2JvdG8sc2Fucy1zZXJpZjtcclxuICAgIHdpZHRoOjEwMCU7bWF4LXdpZHRoOjkwMHB4O21hcmdpbjowIGF1dG87XHJcbiAgYDtcclxuICBcclxuICAvLyBMb2FkIHNsaWRlclxyXG4gIHdyYXBwZXIuYXBwZW5kQ2hpbGQoaW5qZWN0U3R5bGUoKSk7XHJcblxyXG4gIGNvbnN0IFNMPXt9O1xyXG4gIFNMLmxhbT1jcmVhdGVTbGlkZXIoXCJcXHUwM0JCIChtZXNzYWdlcy9ob3VyKVwiLDAuNSw4LDAuNSwzLFwiIzdjM2FlZFwiLFwicHVycGxlXCIpO1xyXG4gIFNMLm49Y3JlYXRlU2xpZGVyKFwibiAodGltZSBzbGljZXMpXCIsMiwyMDAsMSw1LFwiIzNiODJmNlwiLFwiYmx1ZVwiKTtcclxuXHJcbiAgY29uc3QgY3RybFJvdz1kb2N1bWVudC5jcmVhdGVFbGVtZW50KFwiZGl2XCIpO1xyXG4gIGN0cmxSb3cuc3R5bGUuY3NzVGV4dD1cImRpc3BsYXk6ZmxleDtnYXA6MjhweDt3aWR0aDoxMDAlO21hcmdpbi1ib3R0b206MTRweDtwYWRkaW5nLWJvdHRvbToxNHB4O2JvcmRlci1ib3R0b206MXB4IHNvbGlkICNlMmU4ZjA7XCI7XHJcbiAgY3RybFJvdy5hcHBlbmRDaGlsZChTTC5sYW0uZWwpO2N0cmxSb3cuYXBwZW5kQ2hpbGQoU0wubi5lbCk7XHJcbiAgd3JhcHBlci5hcHBlbmRDaGlsZChjdHJsUm93KTtcclxuXHJcbiAgLy8gSW5mbyBib3hcclxuICBjb25zdCBpbmZvQm94PWRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoXCJkaXZcIik7XHJcbiAgaW5mb0JveC5zdHlsZS5jc3NUZXh0PWBcclxuICAgIHdpZHRoOjEwMCU7cGFkZGluZzoxMHB4IDE2cHg7Ym9yZGVyLXJhZGl1czo4cHg7bWFyZ2luLWJvdHRvbToxNHB4O1xyXG4gICAgYmFja2dyb3VuZDojZmFmNWZmO2JvcmRlcjoxcHggc29saWQgI2U5ZDVmZjtcclxuICAgIGZvbnQtc2l6ZToxNHB4O2NvbG9yOiM0YzFkOTU7bGluZS1oZWlnaHQ6MS42O1xyXG4gICAgZm9udC1mYW1pbHk6XCJTRiBNb25vXCIsU0ZNb25vLVJlZ3VsYXIsTWVubG8sQ29uc29sYXMsbW9ub3NwYWNlO1xyXG4gIGA7XHJcbiAgd3JhcHBlci5hcHBlbmRDaGlsZChpbmZvQm94KTtcclxuXHJcbiAgLy8g4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQXHJcbiAgLy8gNC4gVElNRUxJTkUgU1ZHXHJcbiAgLy8g4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQ4pWQXHJcbiAgY29uc3QgTlM9XCJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Z1wiO1xyXG5cclxuICBjb25zdCBUVz03NjAsVEg9MTAwO1xyXG4gIGNvbnN0IHRtZz17bDo1MCxyOjIwLHQ6MTQsYjozMn07XHJcbiAgY29uc3QgdGN3PVRXLXRtZy5sLXRtZy5yO1xyXG5cclxuICBjb25zdCB0U3ZnPWRvY3VtZW50LmNyZWF0ZUVsZW1lbnROUyhOUyxcInN2Z1wiKTtcclxuICB0U3ZnLnNldEF0dHJpYnV0ZShcInZpZXdCb3hcIixgMCAwICR7VFd9ICR7VEh9YCk7XHJcbiAgdFN2Zy5zdHlsZS5jc3NUZXh0PWB3aWR0aDoxMDAlO21heC13aWR0aDoke1RXfXB4O2JhY2tncm91bmQ6I2ZhZmJmYztib3JkZXItcmFkaXVzOjEwcHg7Ym9yZGVyOjFweCBzb2xpZCAjZTJlOGYwO21hcmdpbi1ib3R0b206MTRweDtgO1xyXG5cclxuICBmdW5jdGlvbiBlbCh0YWcsYSl7Y29uc3QgZT1kb2N1bWVudC5jcmVhdGVFbGVtZW50TlMoTlMsdGFnKTtpZihhKWZvcihjb25zdFtrLHZdb2YgT2JqZWN0LmVudHJpZXMoYSkpZS5zZXRBdHRyaWJ1dGUoayx2KTtyZXR1cm4gZTt9XHJcblxyXG4gIC8vIFNsb3QgcG9vbFxyXG4gIGNvbnN0IFRQT09MPTIwMDtcclxuICBjb25zdCB0U2xvdHM9W107XHJcbiAgZm9yKGxldCBpPTA7aTxUUE9PTDtpKyspe1xyXG4gICAgY29uc3Qgcj1lbChcInJlY3RcIix7eTpTdHJpbmcodG1nLnQpLHJ4OlwiMVwifSk7XHJcbiAgICByLnN0eWxlLmRpc3BsYXk9XCJub25lXCI7dFN2Zy5hcHBlbmRDaGlsZChyKTt0U2xvdHMucHVzaChyKTtcclxuICB9XHJcblxyXG4gIC8vIEF4aXNcclxuICBjb25zdCB0QXhpc0xpbmU9ZWwoXCJsaW5lXCIse3N0cm9rZTpcIiM5NGEzYjhcIixcInN0cm9rZS13aWR0aFwiOlwiMVwifSk7XHJcbiAgdFN2Zy5hcHBlbmRDaGlsZCh0QXhpc0xpbmUpO1xyXG4gIGNvbnN0IHRMYWJlbFN0YXJ0PWVsKFwidGV4dFwiLHtcInRleHQtYW5jaG9yXCI6XCJtaWRkbGVcIixmaWxsOlwiIzQ3NTU2OVwiLFwiZm9udC1zaXplXCI6XCIxM1wiLFwiZm9udC13ZWlnaHRcIjpcIjYwMFwiLFwiZm9udC1mYW1pbHlcIjpcIidTRiBNb25vJyxtb25vc3BhY2VcIn0pO1xyXG4gIHRMYWJlbFN0YXJ0LnRleHRDb250ZW50PVwiMFwiO1xyXG4gIGNvbnN0IHRMYWJlbEVuZD1lbChcInRleHRcIix7XCJ0ZXh0LWFuY2hvclwiOlwibWlkZGxlXCIsZmlsbDpcIiM0NzU1NjlcIixcImZvbnQtc2l6ZVwiOlwiMTNcIixcImZvbnQtd2VpZ2h0XCI6XCI2MDBcIixcImZvbnQtZmFtaWx5XCI6XCInU0YgTW9ubycsbW9ub3NwYWNlXCJ9KTtcclxuICB0TGFiZWxFbmQudGV4dENvbnRlbnQ9XCIxIGhvdXJcIjtcclxuICB0U3ZnLmFwcGVuZENoaWxkKHRMYWJlbFN0YXJ0KTt0U3ZnLmFwcGVuZENoaWxkKHRMYWJlbEVuZCk7XHJcblxyXG4gIC8vIFRpY2sgbGFiZWxzXHJcbiAgY29uc3QgdFRpY2tQb29sPVtdO1xyXG4gIGZvcihsZXQgaT0wO2k8MjA7aSsrKXtcclxuICAgIGNvbnN0IHQ9ZWwoXCJ0ZXh0XCIse1widGV4dC1hbmNob3JcIjpcIm1pZGRsZVwiLGZpbGw6XCIjOTRhM2I4XCIsXCJmb250LXNpemVcIjpcIjExXCIsXCJmb250LWZhbWlseVwiOlwiJ1NGIE1vbm8nLG1vbm9zcGFjZVwifSk7XHJcbiAgICB0LnN0eWxlLmRpc3BsYXk9XCJub25lXCI7dFN2Zy5hcHBlbmRDaGlsZCh0KTt0VGlja1Bvb2wucHVzaCh0KTtcclxuICB9XHJcblxyXG4gIC8vIE1lc3NhZ2UgaWNvbnNcclxuICBjb25zdCBtc2dQb29sPVtdO1xyXG4gIGZvcihsZXQgaT0wO2k8MzA7aSsrKXtcclxuICAgIGNvbnN0IHQ9ZWwoXCJ0ZXh0XCIse1widGV4dC1hbmNob3JcIjpcIm1pZGRsZVwiLFwiZm9udC1zaXplXCI6XCIxNlwiLGZpbGw6XCIjN2MzYWVkXCJ9KTtcclxuICAgIHQudGV4dENvbnRlbnQ9XCJcXHVEODNEXFx1RENBQ1wiO3Quc3R5bGUuZGlzcGxheT1cIm5vbmVcIjt0U3ZnLmFwcGVuZENoaWxkKHQpO21zZ1Bvb2wucHVzaCh0KTtcclxuICB9XHJcblxyXG4gIHdyYXBwZXIuYXBwZW5kQ2hpbGQodFN2Zyk7XHJcblxyXG4gIC8vIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkFxyXG4gIC8vIDUuIERJU1RSSUJVVElPTiBDSEFSVCBTVkdcclxuICAvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuICBjb25zdCBDVz03NjAsQ0g9MzQwO1xyXG4gIGNvbnN0IGNtZz17dDoyNCxyOjIwLGI6NTIsbDo2MH07XHJcbiAgY29uc3QgY2N3PUNXLWNtZy5sLWNtZy5yLGNjaD1DSC1jbWcudC1jbWcuYjtcclxuXHJcbiAgY29uc3QgY1N2Zz1kb2N1bWVudC5jcmVhdGVFbGVtZW50TlMoTlMsXCJzdmdcIik7XHJcbiAgY1N2Zy5zZXRBdHRyaWJ1dGUoXCJ2aWV3Qm94XCIsYDAgMCAke0NXfSAke0NIfWApO1xyXG4gIGNTdmcuc3R5bGUuY3NzVGV4dD1gd2lkdGg6MTAwJTttYXgtd2lkdGg6JHtDV31weDtiYWNrZ3JvdW5kOiNmYWZiZmM7Ym9yZGVyLXJhZGl1czoxMHB4O2JvcmRlcjoxcHggc29saWQgI2UyZThmMDtgO1xyXG5cclxuICAvLyBHcmlkXHJcbiAgY29uc3QgZ3JpZExpbmVzPVtdO1xyXG4gIGZvcihsZXQgaT0wO2k8PTQ7aSsrKXtjb25zdCBsPWVsKFwibGluZVwiLHtzdHJva2U6XCIjZTJlOGYwXCIsXCJzdHJva2Utd2lkdGhcIjpcIjAuN1wifSk7Y1N2Zy5hcHBlbmRDaGlsZChsKTtncmlkTGluZXMucHVzaChsKTt9XHJcbiAgY29uc3QgeUxhYmVscz1bXTtcclxuICBmb3IobGV0IGk9MDtpPD00O2krKyl7Y29uc3QgdD1lbChcInRleHRcIix7XCJ0ZXh0LWFuY2hvclwiOlwiZW5kXCIsZmlsbDpcIiM5NGEzYjhcIixcImZvbnQtc2l6ZVwiOlwiMTJcIixcImZvbnQtZmFtaWx5XCI6XCInU0YgTW9ubycsbW9ub3NwYWNlXCJ9KTtjU3ZnLmFwcGVuZENoaWxkKHQpO3lMYWJlbHMucHVzaCh0KTt9XHJcblxyXG4gIC8vIEJpbm9taWFsIGJhcnNcclxuICBjb25zdCBCUE9PTD0zMDtcclxuICBjb25zdCBiQmFycz1bXTtcclxuICBmb3IobGV0IGk9MDtpPEJQT09MO2krKyl7XHJcbiAgICBjb25zdCByPWVsKFwicmVjdFwiLHtyeDpcIjJcIixmaWxsOlwiIzNiODJmNlwiLG9wYWNpdHk6XCIwLjU1XCIsc3Ryb2tlOlwiIzI1NjNlYlwiLFwic3Ryb2tlLXdpZHRoXCI6XCIwLjVcIn0pO1xyXG4gICAgci5zdHlsZS5kaXNwbGF5PVwibm9uZVwiO2NTdmcuYXBwZW5kQ2hpbGQocik7YkJhcnMucHVzaChyKTtcclxuICB9XHJcblxyXG4gIC8vIFBvaXNzb24gbGluZSArIGRvdHNcclxuICBjb25zdCBwUGF0aD1lbChcInBhdGhcIix7ZmlsbDpcIm5vbmVcIixzdHJva2U6XCIjN2MzYWVkXCIsXCJzdHJva2Utd2lkdGhcIjpcIjIuNVwiLG9wYWNpdHk6XCIwLjlcIn0pO1xyXG4gIGNTdmcuYXBwZW5kQ2hpbGQocFBhdGgpO1xyXG4gIGNvbnN0IHBEb3RzPVtdO1xyXG4gIGZvcihsZXQgaT0wO2k8QlBPT0w7aSsrKXtcclxuICAgIGNvbnN0IGM9ZWwoXCJjaXJjbGVcIix7cjpcIjVcIixmaWxsOlwiIzdjM2FlZFwiLHN0cm9rZTpcIiNmZmZcIixcInN0cm9rZS13aWR0aFwiOlwiMS41XCJ9KTtcclxuICAgIGMuc3R5bGUuZGlzcGxheT1cIm5vbmVcIjtjU3ZnLmFwcGVuZENoaWxkKGMpO3BEb3RzLnB1c2goYyk7XHJcbiAgfVxyXG5cclxuICAvLyBBeGVzXHJcbiAgY29uc3QgeEF4PWVsKFwibGluZVwiLHtzdHJva2U6XCIjOTRhM2I4XCJ9KTtjU3ZnLmFwcGVuZENoaWxkKHhBeCk7XHJcbiAgY29uc3QgeFRpY2tQb29sPVtdO1xyXG4gIGZvcihsZXQgaT0wO2k8MjA7aSsrKXtcclxuICAgIGNvbnN0IGxuPWVsKFwibGluZVwiLHtzdHJva2U6XCIjOTRhM2I4XCIseTI6XCI1XCJ9KTtsbi5zdHlsZS5kaXNwbGF5PVwibm9uZVwiO2NTdmcuYXBwZW5kQ2hpbGQobG4pO1xyXG4gICAgY29uc3QgdD1lbChcInRleHRcIix7XCJ0ZXh0LWFuY2hvclwiOlwibWlkZGxlXCIsZmlsbDpcIiM0NzU1NjlcIixcImZvbnQtc2l6ZVwiOlwiMTNcIixcImZvbnQtZmFtaWx5XCI6XCInU0YgTW9ubycsbW9ub3NwYWNlXCIsZHk6XCIxOFwifSk7dC5zdHlsZS5kaXNwbGF5PVwibm9uZVwiO2NTdmcuYXBwZW5kQ2hpbGQodCk7XHJcbiAgICB4VGlja1Bvb2wucHVzaCh7bG4sdH0pO1xyXG4gIH1cclxuICBjU3ZnLmFwcGVuZENoaWxkKGVsKFwibGluZVwiLHt4MTpTdHJpbmcoY21nLmwpLHgyOlN0cmluZyhjbWcubCkseTE6U3RyaW5nKGNtZy50KSx5MjpTdHJpbmcoY21nLnQrY2NoKSxzdHJva2U6XCIjOTRhM2I4XCJ9KSk7XHJcbiAgY29uc3QgeExibD1lbChcInRleHRcIix7XCJ0ZXh0LWFuY2hvclwiOlwibWlkZGxlXCIsZmlsbDpcIiM0NzU1NjlcIixcImZvbnQtc2l6ZVwiOlwiMTRcIix5OlN0cmluZyhDSC02KX0pO1xyXG4gIHhMYmwudGV4dENvbnRlbnQ9XCJOdW1iZXIgb2YgbWVzc2FnZXMgKGspXCI7Y1N2Zy5hcHBlbmRDaGlsZCh4TGJsKTtcclxuICBjb25zdCB5TGJsPWVsKFwidGV4dFwiLHtcInRleHQtYW5jaG9yXCI6XCJtaWRkbGVcIixmaWxsOlwiIzQ3NTU2OVwiLFwiZm9udC1zaXplXCI6XCIxNFwiLHg6XCIxNlwiLHk6U3RyaW5nKGNtZy50K2NjaC8yKSx0cmFuc2Zvcm06YHJvdGF0ZSgtOTAsMTYsJHtjbWcudCtjY2gvMn0pYH0pO1xyXG4gIHlMYmwudGV4dENvbnRlbnQ9XCJQKFggPSBrKVwiO2NTdmcuYXBwZW5kQ2hpbGQoeUxibCk7XHJcblxyXG4gIC8vIExlZ2VuZFxyXG4gIGNvbnN0IGxlZ1I9ZWwoXCJyZWN0XCIse3g6U3RyaW5nKENXLTIwMCkseTpcIjEwXCIsd2lkdGg6XCIxNlwiLGhlaWdodDpcIjEyXCIscng6XCIyXCIsZmlsbDpcIiMzYjgyZjZcIixvcGFjaXR5OlwiMC41NVwifSk7XHJcbiAgY29uc3QgbGVnVDE9ZWwoXCJ0ZXh0XCIse3g6U3RyaW5nKENXLTE3OCkseTpcIjIxXCIsZmlsbDpcIiM0NzU1NjlcIixcImZvbnQtc2l6ZVwiOlwiMTNcIixcImZvbnQtd2VpZ2h0XCI6XCI2MDBcIn0pO2xlZ1QxLnRleHRDb250ZW50PVwiQmlub21pYWxcIjtcclxuICBjb25zdCBsZWdDPWVsKFwiY2lyY2xlXCIse2N4OlN0cmluZyhDVy0xOTIpLGN5OlwiMzZcIixyOlwiNVwiLGZpbGw6XCIjN2MzYWVkXCJ9KTtcclxuICBjb25zdCBsZWdMPWVsKFwibGluZVwiLHt4MTpTdHJpbmcoQ1ctMjAwKSx4MjpTdHJpbmcoQ1ctMTg0KSx5MTpcIjM2XCIseTI6XCIzNlwiLHN0cm9rZTpcIiM3YzNhZWRcIixcInN0cm9rZS13aWR0aFwiOlwiMi41XCJ9KTtcclxuICBjb25zdCBsZWdUMj1lbChcInRleHRcIix7eDpTdHJpbmcoQ1ctMTc4KSx5OlwiNDBcIixmaWxsOlwiIzQ3NTU2OVwiLFwiZm9udC1zaXplXCI6XCIxM1wiLFwiZm9udC13ZWlnaHRcIjpcIjYwMFwifSk7bGVnVDIudGV4dENvbnRlbnQ9XCJQb2lzc29uXCI7XHJcbiAgY1N2Zy5hcHBlbmRDaGlsZChsZWdSKTtjU3ZnLmFwcGVuZENoaWxkKGxlZ1QxKTtjU3ZnLmFwcGVuZENoaWxkKGxlZ0wpO2NTdmcuYXBwZW5kQ2hpbGQobGVnQyk7Y1N2Zy5hcHBlbmRDaGlsZChsZWdUMik7XHJcblxyXG4gIHdyYXBwZXIuYXBwZW5kQ2hpbGQoY1N2Zyk7XHJcblxyXG4gIC8vIOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkOKVkFxyXG4gIC8vIDYuIFNFRURFRCBSTkdcclxuICAvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuICBsZXQgcm5nU3RhdGU9NDI7XHJcbiAgZnVuY3Rpb24gc2VlZFJuZyhzKXtybmdTdGF0ZT1zO31cclxuICBmdW5jdGlvbiBybmcoKXtybmdTdGF0ZT0ocm5nU3RhdGUqMTY4MDcpJTIxNDc0ODM2NDc7cmV0dXJuKHJuZ1N0YXRlLTEpLzIxNDc0ODM2NDY7fVxyXG5cclxuICAvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuICAvLyA3LiBSRU5ERVJcclxuICAvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuICBmdW5jdGlvbiByZW5kZXIoKXtcclxuICAgIGNvbnN0IGxhbT1TTC5sYW0udmFsKCk7XHJcbiAgICBjb25zdCBuPVNMLm4udmFsKCk7XHJcbiAgICBjb25zdCBwPU1hdGgubWluKGxhbS9uLDEpO1xyXG5cclxuICAgIC8vIEluZm9cclxuICAgIGluZm9Cb3guaW5uZXJIVE1MPVxyXG4gICAgICBgRGl2aWRlIDxiPjEgaG91cjwvYj4gaW50byA8YiBzdHlsZT1cImNvbG9yOiMzYjgyZjZcIj5uID0gJHtufTwvYj4gaW50ZXJ2YWxzLiBgK1xyXG4gICAgICBgRWFjaCBoYXMgPGI+cCA9IFxcdTAzQkIvbiA9ICR7bGFtLnRvRml4ZWQoMSl9LyR7bn0gPSAke3AudG9GaXhlZCg0KX08L2I+IGNoYW5jZSBvZiBhIG1lc3NhZ2UuPGJyPmArXHJcbiAgICAgIGA8YiBzdHlsZT1cImNvbG9yOiMzYjgyZjZcIj5CaW5vbSgke259LCAke3AudG9GaXhlZCg0KX0pPC9iPiBhcHByb3hpbWF0ZXMgYCtcclxuICAgICAgYDxiIHN0eWxlPVwiY29sb3I6IzdjM2FlZFwiPlBvaXNzb24oXFx1MDNCQiA9ICR7bGFtLnRvRml4ZWQoMSl9KTwvYj4uYDtcclxuXHJcbiAgICAvLyDilIDilIAgVGltZWxpbmUg4pSA4pSAXHJcbiAgICBzZWVkUm5nKDEyMzQ1KTtcclxuICAgIGNvbnN0IHNsb3RXPXRjdy9uO1xyXG4gICAgY29uc3QgYmFySD00MDtcclxuICAgIGNvbnN0IGF4aXNZPXRtZy50K2JhckgrODtcclxuICAgIGxldCBtaT0wO1xyXG5cclxuICAgIGZvcihsZXQgaT0wO2k8VFBPT0w7aSsrKXtcclxuICAgICAgaWYoaTxuKXtcclxuICAgICAgICBjb25zdCBpc01zZz1ybmcoKTxwO1xyXG4gICAgICAgIGNvbnN0IHg9dG1nLmwraSpzbG90VztcclxuICAgICAgICB0U2xvdHNbaV0uc2V0QXR0cmlidXRlKFwieFwiLHgpO1xyXG4gICAgICAgIHRTbG90c1tpXS5zZXRBdHRyaWJ1dGUoXCJ5XCIsdG1nLnQpO1xyXG4gICAgICAgIHRTbG90c1tpXS5zZXRBdHRyaWJ1dGUoXCJ3aWR0aFwiLE1hdGgubWF4KDAuNSxzbG90Vy1NYXRoLm1pbigxLjUsc2xvdFcqMC4xKSkpO1xyXG4gICAgICAgIHRTbG90c1tpXS5zZXRBdHRyaWJ1dGUoXCJoZWlnaHRcIixiYXJIKTtcclxuICAgICAgICB0U2xvdHNbaV0uc2V0QXR0cmlidXRlKFwiZmlsbFwiLGlzTXNnP1wiIzdjM2FlZFwiOlwiI2UyZThmMFwiKTtcclxuICAgICAgICB0U2xvdHNbaV0uc2V0QXR0cmlidXRlKFwib3BhY2l0eVwiLGlzTXNnP1wiMC44XCI6XCIwLjVcIik7XHJcbiAgICAgICAgdFNsb3RzW2ldLnN0eWxlLmRpc3BsYXk9XCJcIjtcclxuICAgICAgICBpZihpc01zZyYmbWk8MzApe1xyXG4gICAgICAgICAgbXNnUG9vbFttaV0uc2V0QXR0cmlidXRlKFwieFwiLHgrc2xvdFcvMik7XHJcbiAgICAgICAgICBtc2dQb29sW21pXS5zZXRBdHRyaWJ1dGUoXCJ5XCIsdG1nLnQtMSk7XHJcbiAgICAgICAgICBtc2dQb29sW21pXS5zdHlsZS5kaXNwbGF5PXNsb3RXPjg/XCJcIjpcIm5vbmVcIjtcclxuICAgICAgICAgIG1pKys7XHJcbiAgICAgICAgfVxyXG4gICAgICB9ZWxzZXt0U2xvdHNbaV0uc3R5bGUuZGlzcGxheT1cIm5vbmVcIjt9XHJcbiAgICB9XHJcbiAgICBmb3IoO21pPDMwO21pKyspbXNnUG9vbFttaV0uc3R5bGUuZGlzcGxheT1cIm5vbmVcIjtcclxuXHJcbiAgICB0QXhpc0xpbmUuc2V0QXR0cmlidXRlKFwieDFcIix0bWcubCk7dEF4aXNMaW5lLnNldEF0dHJpYnV0ZShcIngyXCIsdG1nLmwrdGN3KTtcclxuICAgIHRBeGlzTGluZS5zZXRBdHRyaWJ1dGUoXCJ5MVwiLGF4aXNZKTt0QXhpc0xpbmUuc2V0QXR0cmlidXRlKFwieTJcIixheGlzWSk7XHJcbiAgICB0TGFiZWxTdGFydC5zZXRBdHRyaWJ1dGUoXCJ4XCIsdG1nLmwpO3RMYWJlbFN0YXJ0LnNldEF0dHJpYnV0ZShcInlcIixheGlzWSsxOCk7XHJcbiAgICB0TGFiZWxFbmQuc2V0QXR0cmlidXRlKFwieFwiLHRtZy5sK3Rjdyk7dExhYmVsRW5kLnNldEF0dHJpYnV0ZShcInlcIixheGlzWSsxOCk7XHJcblxyXG4gICAgY29uc3QgdFN0ZXA9bjw9MTA/MTpuPD0zMD81Om48PTYwPzEwOjIwO1xyXG4gICAgbGV0IHR0aT0wO1xyXG4gICAgZm9yKGxldCBpPXRTdGVwO2k8biYmdHRpPDIwO2krPXRTdGVwKXtcclxuICAgICAgY29uc3QgeD10bWcubCtpKnNsb3RXO1xyXG4gICAgICB0VGlja1Bvb2xbdHRpXS5zZXRBdHRyaWJ1dGUoXCJ4XCIseCk7XHJcbiAgICAgIHRUaWNrUG9vbFt0dGldLnNldEF0dHJpYnV0ZShcInlcIixheGlzWSsxNik7XHJcbiAgICAgIHRUaWNrUG9vbFt0dGldLnRleHRDb250ZW50PWk7XHJcbiAgICAgIHRUaWNrUG9vbFt0dGldLnN0eWxlLmRpc3BsYXk9XCJcIjtcclxuICAgICAgdHRpKys7XHJcbiAgICB9XHJcbiAgICBmb3IoO3R0aTwyMDt0dGkrKyl0VGlja1Bvb2xbdHRpXS5zdHlsZS5kaXNwbGF5PVwibm9uZVwiO1xyXG5cclxuICAgIC8vIOKUgOKUgCBEaXN0cmlidXRpb24gY2hhcnQg4pSA4pSAXHJcbiAgICBjb25zdCBoaUs9TWF0aC5tYXgoTWF0aC5jZWlsKGxhbSs0Kk1hdGguc3FydChsYW0pKSw4KTtcclxuICAgIGxldCBtYXhZPTA7XHJcbiAgICBjb25zdCBiVmFscz1bXSxwVmFscz1bXTtcclxuICAgIGZvcihsZXQgaz0wO2s8PWhpSztrKyspe1xyXG4gICAgICBjb25zdCBidj1iaW5QTUYoayxuLHApLHB2PXBvaXNQTUYoayxsYW0pO1xyXG4gICAgICBiVmFscy5wdXNoKGJ2KTtwVmFscy5wdXNoKHB2KTtcclxuICAgICAgaWYoYnY+bWF4WSltYXhZPWJ2O2lmKHB2Pm1heFkpbWF4WT1wdjtcclxuICAgIH1cclxuICAgIG1heFkqPTEuMTg7aWYobWF4WTwwLjAxKW1heFk9MC4xO1xyXG5cclxuICAgIGNvbnN0IHN4PWs9PmNtZy5sKyhrL2hpSykqY2N3O1xyXG4gICAgY29uc3Qgc3k9eT0+Y21nLnQrY2NoLSh5L21heFkpKmNjaDtcclxuICAgIGNvbnN0IGJhclc9TWF0aC5tYXgoMixNYXRoLm1pbigyOCxjY3cvaGlLKjAuNikpO1xyXG4gICAgY29uc3QgYmFzZWxpbmU9c3koMCk7XHJcblxyXG4gICAgZm9yKGxldCBpPTA7aTw9NDtpKyspe1xyXG4gICAgICBjb25zdCB2PShtYXhZLzQpKmkseXk9c3kodik7XHJcbiAgICAgIGdyaWRMaW5lc1tpXS5zZXRBdHRyaWJ1dGUoXCJ4MVwiLGNtZy5sKTtncmlkTGluZXNbaV0uc2V0QXR0cmlidXRlKFwieDJcIixDVy1jbWcucik7XHJcbiAgICAgIGdyaWRMaW5lc1tpXS5zZXRBdHRyaWJ1dGUoXCJ5MVwiLHl5KTtncmlkTGluZXNbaV0uc2V0QXR0cmlidXRlKFwieTJcIix5eSk7XHJcbiAgICAgIHlMYWJlbHNbaV0uc2V0QXR0cmlidXRlKFwieFwiLGNtZy5sLTgpO3lMYWJlbHNbaV0uc2V0QXR0cmlidXRlKFwieVwiLHl5KzQpO1xyXG4gICAgICB5TGFiZWxzW2ldLnRleHRDb250ZW50PXYudG9GaXhlZCh2PDAuMDE/MzoyKTtcclxuICAgIH1cclxuXHJcbiAgICBmb3IobGV0IGk9MDtpPEJQT09MO2krKyl7XHJcbiAgICAgIGlmKGk8PWhpSyl7XHJcbiAgICAgICAgY29uc3QgYng9c3goaSktYmFyVy8yLGJ5PXN5KGJWYWxzW2ldKTtcclxuICAgICAgICBiQmFyc1tpXS5zZXRBdHRyaWJ1dGUoXCJ4XCIsYngpO2JCYXJzW2ldLnNldEF0dHJpYnV0ZShcInlcIixieSk7XHJcbiAgICAgICAgYkJhcnNbaV0uc2V0QXR0cmlidXRlKFwid2lkdGhcIixiYXJXKTtcclxuICAgICAgICBiQmFyc1tpXS5zZXRBdHRyaWJ1dGUoXCJoZWlnaHRcIixNYXRoLm1heCgwLGJhc2VsaW5lLWJ5KSk7XHJcbiAgICAgICAgYkJhcnNbaV0uc3R5bGUuZGlzcGxheT1cIlwiO1xyXG4gICAgICB9ZWxzZXtiQmFyc1tpXS5zdHlsZS5kaXNwbGF5PVwibm9uZVwiO31cclxuICAgIH1cclxuXHJcbiAgICBsZXQgZD1cIlwiO1xyXG4gICAgZm9yKGxldCBrPTA7azw9aGlLO2srKyl7XHJcbiAgICAgIGNvbnN0IHB4PXN4KGspLHB5PXN5KHBWYWxzW2tdKTtcclxuICAgICAgZCs9KGs9PT0wP1wiTVwiOlwiTFwiKStweC50b0ZpeGVkKDEpK1wiLFwiK3B5LnRvRml4ZWQoMSk7XHJcbiAgICAgIGlmKGs8QlBPT0wpe3BEb3RzW2tdLnNldEF0dHJpYnV0ZShcImN4XCIscHgpO3BEb3RzW2tdLnNldEF0dHJpYnV0ZShcImN5XCIscHkpO3BEb3RzW2tdLnN0eWxlLmRpc3BsYXk9XCJcIjt9XHJcbiAgICB9XHJcbiAgICBmb3IobGV0IGs9aGlLKzE7azxCUE9PTDtrKyspcERvdHNba10uc3R5bGUuZGlzcGxheT1cIm5vbmVcIjtcclxuICAgIHBQYXRoLnNldEF0dHJpYnV0ZShcImRcIixkKTtcclxuXHJcbiAgICB4QXguc2V0QXR0cmlidXRlKFwieDFcIixjbWcubCk7eEF4LnNldEF0dHJpYnV0ZShcIngyXCIsQ1ctY21nLnIpO1xyXG4gICAgeEF4LnNldEF0dHJpYnV0ZShcInkxXCIsYmFzZWxpbmUpO3hBeC5zZXRBdHRyaWJ1dGUoXCJ5MlwiLGJhc2VsaW5lKTtcclxuICAgIHhMYmwuc2V0QXR0cmlidXRlKFwieFwiLGNtZy5sK2Njdy8yKTtcclxuXHJcbiAgICBsZXQgdGk9MDtcclxuICAgIGZvcihsZXQgaz0wO2s8PWhpSyYmdGk8MjA7aysrKXtcclxuICAgICAgY29uc3QgeHg9c3goayk7XHJcbiAgICAgIHhUaWNrUG9vbFt0aV0ubG4uc2V0QXR0cmlidXRlKFwieDFcIix4eCk7eFRpY2tQb29sW3RpXS5sbi5zZXRBdHRyaWJ1dGUoXCJ4MlwiLHh4KTtcclxuICAgICAgeFRpY2tQb29sW3RpXS5sbi5zZXRBdHRyaWJ1dGUoXCJ5MVwiLGJhc2VsaW5lKTt4VGlja1Bvb2xbdGldLmxuLnNldEF0dHJpYnV0ZShcInkyXCIsYmFzZWxpbmUrNSk7XHJcbiAgICAgIHhUaWNrUG9vbFt0aV0ubG4uc3R5bGUuZGlzcGxheT1cIlwiO1xyXG4gICAgICB4VGlja1Bvb2xbdGldLnQuc2V0QXR0cmlidXRlKFwieFwiLHh4KTt4VGlja1Bvb2xbdGldLnQuc2V0QXR0cmlidXRlKFwieVwiLGJhc2VsaW5lKzUpO1xyXG4gICAgICB4VGlja1Bvb2xbdGldLnQudGV4dENvbnRlbnQ9azt4VGlja1Bvb2xbdGldLnQuc3R5bGUuZGlzcGxheT1cIlwiO1xyXG4gICAgICB0aSsrO1xyXG4gICAgfVxyXG4gICAgZm9yKDt0aTwyMDt0aSsrKXt4VGlja1Bvb2xbdGldLmxuLnN0eWxlLmRpc3BsYXk9XCJub25lXCI7eFRpY2tQb29sW3RpXS50LnN0eWxlLmRpc3BsYXk9XCJub25lXCI7fVxyXG5cclxuICAgIGxlZ1QxLnRleHRDb250ZW50PVwiQmlub20oXCIrbitcIiwgXCIrKHA8MC4wMT9wLnRvRXhwb25lbnRpYWwoMSk6cC50b0ZpeGVkKDMpKStcIilcIjtcclxuICAgIGxlZ1QyLnRleHRDb250ZW50PVwiUG9pc3NvbihcIitsYW0udG9GaXhlZCgxKStcIilcIjtcclxuXHJcbiAgICB3cmFwcGVyLnZhbHVlPXtsYW0sbixwfTtcclxuICAgIHdyYXBwZXIuZGlzcGF0Y2hFdmVudChuZXcgRXZlbnQoXCJpbnB1dFwiLHtidWJibGVzOnRydWV9KSk7XHJcbiAgfVxyXG5cclxuICAvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuICAvLyA4LiBFVkVOVFNcclxuICAvLyDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZDilZBcclxuICBsZXQgcmFmSWQ9MDtcclxuICBmdW5jdGlvbiBzY2hlZHVsZSgpe2NhbmNlbEFuaW1hdGlvbkZyYW1lKHJhZklkKTtyYWZJZD1yZXF1ZXN0QW5pbWF0aW9uRnJhbWUocmVuZGVyKTt9XHJcbiAgZnVuY3Rpb24gb25MYW0oKXtTTC5sYW0uc3luYygpO3NjaGVkdWxlKCk7fVxyXG4gIGZ1bmN0aW9uIG9uTigpe1NMLm4uc3luYygpO3NjaGVkdWxlKCk7fVxyXG4gIFNMLmxhbS5pbnB1dC5hZGRFdmVudExpc3RlbmVyKFwiaW5wdXRcIixvbkxhbSk7XHJcbiAgU0wubi5pbnB1dC5hZGRFdmVudExpc3RlbmVyKFwiaW5wdXRcIixvbk4pO1xyXG5cclxuICByZW5kZXIoKTtcclxuXHJcbiAgaW52YWxpZGF0aW9uLnRoZW4oKCk9PntcclxuICAgIGNhbmNlbEFuaW1hdGlvbkZyYW1lKHJhZklkKTtcclxuICAgIFNMLmxhbS5pbnB1dC5yZW1vdmVFdmVudExpc3RlbmVyKFwiaW5wdXRcIixvbkxhbSk7XHJcbiAgICBTTC5uLmlucHV0LnJlbW92ZUV2ZW50TGlzdGVuZXIoXCJpbnB1dFwiLG9uTik7XHJcbiAgICBsY0NhY2hlLmNsZWFyKCk7XHJcbiAgfSk7XHJcblxyXG4gIHdyYXBwZXIudmFsdWU9e307XHJcbiAgcmV0dXJuIHdyYXBwZXI7XHJcbn0pKClcclxuIn0seyJtZXRob2ROYW1lIjoiaW50ZXJwcmV0UXVpZXQiLCJzb3VyY2UiOiJzaGlueUlucHV0KCdiaW5vbV9wb2lzc29uJykifV19
+</script>
+<script type="module">
+if (window.location.protocol === "file:") { alert("The OJS runtime does not work with file:// URLs. Please use a web server to view this document."); }
+window._ojs.paths.runtimeToDoc = "../..";
+window._ojs.paths.runtimeToRoot = "../..";
+window._ojs.paths.docToRoot = "";
+window._ojs.selfContained = false;
+window._ojs.runtime.interpretFromScriptTags();
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<input type="hidden" id="giscus-base-theme" value="light">
+<input type="hidden" id="giscus-alt-theme" value="dark">
+<script>
+  function loadGiscus() {
+    // Function to get the theme based on body class
+    const getTheme = () => {
+      let baseTheme = document.getElementById('giscus-base-theme').value;
+      let altTheme = document.getElementById('giscus-alt-theme').value;
+      return document.body.classList.contains('quarto-dark') ? altTheme : baseTheme;
+    };
+    const script = document.createElement("script");
+    script.src = "https://giscus.app/client.js";
+    script.async = true;
+    script.dataset.repo = "thinhong/s4bvn";
+    script.dataset.repoId = "R_kgDOQtVYcQ";
+    script.dataset.category = "General";
+    script.dataset.categoryId = "DIC_kwDOQtVYcc4C00o0";
+    script.dataset.mapping = "title";
+    script.dataset.reactionsEnabled = "1";
+    script.dataset.emitMetadata = "0";
+    script.dataset.inputPosition = "top";
+    script.dataset.theme = getTheme();
+    script.dataset.lang = "en";
+    script.crossOrigin = "anonymous";
+    // Append the script to the desired div instead of at the end of the body
+    document.getElementById("quarto-content").appendChild(script);
+  }
+  loadGiscus();
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./distr-bin.html" class="pagination-link" aria-label="Phân phối nhị thức">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Phân phối nhị thức</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./distr-c.html" class="pagination-link" aria-label="Phân phối liên tục">
+        <span class="nav-page-text">Phân phối liên tục</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

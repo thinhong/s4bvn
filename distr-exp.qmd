@@ -1,0 +1,453 @@
+---
+title: "Phân phối mũ"
+format: html
+---
+
+## Định nghĩa
+
+Phân phối mũ (exponential distribution) dùng để mô hình **thời gian chờ** từ khi một biến cố xảy ra cho đến biến cố tiếp theo trong một quá trình Poisson.
+
+$$f(x) = \underbrace{\lambda}_{\text{Cường độ ban đầu}} \cdot \underbrace{e^{-\lambda x}}_{\text{Quy luật suy giảm}}$$
+
+Vì vậy phân phối mũ có liên hệ chặt chẽ với phân phối Poisson.
+
+- Poisson: đếm **số lượng** biến cố ngẫu nhiên xảy ra trong 1 khoảng thời gian cố định
+- Mũ: khoảng thời gian giữa 2 biến cố xảy ra
+
+Trong mô hình SIR, khi chúng ta định nghĩa $I$ hồi phục với tần suất trung bình là $\gamma$, thì sự di chuyển từ $I$ sang $R$ là 1 quá trình Poisson. Thời gian một người từ lúc bước vào khoang $I$ cho tới khi chuyển sang khoang $R$ sẽ tuân theo phân phối mũ.
+
+![](img/sir.svg)
+
+```{ojs}
+//| echo: false
+
+viewof sir_sim = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. STYLE
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;
+  `;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .sir-slider{position:relative;height:8px;border-radius:4px;background:#e2e8f0;}
+    .sir-slider-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;transition:width 0.04s;}
+    .sir-slider input[type=range]{
+      position:absolute;top:0;left:0;width:100%;height:100%;
+      -webkit-appearance:none;appearance:none;background:transparent;
+      cursor:pointer;margin:0;padding:0;
+    }
+    .sir-slider input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.28);
+      cursor:pointer;margin-top:-6px;background:#475569;
+    }
+    .sir-slider input[type=range]::-moz-range-thumb{
+      width:14px;height:14px;border-radius:50%;border:3px solid #fff;
+      box-shadow:0 1px 5px rgba(0,0,0,0.28);cursor:pointer;background:#475569;
+    }
+    .sir-slider input[type=range]::-webkit-slider-runnable-track{height:8px;background:transparent;}
+    .sir-slider input[type=range]::-moz-range-track{height:8px;background:transparent;}
+    .sir-slider-blue input[type=range]::-webkit-slider-thumb{background:#3b82f6;}
+    .sir-slider-blue input[type=range]::-moz-range-thumb{background:#3b82f6;}
+    .sir-slider-red input[type=range]::-webkit-slider-thumb{background:#dc2626;}
+    .sir-slider-red input[type=range]::-moz-range-thumb{background:#dc2626;}
+    .sir-slider-amber input[type=range]::-webkit-slider-thumb{background:#d97706;}
+    .sir-slider-amber input[type=range]::-moz-range-thumb{background:#d97706;}
+    .sir-slider-green input[type=range]::-webkit-slider-thumb{background:#16a34a;}
+    .sir-slider-green input[type=range]::-moz-range-thumb{background:#16a34a;}
+    .sir-btn{
+      padding:8px 0;border-radius:8px;border:1px solid #d1d5db;
+      background:#fff;color:#374151;font-size:13px;font-weight:600;
+      cursor:pointer;transition:background 0.1s;font-family:inherit;text-align:center;flex:1;
+    }
+    .sir-btn:hover{background:#f3f4f6;}
+    .sir-btn-step{background:#3b82f6;color:#fff;border-color:#2563eb;}
+    .sir-btn-step:hover{background:#2563eb;color:#fff;}
+    .sir-btn-auto{background:#16a34a;color:#fff;border-color:#15803d;}
+    .sir-btn-auto:hover{background:#15803d;color:#fff;}
+    .sir-btn-reset{background:#fef2f2;color:#dc2626;border-color:#fecaca;}
+    .sir-btn-reset:hover{background:#fee2e2;color:#dc2626;}
+  `;
+  wrapper.appendChild(style);
+
+  // ══════════════════════════════════════════════════════
+  // 2. SLIDERS
+  // ══════════════════════════════════════════════════════
+  function createSlider(label,min,max,step,val,color,cls){
+    const row=document.createElement("div");
+    row.style.cssText="display:flex;flex-direction:column;flex:1;min-width:140px;";
+    const head=document.createElement("div");
+    head.style.cssText="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;";
+    const lbl=document.createElement("span");
+    lbl.style.cssText="font-size:11px;font-weight:600;color:#64748b;letter-spacing:0.3px;text-transform:uppercase;";
+    lbl.textContent=label;
+    const valSpan=document.createElement("span");
+    valSpan.style.cssText=`font-size:17px;font-weight:800;color:${color};font-variant-numeric:tabular-nums;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;`;
+    valSpan.textContent=step<1?Number(val).toFixed(2):val;
+    head.appendChild(lbl);head.appendChild(valSpan);
+    const track=document.createElement("div");
+    track.className="sir-slider sir-slider-"+cls;
+    const fill=document.createElement("div");
+    fill.className="sir-slider-fill";fill.style.background=color;
+    fill.style.width=((val-min)/(max-min))*100+"%";
+    track.appendChild(fill);
+    const input=document.createElement("input");
+    input.type="range";input.min=min;input.max=max;input.step=step;input.value=val;
+    track.appendChild(input);
+    row.appendChild(head);row.appendChild(track);
+    return{el:row,input,valSpan,fill,
+      val(){return+input.value},
+      sync(){const v=+input.value;valSpan.textContent=step<1?v.toFixed(2):String(v);fill.style.width=((v-min)/(max-min))*100+"%";}
+    };
+  }
+
+  const SL={};
+  SL.s0=createSlider("Initial Susceptible",50,300,1,200,"#3b82f6","blue");
+  SL.i0=createSlider("Initial Infected",1,5,1,1,"#dc2626","red");
+  SL.beta=createSlider("\u03B2 (infect per day)",0.5,5,0.5,2,"#d97706","amber");
+  SL.gamma=createSlider("\u03B3 (recovery prob/day)",0.05,0.80,0.05,0.20,"#16a34a","green");
+
+  const r1=document.createElement("div");
+  r1.style.cssText="display:flex;gap:24px;width:100%;margin-bottom:10px;";
+  r1.appendChild(SL.s0.el);r1.appendChild(SL.i0.el);
+  wrapper.appendChild(r1);
+  const r2=document.createElement("div");
+  r2.style.cssText="display:flex;gap:24px;width:100%;margin-bottom:12px;";
+  r2.appendChild(SL.beta.el);r2.appendChild(SL.gamma.el);
+  wrapper.appendChild(r2);
+
+  const r3=document.createElement("div");
+  r3.style.cssText="display:flex;gap:10px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
+  const btnStep=document.createElement("button");
+  btnStep.className="sir-btn sir-btn-step";btnStep.textContent="▶  Step";
+  const btnAuto=document.createElement("button");
+  btnAuto.className="sir-btn sir-btn-auto";btnAuto.textContent="⏩  Auto";
+  const btnReset=document.createElement("button");
+  btnReset.className="sir-btn sir-btn-reset";btnReset.textContent="↺  Reset";
+  r3.appendChild(btnStep);r3.appendChild(btnAuto);r3.appendChild(btnReset);
+  wrapper.appendChild(r3);
+
+  // ══════════════════════════════════════════════════════
+  // 3. COMPARTMENT BOXES
+  // ══════════════════════════════════════════════════════
+  const boxRow=document.createElement("div");
+  boxRow.style.cssText="display:flex;gap:10px;width:100%;margin-bottom:14px;";
+
+  function makeBox(label,borderColor,bgColor,countColor){
+    const box=document.createElement("div");
+    box.style.cssText=`flex:1;border-radius:10px;border:2px solid ${borderColor};background:${bgColor};padding:10px;min-height:120px;overflow:hidden;`;
+    const hdr=document.createElement("div");
+    hdr.style.cssText="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;";
+    const lbl=document.createElement("span");
+    lbl.style.cssText=`font-size:12px;font-weight:700;color:${countColor};text-transform:uppercase;letter-spacing:0.5px;`;
+    lbl.textContent=label;
+    const cnt=document.createElement("span");
+    cnt.style.cssText=`font-size:20px;font-weight:800;color:${countColor};font-family:"SF Mono",monospace;`;
+    cnt.textContent="0";
+    hdr.appendChild(lbl);hdr.appendChild(cnt);box.appendChild(hdr);
+    const grid=document.createElement("div");
+    grid.style.cssText="display:flex;flex-wrap:wrap;gap:3px;align-content:flex-start;";
+    box.appendChild(grid);
+    return{box,cnt,grid};
+  }
+
+  const boxS=makeBox("Susceptible","#bfdbfe","#eff6ff","#1d4ed8");
+  const boxI=makeBox("Infected","#fecaca","#fef2f2","#dc2626");
+  const boxR=makeBox("Recovered","#bbf7d0","#f0fdf4","#16a34a");
+  boxRow.appendChild(boxS.box);boxRow.appendChild(boxI.box);boxRow.appendChild(boxR.box);
+  wrapper.appendChild(boxRow);
+
+  const dayLabel=document.createElement("div");
+  dayLabel.style.cssText=`width:100%;text-align:center;font-size:14px;font-weight:700;color:#334155;margin-bottom:10px;font-family:"SF Mono",monospace;`;
+  wrapper.appendChild(dayLabel);
+
+  // ══════════════════════════════════════════════════════
+  // 4. HISTOGRAM SVG
+  // ══════════════════════════════════════════════════════
+  const NS="http://www.w3.org/2000/svg";
+  const CW=760,CH=300;
+  const cmg={t:20,r:20,b:48,l:56};
+  const ccw=CW-cmg.l-cmg.r,cch=CH-cmg.t-cmg.b;
+
+  const svg=document.createElementNS(NS,"svg");
+  svg.setAttribute("viewBox",`0 0 ${CW} ${CH}`);
+  svg.style.cssText=`width:100%;max-width:${CW}px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;`;
+
+  function el(tag,a){const e=document.createElementNS(NS,tag);if(a)for(const[k,v]of Object.entries(a))e.setAttribute(k,v);return e;}
+
+  const gridLines=[];
+  for(let i=0;i<=4;i++){const l=el("line",{stroke:"#e2e8f0","stroke-width":"0.7"});svg.appendChild(l);gridLines.push(l);}
+  const yLabelsH=[];
+  for(let i=0;i<=4;i++){const t=el("text",{"text-anchor":"end",fill:"#94a3b8","font-size":"10","font-family":"'SF Mono',monospace"});svg.appendChild(t);yLabelsH.push(t);}
+
+  const BPOOL=60;
+  const hBars=[];
+  for(let i=0;i<BPOOL;i++){
+    const r=el("rect",{rx:"2",fill:"#16a34a",stroke:"#15803d","stroke-width":"0.5",opacity:"0.7"});
+    r.style.display="none";svg.appendChild(r);hBars.push(r);
+  }
+
+  const expPath=el("path",{fill:"none",stroke:"#dc2626","stroke-width":"2.5",opacity:"0.85"});
+  svg.appendChild(expPath);
+
+  const xAx=el("line",{stroke:"#94a3b8"});svg.appendChild(xAx);
+  const xTickPool=[];
+  for(let i=0;i<20;i++){
+    const ln=el("line",{stroke:"#94a3b8",y2:"5"});ln.style.display="none";svg.appendChild(ln);
+    const t=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"11","font-family":"'SF Mono',monospace",dy:"16"});t.style.display="none";svg.appendChild(t);
+    xTickPool.push({ln,t});
+  }
+  svg.appendChild(el("line",{x1:String(cmg.l),x2:String(cmg.l),y1:String(cmg.t),y2:String(cmg.t+cch),stroke:"#94a3b8"}));
+
+  const xLbl=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"12",y:String(CH-4)});
+  xLbl.textContent="Length of Stay (days)";svg.appendChild(xLbl);
+  const yLbl=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"12",x:"14",y:String(cmg.t+cch/2),transform:`rotate(-90,14,${cmg.t+cch/2})`});
+  yLbl.textContent="Proportion";svg.appendChild(yLbl);
+
+  const legR1=el("rect",{x:"580",y:"8",width:"14",height:"10",rx:"2",fill:"#16a34a",opacity:"0.7"});
+  const legT1=el("text",{x:"600",y:"17",fill:"#475569","font-size":"11"});legT1.textContent="Observed LOS";
+  const legL2=el("line",{x1:"580",x2:"594",y1:"30",y2:"30",stroke:"#dc2626","stroke-width":"2.5"});
+  const legT2=el("text",{x:"600",y:"34",fill:"#475569","font-size":"11"});legT2.textContent="Geometric(\u03B3)";
+  svg.appendChild(legR1);svg.appendChild(legT1);svg.appendChild(legL2);svg.appendChild(legT2);
+
+  wrapper.appendChild(svg);
+
+  // ══════════════════════════════════════════════════════
+  // 5. FIXED CHART SETUP (axes + theoretical line)
+  // ══════════════════════════════════════════════════════
+  let chartHiX=1,chartMaxP=0.1;
+  let chartSx,chartSy,chartBarW,chartBaseline;
+
+  function initChart(){
+    const gamma=SL.gamma.val();
+
+    // X range: start at 1, go until geometric PMF < 0.5%
+    chartHiX=Math.max(10,Math.ceil(1+Math.log(0.005/Math.max(gamma,0.01))/Math.log(Math.max(1-gamma,0.01))));
+    chartHiX=Math.min(chartHiX,60);
+
+    // Y range: peak at k=1 is gamma
+    chartMaxP=gamma*1.25;
+    if(chartMaxP<0.05)chartMaxP=0.05;
+
+    // X axis starts at 1 (not 0)
+    chartSx=x=>cmg.l+((x-1)/(chartHiX-1))*ccw;
+    chartSy=y=>cmg.t+cch-(y/chartMaxP)*cch;
+    chartBarW=Math.max(2,Math.min(24,ccw/(chartHiX-1)*0.7));
+    chartBaseline=chartSy(0);
+
+    // Grid
+    for(let i=0;i<=4;i++){
+      const v=(chartMaxP/4)*i,yy=chartSy(v);
+      gridLines[i].setAttribute("x1",cmg.l);gridLines[i].setAttribute("x2",CW-cmg.r);
+      gridLines[i].setAttribute("y1",yy);gridLines[i].setAttribute("y2",yy);
+      yLabelsH[i].setAttribute("x",cmg.l-8);yLabelsH[i].setAttribute("y",yy+4);
+      yLabelsH[i].textContent=v.toFixed(v<0.01?3:2);
+    }
+
+    // X axis
+    xAx.setAttribute("x1",cmg.l);xAx.setAttribute("x2",CW-cmg.r);
+    xAx.setAttribute("y1",chartBaseline);xAx.setAttribute("y2",chartBaseline);
+    xLbl.setAttribute("x",cmg.l+ccw/2);
+
+    const ts=chartHiX>40?5:chartHiX>20?2:1;
+    let ti=0;
+    for(let x=1;x<=chartHiX&&ti<20;x+=ts){
+      const xx=chartSx(x);
+      xTickPool[ti].ln.setAttribute("x1",xx);xTickPool[ti].ln.setAttribute("x2",xx);
+      xTickPool[ti].ln.setAttribute("y1",chartBaseline);xTickPool[ti].ln.setAttribute("y2",chartBaseline+5);
+      xTickPool[ti].ln.style.display="";
+      xTickPool[ti].t.setAttribute("x",xx);xTickPool[ti].t.setAttribute("y",chartBaseline+5);
+      xTickPool[ti].t.textContent=x;xTickPool[ti].t.style.display="";
+      ti++;
+    }
+    for(;ti<20;ti++){xTickPool[ti].ln.style.display="none";xTickPool[ti].t.style.display="none";}
+
+    // Theoretical geometric curve starting at k=1
+    // P(X=k) = gamma * (1-gamma)^(k-1), k = 1, 2, ...
+    const q=1-gamma;
+    let d="";
+    for(let k=1;k<=chartHiX;k+=0.2){
+      const fx=gamma*Math.pow(q,k-1);
+      const px=chartSx(k),py=chartSy(fx);
+      d+=(k===1?"M":"L")+px.toFixed(1)+","+py.toFixed(1);
+    }
+    expPath.setAttribute("d",d);
+
+    for(let i=0;i<BPOOL;i++)hBars[i].style.display="none";
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 6. SIMULATION STATE
+  // ══════════════════════════════════════════════════════
+  let S_count=0,I_list=[],R_list=[],day=0,autoId=0,running=false;
+
+  let rngState=12345;
+  function rng(){rngState=(rngState*16807)%2147483647;return(rngState-1)/2147483646;}
+
+  function initSim(){
+    clearInterval(autoId);running=false;
+    btnAuto.textContent="⏩  Auto";
+    rngState=12345+(Date.now()&0xFFFF);
+    S_count=SL.s0.val();
+    I_list=[];
+    for(let i=0;i<SL.i0.val();i++)I_list.push({days:0});
+    R_list=[];day=0;
+    initChart();
+    drawAll();
+  }
+
+  function stepSim(){
+    if(I_list.length===0&&day>0)return;
+    const beta=SL.beta.val(),gamma=SL.gamma.val();
+
+    let newInf=Math.min(S_count,Math.floor(beta*I_list.length));
+    S_count-=newInf;
+    const newI=[];
+    for(let i=0;i<newInf;i++)newI.push({days:0});
+
+    const stayI=[];
+    for(let i=0;i<I_list.length;i++){
+      I_list[i].days++;
+      if(rng()<gamma){R_list.push({los:I_list[i].days});}
+      else{stayI.push(I_list[i]);}
+    }
+
+    I_list=stayI.concat(newI);
+    day++;
+    drawAll();
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 7. RENDER BOXES
+  // ══════════════════════════════════════════════════════
+  function personDot(color,text){
+    const d=document.createElement("div");
+    d.style.cssText=`
+      width:${text?"auto":"10px"};height:${text?"auto":"10px"};min-width:10px;
+      border-radius:${text?"6px":"50%"};background:${color};
+      ${text?"padding:1px 4px;font-size:9px;font-weight:700;color:#fff;font-family:'SF Mono',monospace;text-align:center;":""}
+    `;
+    if(text)d.textContent=text;
+    return d;
+  }
+
+  function drawBoxes(){
+    boxS.cnt.textContent=S_count;
+    boxI.cnt.textContent=I_list.length;
+    boxR.cnt.textContent=R_list.length;
+
+    boxS.grid.innerHTML="";
+    const sShow=Math.min(S_count,100);
+    for(let i=0;i<sShow;i++)boxS.grid.appendChild(personDot("#3b82f6"));
+    if(S_count>100){const m=document.createElement("span");m.style.cssText="font-size:10px;color:#64748b;margin-left:4px;";m.textContent="+"+(S_count-100);boxS.grid.appendChild(m);}
+
+    boxI.grid.innerHTML="";
+    const iShow=Math.min(I_list.length,60);
+    for(let i=0;i<iShow;i++)boxI.grid.appendChild(personDot("#dc2626",String(I_list[i].days)));
+    if(I_list.length>60){const m=document.createElement("span");m.style.cssText="font-size:10px;color:#64748b;margin-left:4px;";m.textContent="+"+(I_list.length-60);boxI.grid.appendChild(m);}
+
+    boxR.grid.innerHTML="";
+    const rShow=Math.min(R_list.length,60);
+    for(let i=R_list.length-1;i>=Math.max(0,R_list.length-rShow);i--)
+      boxR.grid.appendChild(personDot("#16a34a",String(R_list[i].los)));
+    if(R_list.length>60){const m=document.createElement("span");m.style.cssText="font-size:10px;color:#64748b;margin-left:4px;";m.textContent="+"+(R_list.length-60);boxR.grid.appendChild(m);}
+
+    dayLabel.textContent="Day "+day+(I_list.length===0&&day>0?" — Epidemic ended":"");
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 8. HISTOGRAM BARS ONLY
+  // ══════════════════════════════════════════════════════
+  function drawHistBars(){
+    if(R_list.length===0){
+      for(let i=0;i<BPOOL;i++)hBars[i].style.display="none";
+      return;
+    }
+
+    const losArr=R_list.map(r=>r.los);
+    const maxLOS=Math.max(...losArr);
+    const bins=new Int32Array(Math.min(maxLOS+1,BPOOL));
+    for(const v of losArr)if(v<bins.length)bins[v]++;
+
+    const total=R_list.length;
+
+    for(let i=0;i<BPOOL;i++){
+      if(i>=1&&i<bins.length&&bins[i]>0){
+        const prop=bins[i]/total;
+        const bx=chartSx(i)-chartBarW/2;
+        const by=chartSy(prop);
+        hBars[i].setAttribute("x",bx);
+        hBars[i].setAttribute("y",by);
+        hBars[i].setAttribute("width",chartBarW);
+        hBars[i].setAttribute("height",Math.max(0,chartBaseline-by));
+        hBars[i].style.display="";
+      }else{
+        hBars[i].style.display="none";
+      }
+    }
+  }
+
+  function drawAll(){drawBoxes();drawHistBars();}
+
+  // ══════════════════════════════════════════════════════
+  // 9. BUTTONS
+  // ══════════════════════════════════════════════════════
+  function onStep(){stepSim();}
+  function onAuto(){
+    if(running){clearInterval(autoId);running=false;btnAuto.textContent="⏩  Auto";return;}
+    running=true;btnAuto.textContent="⏸  Stop";
+    autoId=setInterval(()=>{
+      if(I_list.length===0&&day>0){clearInterval(autoId);running=false;btnAuto.textContent="⏩  Auto";return;}
+      stepSim();
+    },200);
+  }
+  function onReset(){initSim();}
+
+  btnStep.addEventListener("click",onStep);
+  btnAuto.addEventListener("click",onAuto);
+  btnReset.addEventListener("click",onReset);
+
+  function onParam(){SL.s0.sync();SL.i0.sync();SL.beta.sync();SL.gamma.sync();if(!running)initSim();}
+  SL.s0.input.addEventListener("input",onParam);
+  SL.i0.input.addEventListener("input",onParam);
+  SL.beta.input.addEventListener("input",onParam);
+  SL.gamma.input.addEventListener("input",onParam);
+
+  // ══════════════════════════════════════════════════════
+  // 10. INIT & CLEANUP
+  // ══════════════════════════════════════════════════════
+  initSim();
+
+  invalidation.then(()=>{
+    clearInterval(autoId);
+    btnStep.removeEventListener("click",onStep);
+    btnAuto.removeEventListener("click",onAuto);
+    btnReset.removeEventListener("click",onReset);
+    SL.s0.input.removeEventListener("input",onParam);
+    SL.i0.input.removeEventListener("input",onParam);
+    SL.beta.input.removeEventListener("input",onParam);
+    SL.gamma.input.removeEventListener("input",onParam);
+    I_list=[];R_list=[];
+  });
+
+  wrapper.value={};
+  return wrapper;
+})()
+```
+
+**Tại sao thời gian ở khoảng $I$ lại là hàm mũ?**
+
+Hãy tưởng tượng việc ở trong khoang nhiễm ($I$) giống như tham gia một trò chơi may rủi mỗi ngày.Giả sử mỗi ngày có một tỷ lệ cố định $p$ số người sẽ hồi phục (rời đi).$\rightarrow$ Tỷ lệ người còn ở lại sau mỗi ngày là $(1 - p)$.Quy luật đào thải sẽ diễn ra như sau:Ngày 1: Bạn phải "sống sót" qua đợt lọc đầu tiên. Xác suất còn lại: $(1 - p)$.Ngày 2: Bạn phải tiếp tục sống sót qua đợt lọc thứ hai. Xác suất là: $(1 - p) \times (1 - p) = (1 - p)^2$.Ngày $t$: Bạn phải sống sót qua $t$ lần lọc liên tiếp. Xác suất là: $(1 - p)^t$.
+
+Số lượng người còn lại trong khoang $I$ giảm đi theo luỹ thừa của thời gian (cấp số nhân).
+Khi chúng ta chia nhỏ thời gian đến vô hạn (từ ngày $\to$ giờ $\to$ giây), công thức $(1 - p)^t$ sẽ chuyển thành hàm số mũ liên tục $e^{-\lambda t}$.
+
+Đó là lý do tại sao thời gian lưu trú tuân theo phân phối mũ.
+
+
+

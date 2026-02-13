@@ -1,7 +1,13 @@
 ---
 title: "Xác suất"
 format: html
+execute: 
+  echo: false
 ---
+
+```{ojs}
+import { createButton, createSlider, injectStyle } from "./_slider.js"
+```
 
 ## Nguồn gốc
 
@@ -43,9 +49,11 @@ Kết quả:
 
 Nếu tiếp tục chơi, chỉ có 4 kịch bản có thể xảy ra, trong đó A thắng 3 lần, B thắng 1 lần. Vậy khả năng A thắng là 3/4 trường hợp, và B thắng 1/4 trường hợp. Vậy A nên được chia 3/4 của 100\$ là 75\$, và B được chia 25\$.
 
+Nhu cầu "xử lý tương lai" là rất lớn. Khi đánh bài, nên bỏ bài, theo, tố hay cược hết (all-in) luôn? Nhà cái cần tính toán luật chơi sao cho họ luôn có lợi thế. Nếu mua mã cổ phiếu này thì sau 1 tháng, 3 tháng, 6 tháng có lên giá không? Vì tương lai chưa xảy ra nên không có câu trả lời chắc chắn, nhưng không có nghĩa là ta phải nhắm mắt làm liều. Xác suất ra đời để giải quyết vấn đề này, bằng cách gán một con số để phản ánh mức độ chắc chắn.
+
 ## Định nghĩa
 
-Trong bài toán trên, khả năng thắng cuộc chính là xác suất.
+Trong "Bài toán Chia điểm" trên, khả năng thắng cuộc chính là xác suất.
 
 Xác suất (Probability): là một con số nằm trong khoảng từ 0 đến 1, dùng để đo lường khả năng xảy ra của một sự kiện.
 
@@ -100,26 +108,417 @@ Biến cố $A$ được gọi là xảy ra (occurs) nếu chúng ta quan sát �
 
 ### Ví dụ
 
--   Phép thử ngẫu nhiên: "Tung một đồng xu hai lần"
+Phép thử ngẫu nhiên: "Tung một đồng xu hai lần"
 
--   Không gian mẫu: $\Omega = \{ SS, SN, NS, NN \}$
+```{ojs}
+viewof sample_space = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. DATA: Toss coin twice → 4 sample points
+  // ══════════════════════════════════════════════════════
+  const pts = [
+    { id: 0, c1: "H", c2: "H", label: "HH", heads: 2 },
+    { id: 1, c1: "H", c2: "T", label: "HT", heads: 1 },
+    { id: 2, c1: "T", c2: "H", label: "TH", heads: 1 },
+    { id: 3, c1: "T", c2: "T", label: "TT", heads: 0 },
+  ];
 
--   Biến cố "có đúng một mặt ngửa": $A = \{ SN, NS \}$
+  const events = [
+    { name: "Exactly 1 Head",  color: "#7c3aed", test: p => p.heads === 1 },
+    { name: "At Least 1 Head", color: "#3b82f6", test: p => p.heads >= 1 },
+    { name: "Both Same",       color: "#d97706", test: p => p.c1 === p.c2 },
+    { name: "No Heads",        color: "#dc2626", test: p => p.heads === 0 },
+  ];
 
--   Chúng ta thực sự tiến hành phép thử ngẫu nhiên:
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:700px;margin:0 auto;`;
+  wrapper.appendChild(injectStyle());
 
-```{r}
-set.seed(27)
-coin <- c("S", "N")
+  const style = document.createElement("style");
+  style.textContent = `
+    .ev-card{padding:10px 14px;border-radius:10px;border:2px solid #e2e8f0;
+      background:#fff;cursor:pointer;transition:all 0.15s;user-select:none;text-align:center;flex:1;min-width:100px;}
+    .ev-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08);}
+    .ev-card.active{border-width:3px;}
+    .ev-card-name{font-size:13px;font-weight:700;margin-bottom:2px;}
+    .ev-card-prob{font-size:11px;color:#64748b;font-family:"SF Mono",monospace;}
 
-sample(coin, size = 2, replace = TRUE)
+    @keyframes coinFlip {
+      0%   { transform: rotateX(0deg) translateY(0); }
+      25%  { transform: rotateX(360deg) translateY(-40px); }
+      50%  { transform: rotateX(720deg) translateY(-60px); }
+      75%  { transform: rotateX(1080deg) translateY(-30px); }
+      100% { transform: rotateX(1440deg) translateY(0); }
+    }
+    .coin-anim { animation: coinFlip 0.8s ease-out; }
+    .coin-container { perspective: 300px; display:inline-block; }
+  `;
+  wrapper.appendChild(style);
+
+  // ══════════════════════════════════════════════════════
+  // 3. SVG DIAGRAM
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const DW = 660, DH = 340;
+
+  function mkEl(tag, a) { const e = document.createElementNS(NS, tag); if (a) for (const [k,v] of Object.entries(a)) e.setAttribute(k,v); return e; }
+
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${DW} ${DH}`);
+  svg.style.cssText = `width:100%;max-width:${DW}px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:10px;cursor:default;overflow:visible;`;
+
+  // Background (whole SVG = omega hover zone)
+  const bg = mkEl("rect", { x: "0", y: "0", width: String(DW), height: String(DH), fill: "#fafbfc", rx: "12" });
+  svg.appendChild(bg);
+
+  // Omega box
+  const omX = 30, omY = 30, omW = DW - 60, omH = DH - 60;
+  const omRect = mkEl("rect", { x: String(omX), y: String(omY), width: String(omW), height: String(omH), rx: "16", fill: "#f8fafc", stroke: "#1e293b", "stroke-width": "2.5" });
+  svg.appendChild(omRect);
+
+  // Omega label (hoverable)
+  const omLabelG = mkEl("g"); omLabelG.style.cursor = "pointer";
+  const omLabelBg = mkEl("rect", { x: String(omX), y: String(omY), width: "210", height: "32", rx: "8", fill: "transparent" });
+  omLabelG.appendChild(omLabelBg);
+  const omLabel = mkEl("text", { x: String(omX + 12), y: String(omY + 22), fill: "#1e293b", "font-size": "16", "font-weight": "700" });
+  omLabel.textContent = "\u03A9 = { HH, HT, TH, TT }"; omLabelG.appendChild(omLabel);
+  svg.appendChild(omLabelG);
+
+  // Event region (dashed rect, behind dots)
+  const evRegionRect = mkEl("rect", { rx: "22", fill: "transparent", stroke: "transparent", "stroke-width": "3", "stroke-dasharray": "8,4", opacity: "0.9" });
+  evRegionRect.style.display = "none"; svg.appendChild(evRegionRect);
+  const evRegionFill = mkEl("rect", { rx: "22", fill: "transparent", opacity: "0.08" });
+  evRegionFill.style.display = "none"; svg.appendChild(evRegionFill);
+
+  // Dot positions: spread nicely
+  const dotPositions = [
+    { x: 170, y: 140 },  // HH
+    { x: 340, y: 110 },  // HT
+    { x: 340, y: 220 },  // TH
+    { x: 510, y: 175 },  // TT
+  ];
+
+  // Dots
+  const dotEls = [];
+  for (let i = 0; i < 4; i++) {
+    const p = pts[i], pos = dotPositions[i];
+    const g = mkEl("g"); g.style.cursor = "pointer";
+
+    // Outer ring (for highlight)
+    const ring = mkEl("circle", { cx: String(pos.x), cy: String(pos.y), r: "44", fill: "none", stroke: "transparent", "stroke-width": "3" });
+    g.appendChild(ring);
+
+    // Main circle
+    const c = mkEl("circle", { cx: String(pos.x), cy: String(pos.y), r: "38", fill: "#fff", stroke: "#cbd5e1", "stroke-width": "2.5" });
+    g.appendChild(c);
+
+    // Coin icons: two small circles
+    const coinY1 = pos.y - 10, coinY2 = pos.y + 10;
+    const coinR = 8;
+    for (let ci = 0; ci < 2; ci++) {
+      const face = ci === 0 ? p.c1 : p.c2;
+      const cy = ci === 0 ? coinY1 : coinY2;
+      const coinBg = mkEl("circle", { cx: String(pos.x - 10), cy: String(cy), r: String(coinR), fill: face === "H" ? "#fef3c7" : "#e0e7ff", stroke: face === "H" ? "#d97706" : "#6366f1", "stroke-width": "1.5" });
+      g.appendChild(coinBg);
+      const coinTxt = mkEl("text", { x: String(pos.x - 10), y: String(cy + 1), "text-anchor": "middle", "dominant-baseline": "middle", fill: face === "H" ? "#92400e" : "#4338ca", "font-size": "9", "font-weight": "700", "font-family": "'SF Mono',monospace" });
+      coinTxt.textContent = face; g.appendChild(coinTxt);
+    }
+
+    // Label
+    const t = mkEl("text", { x: String(pos.x + 10), y: String(pos.y + 1), "text-anchor": "start", "dominant-baseline": "middle", fill: "#334155", "font-size": "16", "font-weight": "700", "font-family": "'SF Mono',monospace" });
+    t.textContent = p.label; g.appendChild(t);
+
+    svg.appendChild(g);
+    dotEls.push({ g, c, t, ring, pos });
+
+    // Hover on dot = highlight as sample point
+    g.addEventListener("mouseenter", () => { highlightPoint(i); });
+    g.addEventListener("mouseleave", () => { if (!outcomeIdx >= 0 || activeEvent < 0) clearHighlight(); });
+  }
+
+  // Outcome ring (on top)
+  const outRing = mkEl("circle", { r: "48", fill: "none", stroke: "#dc2626", "stroke-width": "4", "stroke-dasharray": "6,3" });
+  outRing.style.display = "none"; svg.appendChild(outRing);
+  const outLabel = mkEl("text", { "text-anchor": "middle", fill: "#dc2626", "font-size": "13", "font-weight": "700" });
+  outLabel.style.display = "none"; svg.appendChild(outLabel);
+
+  wrapper.appendChild(svg);
+
+  // ══════════════════════════════════════════════════════
+  // 4. EXPLANATION BOX
+  // ══════════════════════════════════════════════════════
+  const explainBox = document.createElement("div");
+  explainBox.style.cssText = `width:100%;padding:12px 18px;border-radius:10px;margin-bottom:14px;
+    background:#fff;border:2px solid #e2e8f0;font-size:14px;color:#334155;line-height:1.7;
+    text-align:center;min-height:24px;transition:all 0.2s;`;
+  explainBox.innerHTML = `Hover over the diagram to explore. <b>\u03A9</b> = sample space, each circle = sample point <b>\u03C9</b>.`;
+  wrapper.appendChild(explainBox);
+
+  // ══════════════════════════════════════════════════════
+  // 5. COIN TOSS ANIMATION + BUTTON
+  // ══════════════════════════════════════════════════════
+  const tossRow = document.createElement("div");
+  tossRow.style.cssText = "display:flex;align-items:center;gap:16px;margin-bottom:14px;justify-content:center;";
+
+  const coinDisplay = document.createElement("div");
+  coinDisplay.style.cssText = "display:flex;gap:10px;min-width:100px;justify-content:center;";
+  function makeCoinEl() {
+    const outer = document.createElement("div"); outer.className = "coin-container";
+    const coin = document.createElement("div");
+    coin.style.cssText = `width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+      font-size:20px;font-weight:800;font-family:"SF Mono",monospace;border:3px solid #d1d5db;background:#f8fafc;color:#94a3b8;`;
+    coin.textContent = "?";
+    outer.appendChild(coin);
+    return { outer, coin };
+  }
+  const coin1 = makeCoinEl(), coin2 = makeCoinEl();
+  coinDisplay.appendChild(coin1.outer); coinDisplay.appendChild(coin2.outer);
+
+  const tossBtn = document.createElement("button");
+  tossBtn.style.cssText = `padding:12px 28px;border-radius:12px;border:2px solid #dc2626;
+    background:#fef2f2;color:#dc2626;font-size:16px;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:all 0.15s;`;
+  tossBtn.textContent = "\uD83E\uDE99  Toss Twice!";
+  tossBtn.addEventListener("mouseenter", () => tossBtn.style.background = "#fee2e2");
+  tossBtn.addEventListener("mouseleave", () => tossBtn.style.background = "#fef2f2");
+
+  tossRow.appendChild(coinDisplay); tossRow.appendChild(tossBtn);
+  wrapper.appendChild(tossRow);
+
+  // ══════════════════════════════════════════════════════
+  // 6. EVENT CARDS
+  // ══════════════════════════════════════════════════════
+  const evTitle = document.createElement("div");
+  evTitle.style.cssText = "font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px;width:100%;text-align:left;";
+  evTitle.textContent = "Events (subsets of \u03A9) — click to highlight";
+  wrapper.appendChild(evTitle);
+
+  const evRow = document.createElement("div"); evRow.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:10px;flex-wrap:wrap;";
+
+  let activeEvent = -1, outcomeIdx = -1;
+
+  for (let ei = 0; ei < events.length; ei++) {
+    const ev = events[ei];
+    const count = pts.filter(ev.test).length;
+    const card = document.createElement("div"); card.className = "ev-card";
+    const nm = document.createElement("div"); nm.className = "ev-card-name"; nm.style.color = ev.color; nm.textContent = ev.name;
+    const pr = document.createElement("div"); pr.className = "ev-card-prob"; pr.textContent = `${count}/4 = ${(count/4*100).toFixed(0)}%`;
+    card.appendChild(nm); card.appendChild(pr);
+    card.addEventListener("click", () => {
+      activeEvent = activeEvent === ei ? -1 : ei;
+      highlightEvent();
+    });
+    evRow.appendChild(card);
+    ev._card = card;
+  }
+  wrapper.appendChild(evRow);
+
+  // ══════════════════════════════════════════════════════
+  // 7. INTERACTION LOGIC
+  // ══════════════════════════════════════════════════════
+  function resetDots() {
+    for (let i = 0; i < 4; i++) {
+      dotEls[i].c.setAttribute("fill", "#fff"); dotEls[i].c.setAttribute("stroke", "#cbd5e1");
+      dotEls[i].c.setAttribute("stroke-width", "2.5"); dotEls[i].c.setAttribute("r", "38");
+      dotEls[i].t.setAttribute("fill", "#334155");
+      dotEls[i].ring.setAttribute("stroke", "transparent");
+    }
+    evRegionRect.style.display = "none"; evRegionFill.style.display = "none";
+    outRing.style.display = "none"; outLabel.style.display = "none";
+    omRect.setAttribute("stroke-width", "2.5"); omRect.setAttribute("fill", "#f8fafc");
+  }
+
+  function highlightOmega() {
+    resetDots();
+    omRect.setAttribute("stroke-width", "4"); omRect.setAttribute("fill", "#eef2ff");
+    for (let i = 0; i < 4; i++) {
+      dotEls[i].c.setAttribute("fill", "#eef2ff"); dotEls[i].c.setAttribute("stroke", "#1e293b");
+    }
+    explainBox.style.borderColor = "#1e293b";
+    explainBox.innerHTML = `<b style="color:#1e293b">\u03A9 (Sample Space)</b> = {HH, HT, TH, TT} — the set of <b>all 4 possible outcomes</b> when tossing a coin twice.`;
+  }
+
+  function highlightPoint(i) {
+    resetDots();
+    showOutcome(); // keep outcome visible if present
+    const p = pts[i], pos = dotPositions[i];
+    dotEls[i].c.setAttribute("fill", "#dcfce7"); dotEls[i].c.setAttribute("stroke", "#16a34a");
+    dotEls[i].c.setAttribute("stroke-width", "3"); dotEls[i].ring.setAttribute("stroke", "#16a34a");
+    dotEls[i].t.setAttribute("fill", "#16a34a");
+    explainBox.style.borderColor = "#16a34a";
+    explainBox.innerHTML = `<b style="color:#16a34a">\u03C9 = ${p.label}</b> is a <b>sample point</b> — one element of \u03A9. Toss 1 = ${p.c1}, Toss 2 = ${p.c2} (${p.heads} head${p.heads !== 1 ? "s" : ""}).`;
+  }
+
+  function highlightEvent() {
+    resetDots();
+    // Card states
+    for (let ei = 0; ei < events.length; ei++) {
+      const ev = events[ei];
+      ev._card.style.borderColor = activeEvent === ei ? ev.color : "#e2e8f0";
+      ev._card.style.background = activeEvent === ei ? ev.color + "0a" : "#fff";
+    }
+
+    if (activeEvent < 0) {
+      explainBox.style.borderColor = "#e2e8f0";
+      explainBox.innerHTML = `Click an event card to highlight its members on the diagram.`;
+      showOutcome();
+      return;
+    }
+
+    const ev = events[activeEvent];
+    const members = [], nonMembers = [];
+    for (let i = 0; i < 4; i++) {
+      if (ev.test(pts[i])) members.push(i); else nonMembers.push(i);
+    }
+
+    // Fade non-members
+    for (const i of nonMembers) {
+      dotEls[i].c.setAttribute("fill", "#f1f5f9"); dotEls[i].c.setAttribute("stroke", "#e2e8f0");
+      dotEls[i].t.setAttribute("fill", "#cbd5e1");
+    }
+    // Highlight members
+    for (const i of members) {
+      dotEls[i].c.setAttribute("fill", ev.color + "18"); dotEls[i].c.setAttribute("stroke", ev.color);
+      dotEls[i].c.setAttribute("stroke-width", "3"); dotEls[i].t.setAttribute("fill", ev.color);
+    }
+
+    // Enclosing region
+    if (members.length > 0) {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      for (const i of members) { const pos = dotPositions[i]; x0 = Math.min(x0, pos.x); y0 = Math.min(y0, pos.y); x1 = Math.max(x1, pos.x); y1 = Math.max(y1, pos.y); }
+      const pad = 52;
+      evRegionRect.setAttribute("x", x0 - pad); evRegionRect.setAttribute("y", y0 - pad);
+      evRegionRect.setAttribute("width", x1 - x0 + 2 * pad); evRegionRect.setAttribute("height", y1 - y0 + 2 * pad);
+      evRegionRect.setAttribute("stroke", ev.color); evRegionRect.style.display = "";
+      evRegionFill.setAttribute("x", x0 - pad); evRegionFill.setAttribute("y", y0 - pad);
+      evRegionFill.setAttribute("width", x1 - x0 + 2 * pad); evRegionFill.setAttribute("height", y1 - y0 + 2 * pad);
+      evRegionFill.setAttribute("rx", "22"); evRegionFill.setAttribute("fill", ev.color);
+      evRegionFill.style.display = "";
+    }
+
+    // Check if outcome is in this event
+    let outcomeNote = "";
+    if (outcomeIdx >= 0) {
+      showOutcome();
+      const inEv = ev.test(pts[outcomeIdx]);
+      outcomeNote = ` Your outcome <b>${pts[outcomeIdx].label}</b> is ${inEv ? `<b style="color:${ev.color}">\u2208 in this event</b>` : `<b>\u2209 not in this event</b>`}.`;
+    }
+
+    explainBox.style.borderColor = ev.color;
+    explainBox.innerHTML = `<b style="color:${ev.color}">Event: "${ev.name}"</b> = {${members.map(i => pts[i].label).join(", ")}} — ` +
+      `<b>${members.length}</b> out of 4 sample points. P = ${members.length}/4 = <b>${(members.length/4).toFixed(2)}</b>.${outcomeNote}`;
+  }
+
+  function clearHighlight() {
+    resetDots();
+    showOutcome();
+    if (activeEvent >= 0) { highlightEvent(); return; }
+    explainBox.style.borderColor = "#e2e8f0";
+    explainBox.innerHTML = `Hover over the diagram to explore. <b>\u03A9</b> = sample space, each circle = sample point <b>\u03C9</b>.`;
+  }
+
+  function showOutcome() {
+    if (outcomeIdx < 0) return;
+    const pos = dotPositions[outcomeIdx];
+    outRing.setAttribute("cx", pos.x); outRing.setAttribute("cy", pos.y); outRing.style.display = "";
+    outLabel.setAttribute("x", pos.x); outLabel.setAttribute("y", pos.y - 56);
+    outLabel.textContent = `Outcome: ${pts[outcomeIdx].label}`; outLabel.style.display = "";
+  }
+
+  // Omega hover (on the label or the background margins)
+  omLabelG.addEventListener("mouseenter", highlightOmega);
+  omLabelG.addEventListener("mouseleave", clearHighlight);
+  // Also hovering the border area of omega rect
+  omRect.addEventListener("mouseenter", highlightOmega);
+  omRect.addEventListener("mouseleave", clearHighlight);
+
+  // ══════════════════════════════════════════════════════
+  // 8. COIN TOSS
+  // ══════════════════════════════════════════════════════
+  function setCoin(coinEl, face) {
+    coinEl.coin.textContent = face;
+    if (face === "H") {
+      coinEl.coin.style.background = "#fef3c7"; coinEl.coin.style.borderColor = "#d97706"; coinEl.coin.style.color = "#92400e";
+    } else {
+      coinEl.coin.style.background = "#e0e7ff"; coinEl.coin.style.borderColor = "#6366f1"; coinEl.coin.style.color = "#4338ca";
+    }
+  }
+
+  function animateCoin(coinEl, face, delay) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        coinEl.coin.textContent = "?"; coinEl.coin.style.background = "#f8fafc";
+        coinEl.coin.style.borderColor = "#d1d5db"; coinEl.coin.style.color = "#94a3b8";
+        coinEl.coin.classList.remove("coin-anim");
+        void coinEl.coin.offsetWidth; // reflow
+        coinEl.coin.classList.add("coin-anim");
+        setTimeout(() => {
+          setCoin(coinEl, face);
+          coinEl.coin.classList.remove("coin-anim");
+          resolve();
+        }, 800);
+      }, delay);
+    });
+  }
+
+  let tossing = false;
+  tossBtn.addEventListener("click", async () => {
+    if (tossing) return;
+    tossing = true;
+    tossBtn.style.opacity = "0.5"; tossBtn.style.pointerEvents = "none";
+
+    const r = Math.floor(Math.random() * 4);
+    const p = pts[r];
+
+    // Animate both coins
+    await Promise.all([
+      animateCoin(coin1, p.c1, 0),
+      animateCoin(coin2, p.c2, 200),
+    ]);
+
+    outcomeIdx = r;
+    activeEvent = -1;
+    resetDots();
+
+    // Highlight outcome
+    const pos = dotPositions[r];
+    dotEls[r].c.setAttribute("fill", "#fef2f2"); dotEls[r].c.setAttribute("stroke", "#dc2626");
+    dotEls[r].c.setAttribute("stroke-width", "3");
+    dotEls[r].t.setAttribute("fill", "#dc2626");
+    showOutcome();
+
+    // Which events contain this outcome
+    const inEvents = events.filter(ev => ev.test(p)).map(ev => ev.name);
+    const evStr = inEvents.length > 0 ? ` Belongs to: <b>${inEvents.join(", ")}</b>.` : " Doesn't belong to any defined event.";
+
+    explainBox.style.borderColor = "#dc2626";
+    explainBox.innerHTML = `<b style="color:#dc2626">Outcome: ${p.label}</b> — Toss 1 = ${p.c1}, Toss 2 = ${p.c2} (${p.heads} head${p.heads !== 1 ? "s" : ""}). ` +
+      `This is the sample point that <b>actually occurred</b>.${evStr}`;
+
+    // Update event card highlights
+    for (let ei = 0; ei < events.length; ei++) {
+      events[ei]._card.style.borderColor = "#e2e8f0"; events[ei]._card.style.background = "#fff";
+    }
+
+    tossing = false;
+    tossBtn.style.opacity = "1"; tossBtn.style.pointerEvents = "auto";
+  });
+
+  // ══════════════════════════════════════════════════════
+  // 9. INIT
+  // ══════════════════════════════════════════════════════
+  clearHighlight();
+  invalidation.then(() => {});
+  wrapper.value = {};
+  return wrapper;
+})()
 ```
 
--   Kết quả thu được là $SN$, là phần tử của $A = \{ SN, NS \}$, vậy ta nói lần thử này biến cố $A$ có xảy ra
-
--   Xác suất là con số thể hiện khả năng xảy ra của từng điểm mẫu hay biến cố trong $\Omega$
-
-Xác suất luôn gắn liền với không gian mẫu. Xác suất sẽ thay đổi trong các không gian mẫu khác nhau.
+Xác suất là con số thể hiện khả năng xảy ra của từng điểm mẫu hay biến cố trong $\Omega$. Lưu ý: Xác suất luôn gắn liền với không gian mẫu. Xác suất sẽ thay đổi trong các không gian mẫu khác nhau.
 
 ::: callout-note
 ## Bài tập
@@ -245,17 +644,17 @@ $$\mathbb{P}(A \cap B) = 0$$
 
 Nếu $A$ xảy ra thì chắc chắn $B$ không xảy ra (và ngược lại).
 
-$$\mathbb{P}(A | B) = 0$$
+$$\mathbb{P}(A \mid B) = 0$$
 
-$$\mathbb{P}(B | A) = 0$$
+$$\mathbb{P}(B \mid A) = 0$$
 
 #### Phụ thuộc (dependent)
 
 Hai biến cố $A$ và $B$ phụ thuộc nhau khi chúng có mối liên hệ với nhau ($A \cap B \neq \emptyset$). Việc biết biến cố này xảy ra sẽ làm thay đổi xác suất của biến cố kia.
 
-$$\mathbb{P}(A | B) \neq \mathbb{P}(A)$$
+$$\mathbb{P}(A \mid B) \neq \mathbb{P}(A)$$
 
-$$\mathbb{P}(B | A) \neq \mathbb{P}(B)$$
+$$\mathbb{P}(B \mid A) \neq \mathbb{P}(B)$$
 
 Đây là trường hợp phổ biến nhất trong thực tế.
 
@@ -263,9 +662,9 @@ $$\mathbb{P}(B | A) \neq \mathbb{P}(B)$$
 
 Hai biến cố $A$ và $B$ độc lập nghĩa là việc biết $B$ xảy ra không cung cấp thêm thông tin gì về khả năng xảy ra của $A$ và ngược lại.
 
-$$\mathbb{P}(A | B) = \mathbb{P}(A)$$
+$$\mathbb{P}(A \mid B) = \mathbb{P}(A)$$
 
-$$\mathbb{P}(B | A) = \mathbb{P}(B)$$
+$$\mathbb{P}(B \mid A) = \mathbb{P}(B)$$
 
 Khi hai biến cố là độc lập, ta có thể nhân xác suất:
 
@@ -274,189 +673,217 @@ $$\mathbb{P}(A \cap B) = \mathbb{P}(A) \times \mathbb{P}(B)$$
 Quan hệ giữa hai biến cố có thể được minh họa bằng biểu đồ Venn như sau:
 
 ```{ojs}
-//| echo: false
+viewof venn = (() => {
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:700px;margin:0 auto;`;
+  wrapper.appendChild(injectStyle());
 
-viewof prob_a_ov = Inputs.range([0, 1], {
-  value: 0.05,
-  step: 0.01,
-  label: "P(A)"
-})
+  // ══════════════════════════════════════════════════════
+  // CONTROLS
+  // ══════════════════════════════════════════════════════
+  const SL = {};
+  SL.pA = createSlider("P(A)", 0.01, 0.95, 0.01, 0.05, "#5b9bd5", "blue");
+  SL.pB = createSlider("P(B)", 0.01, 0.95, 0.01, 0.05, "#e8915a", "amber");
 
-viewof prob_b_ov = Inputs.range([0, 1], {
-  value: 0.05,
-  step: 0.01,
-  label: "P(B)"
-})
+  const r1 = document.createElement("div"); r1.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:16px;";
+  r1.appendChild(SL.pA.el); r1.appendChild(SL.pB.el);
+  wrapper.appendChild(r1);
 
-// 1. CONFIGURATION
-sim_config_dens = ({
-  N: 5000,                    
-  centerA: {x: 0.3, y: 0.5}, 
-  centerB: {x: 0.7, y: 0.5}  
-})
+  // ══════════════════════════════════════════════════════
+  // SVG
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const W = 660, H = 460;
+  // Ω box inset
+  const OX = 20, OY = 50, OW = W - 40, OH = H - 70;
+  const OMEGA_AREA = OW * OH;
 
-// 2. GENERATE POINTS
-substratePoints_dens = {
-  const rng = d3.randomLcg(42); 
-  const points = [];
-  for(let i = 0; i < sim_config_dens.N; i++) {
-    const px = rng();
-    const py = rng();
-    const dA = (px - sim_config_dens.centerA.x)**2 + (py - sim_config_dens.centerA.y)**2;
-    const dB = (px - sim_config_dens.centerB.x)**2 + (py - sim_config_dens.centerB.y)**2;
-    points.push({id: i, x: px, y: py, distA: dA, distB: dB});
-  }
-  return points;
-}
-
-// 3. CLASSIFY LOGIC
-classifiedPoints_dens = {
-  const targetCountA = Math.round(sim_config_dens.N * prob_a_ov);
-  const targetCountB = Math.round(sim_config_dens.N * prob_b_ov);
-
-  // A Selection
-  const sortedByA = substratePoints_dens.slice().sort((a, b) => a.distA - b.distA);
-  const idsA = new Set(sortedByA.slice(0, targetCountA).map(d => d.id));
-
-  // B Selection
-  const sortedByB = substratePoints_dens.slice().sort((a, b) => a.distB - b.distB);
-  const idsB = new Set(sortedByB.slice(0, targetCountB).map(d => d.id));
-
-  // Count Overlap
-  let totalOverlapCount = 0;
-  substratePoints_dens.forEach(p => {
-    if (idsA.has(p.id) && idsB.has(p.id)) totalOverlapCount++;
-  });
-  
-  // --- MATH CALCULATIONS ---
-  const N = sim_config_dens.N;
-  const countA = idsA.size;
-  const countB = idsB.size;
-  
-  const probIntersection = totalOverlapCount / N;    // P(A and B)
-  const probProduct = prob_a_ov * prob_b_ov;         // P(A)*P(B)
-  
-  // Conditional Probabilities
-  const probAgivenB = countB === 0 ? 0 : totalOverlapCount / countB; // P(A|B)
-  const probBgivenA = countA === 0 ? 0 : totalOverlapCount / countA; // P(B|A)
-
-  // --- RELATIONSHIP LOGIC ---
-  const epsilon = 0.001; 
-  let relationship = "";
-  let relColor = "";
-
-  if (probIntersection === 0) {
-      relationship = "Xung khắc";
-      relColor = "#e15759"; // Red
-  } else if (Math.abs(probIntersection - probProduct) <= epsilon) {
-      relationship = "Độc lập";
-      relColor = "#59a14f"; // Green
-  } else {
-      relationship = "Phụ thuộc";
-      relColor = "#76b7b2"; // Teal/Blue
+  function mkEl(tag, a) {
+    const e = document.createElementNS(NS, tag);
+    if (a) for (const [k,v] of Object.entries(a)) e.setAttribute(k,v);
+    return e;
   }
 
-  // Create final array
-  const finalPoints = substratePoints_dens.map(p => {
-    const inA = idsA.has(p.id);
-    const inB = idsB.has(p.id);
-    return { ...p, inA, inB };
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.style.cssText = `width:100%;max-width:${W}px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:12px;`;
+
+  // Outer background
+  svg.appendChild(mkEl("rect", { x: "0", y: "0", width: String(W), height: String(H), fill: "#f1f5f9", rx: "12" }));
+
+  // Ω box
+  svg.appendChild(mkEl("rect", { x: String(OX), y: String(OY), width: String(OW), height: String(OH), rx: "12", fill: "#fafbfc", stroke: "#1e293b", "stroke-width": "2.5" }));
+
+  // Title
+  const titleText = mkEl("text", { x: String(W / 2), y: "34", "text-anchor": "middle", fill: "#dc2626", "font-size": "22", "font-weight": "700" });
+  svg.appendChild(titleText);
+
+  // Ω label
+  const omLabel = mkEl("text", { x: String(OX + OW - 10), y: String(OY + 22), "text-anchor": "end", fill: "#1e293b", "font-size": "22", "font-weight": "700" });
+  omLabel.textContent = "\u03A9"; svg.appendChild(omLabel);
+
+  // Clip to Ω box so circles don't overflow
+  const defs = mkEl("defs");
+  const clipOmega = mkEl("clipPath", { id: "clipOmega" });
+  clipOmega.appendChild(mkEl("rect", { x: String(OX), y: String(OY), width: String(OW), height: String(OH), rx: "12" }));
+  defs.appendChild(clipOmega);
+
+  // Clip for intersection (circle A shape)
+  const clipA = mkEl("clipPath", { id: "clipA" });
+  const clipACirc = mkEl("circle"); clipA.appendChild(clipACirc);
+  defs.appendChild(clipA);
+  svg.appendChild(defs);
+
+  // Group clipped to Ω
+  const gClipped = mkEl("g", { "clip-path": "url(#clipOmega)" });
+  svg.appendChild(gClipped);
+
+  // Circle A
+  const circA = mkEl("circle", { fill: "#5b9bd5", opacity: "0.25", stroke: "#5b9bd5", "stroke-width": "2.5" });
+  gClipped.appendChild(circA);
+  // Circle B
+  const circB = mkEl("circle", { fill: "#f4b183", opacity: "0.25", stroke: "#e8915a", "stroke-width": "2.5" });
+  gClipped.appendChild(circB);
+  // Intersection: B clipped to A
+  const interCirc = mkEl("circle", { fill: "#16a34a", opacity: "0.28", "clip-path": "url(#clipA)" });
+  gClipped.appendChild(interCirc);
+
+  // Labels (outside clip so always visible)
+  const lblA = mkEl("text", { "text-anchor": "middle", fill: "#1e5a9e", "font-size": "17", "font-weight": "700" });
+  svg.appendChild(lblA);
+  const lblB = mkEl("text", { "text-anchor": "middle", fill: "#b35a1f", "font-size": "17", "font-weight": "700" });
+  svg.appendChild(lblB);
+
+  wrapper.appendChild(svg);
+
+  // ══════════════════════════════════════════════════════
+  // STATS
+  // ══════════════════════════════════════════════════════
+  const statsRow = document.createElement("div");
+  statsRow.style.cssText = "display:flex;gap:16px;width:100%;flex-wrap:wrap;margin-bottom:12px;";
+
+  function makeStatBox(borderColor, bgColor) {
+    const box = document.createElement("div");
+    box.style.cssText = `flex:1;min-width:200px;padding:12px 16px;border-radius:10px;
+      background:${bgColor};border:2px solid ${borderColor};
+      font-size:15px;line-height:2.0;
+      font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;`;
+    return box;
+  }
+
+  const statLeft = makeStatBox("#bfdbfe", "#eff6ff");
+  const statRight = makeStatBox("#fed7aa", "#fff7ed");
+  statsRow.appendChild(statLeft); statsRow.appendChild(statRight);
+  wrapper.appendChild(statsRow);
+
+  // ══════════════════════════════════════════════════════
+  // GEOMETRY
+  // ══════════════════════════════════════════════════════
+  // Fixed centers: A at 1/3, B at 2/3 of the Ω box
+  const AX = OX + OW * 0.37;
+  const BX = OX + OW * 0.63;
+  const CY = OY + OH * 0.5;
+  const DIST = BX - AX;
+
+  function radiusFromP(p) {
+    // Circle area = p × OMEGA_AREA
+    return Math.sqrt(p * OMEGA_AREA / Math.PI);
+  }
+
+  function circleOverlapArea(r1, r2, d) {
+    if (d >= r1 + r2) return 0;
+    if (d <= Math.abs(r1 - r2)) return Math.PI * Math.min(r1, r2) ** 2;
+    const a = (r1 * r1 - r2 * r2 + d * d) / (2 * d);
+    const b = d - a;
+    return r1 * r1 * Math.acos(Math.max(-1, Math.min(1, a / r1)))
+         - a * Math.sqrt(Math.max(0, r1 * r1 - a * a))
+         + r2 * r2 * Math.acos(Math.max(-1, Math.min(1, b / r2)))
+         - b * Math.sqrt(Math.max(0, r2 * r2 - b * b));
+  }
+
+  // ══════════════════════════════════════════════════════
+  // UPDATE
+  // ══════════════════════════════════════════════════════
+  function update() {
+    const pA = SL.pA.val();
+    const pB = SL.pB.val();
+
+    const rA = radiusFromP(pA);
+    const rB = radiusFromP(pB);
+
+    // Set circles
+    circA.setAttribute("cx", AX); circA.setAttribute("cy", CY); circA.setAttribute("r", rA);
+    circB.setAttribute("cx", BX); circB.setAttribute("cy", CY); circB.setAttribute("r", rB);
+    clipACirc.setAttribute("cx", AX); clipACirc.setAttribute("cy", CY); clipACirc.setAttribute("r", rA);
+    interCirc.setAttribute("cx", BX); interCirc.setAttribute("cy", CY); interCirc.setAttribute("r", rB);
+
+    // Compute overlap
+    const overlapPx = circleOverlapArea(rA, rB, DIST);
+    const pAB = overlapPx / OMEGA_AREA;
+
+    interCirc.style.display = pAB > 0.001 ? "" : "none";
+
+    // Label positions: shift outward if overlapping
+    const hasOverlap = pAB > 0.01;
+    const aLblX = hasOverlap ? Math.max(OX + 40, AX - rA * 0.45) : AX;
+    const bLblX = hasOverlap ? Math.min(OX + OW - 40, BX + rB * 0.45) : BX;
+
+    lblA.setAttribute("x", aLblX); lblA.setAttribute("y", CY + 5);
+    lblA.textContent = `P(A) = ${pA.toFixed(2)}`;
+    lblB.setAttribute("x", bLblX); lblB.setAttribute("y", CY + 5);
+    lblB.textContent = `P(B) = ${pB.toFixed(2)}`;
+
+    // ── Stats ──
+    const pA_B = pB > 0.001 ? pAB / pB : 0;
+    const pB_A = pA > 0.001 ? pAB / pA : 0;
+    const pApB = pA * pB;
+    const fmt = v => v.toFixed(2);
+
+    statLeft.innerHTML =
+      `<span style="color:#dc2626;font-weight:700">P(A | B)</span> = ${fmt(pA_B)}<br>` +
+      `<span style="color:#d97706;font-weight:700">P(B | A)</span> = ${fmt(pB_A)}`;
+
+    statRight.innerHTML =
+      `<span style="color:#16a34a;font-weight:700">P(A \u2229 B)</span> = ${fmt(pAB)}<br>` +
+      `<span style="color:#64748b;font-weight:700">P(A)\u00D7P(B)</span> = ${fmt(pApB)}`;
+
+    // ── Relationship ──
+    const eps = 0.002;
+    const isMutEx = pAB < eps;
+    const isIndep = Math.abs(pAB - pApB) < eps && !isMutEx;
+
+    if (isMutEx) {
+      titleText.textContent = "Xung khắc";
+      titleText.setAttribute("fill", "#dc2626");
+    } else if (isIndep) {
+      titleText.textContent = "Độc lập";
+      titleText.setAttribute("fill", "#16a34a");
+    } else {
+      const dir = pAB > pApB ? "Positive" : "Negative";
+      titleText.textContent = "Phụ thuộc";
+      titleText.setAttribute("fill", "#d97706");
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // EVENTS
+  // ══════════════════════════════════════════════════════
+  function onInput() { SL.pA.sync(); SL.pB.sync(); update(); }
+  SL.pA.input.addEventListener("input", onInput);
+  SL.pB.input.addEventListener("input", onInput);
+  update();
+
+  invalidation.then(() => {
+    SL.pA.input.removeEventListener("input", onInput);
+    SL.pB.input.removeEventListener("input", onInput);
   });
 
-  // Attach Stats
-  finalPoints.stats = {
-      p_int: probIntersection,
-      p_prod: probProduct,
-      p_AgB: probAgivenB,
-      p_BgA: probBgivenA,
-      rel: relationship,
-      col: relColor
-  };
-  
-  return finalPoints;
-}
-
-// 4. THE PLOT
-Plot.plot({
-  width: 500,
-  height: 500,
-  x: {axis: null, domain: [0,1]},
-  y: {axis: null, domain: [0,1]},
-  
-  marks: [
-    Plot.frame({stroke: "#ccc"}),
-
-    // Density Layers
-    Plot.density(classifiedPoints_dens, {
-      x: "x", y: "y", fill: "#6ecae1", fillOpacity: 0.3, thresholds: [0.1], bandwidth: 15,
-      weight: d => d.inA ? 1 : (d.inB ? -1 : 0)
-    }),
-    Plot.density(classifiedPoints_dens, {
-      x: "x", y: "y", fill: "#f7941d", fillOpacity: 0.3, thresholds: [0.1], bandwidth: 15,
-      weight: d => d.inB ? 1 : (d.inA ? -1 : 0)
-    }),
-    
-    // Labels P(A) & P(B) on blobs (2 decimals)
-    Plot.text([sim_config_dens.centerA], {
-      x: "x", y: "y", text: [`P(A) = ${prob_a_ov.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
-    }),
-    Plot.text([sim_config_dens.centerB], {
-      x: "x", y: "y", text: [`P(B) = ${prob_b_ov.toFixed(2)}`], 
-      fill: "black", fontWeight: "bold", fontSize: 16, stroke: "white", strokeWidth: 3
-    }),
-
-    // Top Status Text
-    Plot.text([0.5], {
-        frameAnchor: "top", dy: 20,
-        text: [`${classifiedPoints_dens.stats.rel}`],
-        fontSize: 24, fontWeight: "bold", fill: classifiedPoints_dens.stats.col, stroke: "white", strokeWidth: 4
-    }),
-    
-    // --- BOTTOM LEFT: Conditional Probabilities (2 decimals) ---
-    Plot.text([0], {
-       frameAnchor: "bottom-left", dx: 10, dy: -30,
-       text: [`P(A | B) = ${classifiedPoints_dens.stats.p_AgB.toFixed(2)}`],
-       fontSize: 14, fontWeight: "bold", fill: "#2563eb", stroke: "white", strokeWidth: 3, textAnchor: "start"
-    }),
-    Plot.text([0], {
-       frameAnchor: "bottom-left", dx: 10, dy: -10,
-       text: [`P(B | A) = ${classifiedPoints_dens.stats.p_BgA.toFixed(2)}`],
-       fontSize: 14, fontWeight: "bold", fill: "#d97706", stroke: "white", strokeWidth: 3, textAnchor: "start"
-    }),
-
-    // --- BOTTOM RIGHT: Intersection & Product (2 decimals) ---
-    Plot.text([1], {
-       frameAnchor: "bottom-right", dx: -10, dy: -30,
-       text: [`P(A ∩ B) = ${classifiedPoints_dens.stats.p_int.toFixed(2)}`],
-       fontSize: 14, fontWeight: "bold", fill: "#333", stroke: "white", strokeWidth: 3, textAnchor: "end"
-    }),
-    Plot.text([1], {
-       frameAnchor: "bottom-right", dx: -10, dy: -10,
-       text: [`P(A)×P(B) = ${classifiedPoints_dens.stats.p_prod.toFixed(2)}`],
-       fontSize: 14, fontWeight: "bold", fill: "#555", stroke: "white", strokeWidth: 3, textAnchor: "end"
-    }),
-    Plot.text(["Ω"], {
-      frameAnchor: "top-right", dx: -15, dy: 15, 
-      fontSize: 30, fontWeight: "bold", fill: "#999"
-    })
-  ]
-})
+  wrapper.value = {};
+  return wrapper;
+})()
 ```
-
-### Phân phối xác suất (probability distribution)
-
-Là một hàm số (function) thể hiện xác suất của mọi tập hợp con của không gian mẫu $\Omega$.
-
-Phân phối xác suất bắt buộc phải thỏa 3 điều kiện sau:
-
--   $\mathbb{P}(\Omega) = 1$
-
--   $0 \leq \mathbb{P}(A) \leq 1$ với mọi biến cố $A$
-
--   Nếu các biến số $A_1$, $A_2$, ..., $A_n$ xung khắc, thì:
-
-$$\mathbb{P}(A_1 \cup A_2 \cup \cdots \cup A_n) = \mathbb{P}(A_1) + \mathbb{P}(A_2) + \cdots + \mathbb{P}(A_n)$$
 
 ## Biến ngẫu nhiên (random variable)
 

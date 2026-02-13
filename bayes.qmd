@@ -1,7 +1,13 @@
 ---
 title: "Bayesian"
 format: html
+execute: 
+  echo: false
 ---
+
+```{ojs}
+import { createSlider, createButton, injectStyle } from "./_slider.js"
+```
 
 ## Xác suất có điều kiện
 
@@ -32,10 +38,9 @@ Biết rằng học sinh được chọn ở Lớp A. Tính xác suất học si
 
 Thông tin "Học sinh Lớp A" đã làm thu nhỏ không gian mẫu. Không gian mẫu lúc này chỉ là Học sinh lớp A thôi.
 
-$$\mathbb{P}(\text{Nữ} | \text{Lớp A}) = \frac{\overbrace{10}^{\text{Số Nữ trong Lớp A}}}{\underbrace{40}_{\text{Tổng sĩ số Lớp A}}} = 25.0\%$$
+$$\mathbb{P}(\text{Nữ} \mid \text{Lớp A}) = \frac{\overbrace{10}^{\text{Số Nữ trong Lớp A}}}{\underbrace{40}_{\text{Tổng sĩ số Lớp A}}} = 25.0\%$$
 
 ```{ojs}
-//| echo: false
 viewof classroom_prob_sharp = (() => {
   // --- 1. SETUP ---
   const wrapper = document.createElement("div");
@@ -343,35 +348,35 @@ Trong ví dụ chọn ngẫu nhiên 1 học sinh trong trường, chúng ta có 
 - Nếu đã biết là học sinh Lớp A, xác suất đó là Nữ là bao nhiêu?
 
 $$\begin{aligned}
-\mathbb{P}(\text{Nữ} | \text{Lớp A}) &= \frac{\text{Số Nữ trong Lớp A}}{\text{Tổng sĩ số Lớp A}} \\[10pt]
-\Leftrightarrow \text{Số Nữ trong Lớp A} &= \mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng sĩ số Lớp A} \quad (1)
+\mathbb{P}(\text{Nữ} \mid \text{Lớp A}) &= \frac{\text{Số Nữ trong Lớp A}}{\text{Tổng sĩ số Lớp A}} \\[10pt]
+\Leftrightarrow \text{Số Nữ trong Lớp A} &= \mathbb{P}(\text{Nữ} \mid \text{Lớp A}) \times \text{Tổng sĩ số Lớp A} \quad (1)
 \end{aligned}$$
 
 - Nếu đã biết là Nữ, xác suất đó là học sinh Lớp A là bao nhiêu?
 
 $$\begin{aligned}
-\mathbb{P}(\text{Lớp A} | \text{Nữ}) &= \frac{\text{Số Nữ trong Lớp A}}{\text{Tổng số Nữ toàn trường}} \\[10pt]
-\Leftrightarrow \text{Số Nữ trong Lớp A} &= \mathbb{P}(\text{Lớp A} | \text{Nữ}) \times \text{Tổng số Nữ toàn trường} \quad (2)
+\mathbb{P}(\text{Lớp A} \mid \text{Nữ}) &= \frac{\text{Số Nữ trong Lớp A}}{\text{Tổng số Nữ toàn trường}} \\[10pt]
+\Leftrightarrow \text{Số Nữ trong Lớp A} &= \mathbb{P}(\text{Lớp A} \mid \text{Nữ}) \times \text{Tổng số Nữ toàn trường} \quad (2)
 \end{aligned}$$
 
 Từ $(1)$ và $(2)$ ta thấy vế trái đều là $\text{Số Nữ trong Lớp A}$, vậy:
 
 $$\begin{aligned}
-\mathbb{P}(\text{Lớp A} | \text{Nữ}) \times \text{Tổng Nữ} &= \mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A} \\[10pt]
-\Leftrightarrow \mathbb{P}(\text{Lớp A} | \text{Nữ}) &= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A}}{\text{Tổng Nữ}}
+\mathbb{P}(\text{Lớp A} \mid \text{Nữ}) \times \text{Tổng Nữ} &= \mathbb{P}(\text{Nữ} \mid \text{Lớp A}) \times \text{Tổng Lớp A} \\[10pt]
+\Leftrightarrow \mathbb{P}(\text{Lớp A} \mid \text{Nữ}) &= \frac{\mathbb{P}(\text{Nữ} \mid \text{Lớp A}) \times \text{Tổng Lớp A}}{\text{Tổng Nữ}}
 \end{aligned}$$
 
 Chia cả Tử số và Mẫu số cho Tổng số học sinh toàn trường:
 
 $$\begin{aligned}
-\mathbb{P}(\text{Lớp A} | \text{Nữ}) &= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \text{Tổng Lớp A}}{\text{Tổng Nữ}} \\
-&= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \frac{\text{Tổng Lớp A}}{\text{Tổng HS}}}{\frac{\text{Tổng Nữ}}{\text{Tổng HS}}} \\
-&= \frac{\mathbb{P}(\text{Nữ} | \text{Lớp A}) \times \mathbb{P}(\text{Lớp A})}{\mathbb{P}(\text{Nữ})} \quad (3)
+\mathbb{P}(\text{Lớp A} \mid \text{Nữ}) &= \frac{\mathbb{P}(\text{Nữ} \mid \text{Lớp A}) \times \text{Tổng Lớp A}}{\text{Tổng Nữ}} \\
+&= \frac{\mathbb{P}(\text{Nữ} \mid \text{Lớp A}) \times \frac{\text{Tổng Lớp A}}{\text{Tổng HS}}}{\frac{\text{Tổng Nữ}}{\text{Tổng HS}}} \\
+&= \frac{\mathbb{P}(\text{Nữ} \mid \text{Lớp A}) \times \mathbb{P}(\text{Lớp A})}{\mathbb{P}(\text{Nữ})} \quad (3)
 \end{aligned}$$
 
 Đặt $A = \text{Lớp A}$, $B = \text{Nữ}$. Thay vào $(3)$, ta có **Định lý Bayes**:
 
-$$\mathbb{P}(A | B) = \frac{\mathbb{P}(B | A) \times \mathbb{P}(A)}{\mathbb{P}(B)}$$
+$$\mathbb{P}(A \mid B) = \frac{\mathbb{P}(B \mid A) \times \mathbb{P}(A)}{\mathbb{P}(B)}$$
 
 ## Ví dụ
 
@@ -394,182 +399,234 @@ Sau khi đã đi date với từng người, bạn muốn tính xác suất mìn
 Biểu đồ này được tạo theo phương pháp trong video [Bayes theorem, the geometry of changing beliefs](https://www.youtube.com/watch?v=HZGCoVF3YvM) của kênh 3Blue1Brown.
 
 ```{ojs}
-//| echo: false
+viewof bayes_mosaic = (() => {
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:700px;margin:0 auto;`;
+  wrapper.appendChild(injectStyle());
 
-viewof prior = Inputs.range([0, 1], {
-  label: "Prior A", 
-  value: 0.5, 
-  step: 0.05
-})
+  // ══════════════════════════════════════════════════════
+  // PALETTE (light theme)
+  // ══════════════════════════════════════════════════════
+  const COL = {
+    likeA:   "#60a5fa",  // blue-400  — Thích A
+    unlikeA: "#bfdbfe",  // blue-200  — Không thích A
+    likeB:   "#f59e0b",  // amber-500 — Thích B
+    unlikeB: "#fde68a",  // amber-200 — Không thích B
+    txtA:    "#1d4ed8",  // blue-700
+    txtB:    "#b45309",  // amber-700
+    grid:    "#e2e8f0",
+    fg:      "#1e293b",
+    fgSub:   "#64748b",
+  };
 
-viewof like_alex = Inputs.range([0, 1], {
-  label: "Likelihood A", 
-  value: 0.8, 
-  step: 0.05
-})
+  // ══════════════════════════════════════════════════════
+  // CONTROLS
+  // ══════════════════════════════════════════════════════
+  const SL = {};
+  SL.prior = createSlider("P(A)  — Prior", 0.05, 0.95, 0.05, 0.50, COL.txtA, "blue");
+  SL.likA  = createSlider("P(Date | A)  — Likelihood A", 0.05, 0.95, 0.05, 0.80, COL.txtA, "blue");
+  SL.likB  = createSlider("P(Date | B)  — Likelihood B", 0.05, 0.95, 0.05, 0.15, COL.txtB, "amber");
 
-viewof like_ben = Inputs.range([0, 1], {
-  label: "Likelihood B", 
-  value: 0.15, 
-  step: 0.05
-})
+  const r1 = document.createElement("div"); r1.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:10px;";
+  r1.appendChild(SL.prior.el);
+  wrapper.appendChild(r1);
+  const r2 = document.createElement("div"); r2.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:16px;";
+  r2.appendChild(SL.likA.el); r2.appendChild(SL.likB.el);
+  wrapper.appendChild(r2);
 
-// 2. THE CALCULATIONS
-rect_data = [
-  // --- COLUMN 1: ALEX (Left Side) ---
-  {
-    label: "Thích A",
-    x1: 0, x2: prior, y1: 0, y2: like_alex,
-    color: "#6ecae1" 
-  },
-  {
-    label: "Không thích A",
-    x1: 0, x2: prior, y1: like_alex, y2: 1,
-    color: "#1a1a1a" 
-  },
-  // --- COLUMN 2: BEN (Right Side) ---
-  {
-    label: "Thích B",
-    x1: prior, x2: 1, y1: 0, y2: like_ben,
-    color: "#2f7e9b" 
-  },
-  {
-    label: "Không thích B",
-    x1: prior, x2: 1, y1: like_ben, y2: 1,
-    color: "#0f0f0f" 
+  // ══════════════════════════════════════════════════════
+  // SVG
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const W = 620, H = 480;
+  const mg = { t: 55, r: 80, b: 25, l: 80 };
+  const pw = W - mg.l - mg.r, ph = H - mg.t - mg.b;
+
+  function mkEl(tag, a) {
+    const e = document.createElementNS(NS, tag);
+    if (a) for (const [k,v] of Object.entries(a)) e.setAttribute(k,v);
+    return e;
   }
-]
 
-Plot.plot({
-  width: 550, height: 450,
-  marginTop: 50,
-  marginLeft: 60,
-  marginRight: 60,
-  marginBottom: 20,
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.style.cssText = `width:100%;max-width:${W}px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:16px;`;
 
-  style: {
-    background: "black",
-    color: "white",
-    fontSize: "16px" 
-  },
-  
-  x: { axis: null, domain: [0, 1] },
-  y: { axis: null, domain: [0, 1] },
+  // White background
+  svg.appendChild(mkEl("rect", { x: "0", y: "0", width: String(W), height: String(H), fill: "#ffffff", rx: "12" }));
 
-  marks: [
-    // --- PART 1: THE ANNOTATIONS ---
-    // Fix: Use [1] as dummy data, and arrow functions `() =>` for text strings.
+  // 4 mosaic rects
+  const boxes = [];
+  for (let i = 0; i < 4; i++) {
+    const r = mkEl("rect", { stroke: "#fff", "stroke-width": "2", rx: "3" });
+    svg.appendChild(r); boxes.push(r);
+  }
 
-    // A. TOP ANNOTATION: Prior P(H)
-    Plot.ruleY([1], { 
-      y: 1.03,           
-      x1: 0, x2: prior,  
-      stroke: "#000", strokeWidth: 2,
-      clip: false
-    }),
-    Plot.text([1], {
-      x: prior / 2,      
-      y: 1.03, dy: -10,
-      text: () => `P(A) = ${prior.toFixed(2)}`, // <--- Arrow function required
-      fill: "#000", fontWeight: "bold", fontSize: 16,
-      clip: false
-    }),
+  // Labels
+  const lbls = [];
+  for (let i = 0; i < 4; i++) {
+    const t = mkEl("text", { "text-anchor": "middle", "dominant-baseline": "middle", "font-size": "15", "font-weight": "700" });
+    svg.appendChild(t); lbls.push(t);
+  }
+  // Area sub-labels
+  const aLbls = [];
+  for (let i = 0; i < 4; i++) {
+    const t = mkEl("text", { "text-anchor": "middle", "dominant-baseline": "middle", "font-size": "12", "font-family": "'SF Mono',monospace" });
+    svg.appendChild(t); aLbls.push(t);
+  }
 
-    // B. LEFT ANNOTATION: P(E|H)
-    Plot.ruleX([1], {
-      x: -0.03,          
-      y1: 0, y2: like_alex, 
-      stroke: "#6ecae1", strokeWidth: 2,
-      clip: false
-    }),
-    Plot.text([1], {
-      x: -0.03,          
-      y: like_alex / 2, 
-      dx: -15, // Push slightly left away from the line
-      rotate: -90, // <--- Rotates text vertically
-      text: () => `P(Date|A) = ${like_alex.toFixed(2)}`, // Removed \n for cleaner vertical look
-      fill: "#6ecae1", 
-      textAnchor: "middle", // Centers text on the bar height
-      fontWeight: "bold", fontSize: 16, clip: false
-    }),
+  // ── Top annotation ──
+  const topLine = mkEl("line", { stroke: COL.fg, "stroke-width": "2" }); svg.appendChild(topLine);
+  const topText = mkEl("text", { "text-anchor": "middle", fill: COL.fg, "font-size": "15", "font-weight": "700" }); svg.appendChild(topText);
 
-    // C. RIGHT ANNOTATION: P(E|¬H)
-    Plot.ruleX([1], {
-      x: 1.03,           
-      y1: 0, y2: like_ben, 
-      stroke: "#2f7e9b", strokeWidth: 2, clip: false
-    }),
-    Plot.text([1], {
-      x: 1.03,           
-      y: like_ben / 2, 
-      dx: 15, // Push slightly right away from the line
-      rotate: -90, // <--- Rotates text vertically
-      text: () => `P(Date|B) = ${like_ben.toFixed(2)}`, 
-      fill: "#2f7e9b", 
-      textAnchor: "middle", 
-      fontWeight: "bold", fontSize: 16, clip: false
-    }),
+  // ── Left annotation ──
+  const leftLine = mkEl("line", { stroke: COL.txtA, "stroke-width": "2" }); svg.appendChild(leftLine);
+  const leftText = mkEl("text", { "text-anchor": "middle", fill: COL.txtA, "font-size": "14", "font-weight": "700" }); svg.appendChild(leftText);
 
-    // --- PART 2: THE MOSAIC ---
-    Plot.rect(rect_data, {
-      x1: "x1", x2: "x2", y1: "y1", y2: "y2", 
-      fill: "color", stroke: "white", strokeWidth: 1,
-      tip: {
-        fill: "#222", stroke: "white",
-        maxRadius: 100,
-        title: "label",
-        channels: {
-          "Diện tích": d => ((d.x2 - d.x1) * (d.y2 - d.y1)).toFixed(3)
-        },
-        format: {
-          "Diện tích": true, x: false, y: false, fill: false, stroke: false, x1: false, y1: false, x2: false, y2: false
-        }
-      }
-    }),
-    
-    // Labels inside boxes
-    Plot.text(rect_data, {
-      x: d => (d.x1 + d.x2) / 2, 
-      y: d => (d.y1 + d.y2) / 2, 
-      text: d => (d.y2 - d.y1) > 0.1 && (d.x2 - d.x1) > 0.1 ? d.label : "", 
-      fill: "white", fontWeight: "bold", pointerEvents: "none" 
-    })
-  ]
-})
-```
+  // ── Right annotation ──
+  const rightLine = mkEl("line", { stroke: COL.txtB, "stroke-width": "2" }); svg.appendChild(rightLine);
+  const rightText = mkEl("text", { "text-anchor": "middle", fill: COL.txtB, "font-size": "14", "font-weight": "700" }); svg.appendChild(rightText);
 
-```{ojs}
-//| echo: false
+  wrapper.appendChild(svg);
 
-area_alex = prior * like_alex
-area_ben  = (1 - prior) * like_ben
-total_area = area_alex + area_ben
-posterior_alex = area_alex / total_area
+  // ══════════════════════════════════════════════════════
+  // FORMULA
+  // ══════════════════════════════════════════════════════
+  const formulaBox = document.createElement("div");
+  formulaBox.style.cssText = `
+    width:100%;padding:16px 20px;border-radius:12px;
+    background:#f8fafc;border:1px solid #e2e8f0;
+    display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;
+    font-size:18px;font-weight:700;color:${COL.fg};
+    font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  `;
+  wrapper.appendChild(formulaBox);
 
-html`
-  <div style="display: flex; align-items: center; flex-wrap: wrap;">
-    <div style="font-weight: bold; margin-right: 5px;">
-      P(A | Date) = 
-    </div>
+  // ══════════════════════════════════════════════════════
+  // UPDATE
+  // ══════════════════════════════════════════════════════
+  const rectNames  = ["Thích A", "Không thích A", "Thích B", "Không thích B"];
+  const rectColors = [COL.likeA, COL.unlikeA, COL.likeB, COL.unlikeB];
+  // Text color: dark on light rects, white on saturated
+  const txtColors  = ["#fff", COL.txtA, "#fff", COL.txtB];
+  const subColors  = ["rgba(255,255,255,0.7)", COL.txtA + "99", "rgba(255,255,255,0.7)", COL.txtB + "99"];
 
-    <div style="display: flex; flex-direction: column; align-items: center; margin: 0 5px;">
-      
-      <div style="border-bottom: 2px solid; padding-bottom: 5px; text-align: center; width: 100%;">
-        <span style="color: #6ecae1;">${area_alex.toFixed(3)}</span>
+  function update() {
+    const pA = SL.prior.val();
+    const lA = SL.likA.val();
+    const lB = SL.likB.val();
+    const pB = 1 - pA;
+
+    const data = [
+      { x1: 0,  x2: pA, y1: 0,  y2: lA },
+      { x1: 0,  x2: pA, y1: lA, y2: 1  },
+      { x1: pA, x2: 1,  y1: 0,  y2: lB },
+      { x1: pA, x2: 1,  y1: lB, y2: 1  },
+    ];
+
+    const sx = v => mg.l + v * pw;
+    const sy = v => mg.t + (1 - v) * ph;
+
+    for (let i = 0; i < 4; i++) {
+      const d = data[i];
+      const px1 = sx(d.x1), px2 = sx(d.x2);
+      const py1 = sy(d.y2), py2 = sy(d.y1);
+      const rw = px2 - px1, rh = py2 - py1;
+
+      boxes[i].setAttribute("x", px1); boxes[i].setAttribute("y", py1);
+      boxes[i].setAttribute("width", Math.max(0, rw)); boxes[i].setAttribute("height", Math.max(0, rh));
+      boxes[i].setAttribute("fill", rectColors[i]);
+
+      const cx = (px1 + px2) / 2, cy = (py1 + py2) / 2;
+      lbls[i].setAttribute("x", cx); lbls[i].setAttribute("y", cy - 8);
+      lbls[i].setAttribute("fill", txtColors[i]);
+      lbls[i].textContent = (rw > 60 && rh > 35) ? rectNames[i] : "";
+
+      const area = (d.x2 - d.x1) * (d.y2 - d.y1);
+      aLbls[i].setAttribute("x", cx); aLbls[i].setAttribute("y", cy + 14);
+      aLbls[i].setAttribute("fill", subColors[i]);
+      aLbls[i].textContent = (rw > 60 && rh > 35) ? area.toFixed(3) : "";
+    }
+
+    // ── Top: P(A) ──
+    const topY = mg.t - 18;
+    topLine.setAttribute("x1", sx(0)); topLine.setAttribute("x2", sx(pA));
+    topLine.setAttribute("y1", topY); topLine.setAttribute("y2", topY);
+    topText.setAttribute("x", (sx(0) + sx(pA)) / 2); topText.setAttribute("y", topY - 12);
+    topText.textContent = `P(A) = ${pA.toFixed(2)}`;
+
+    // ── Left: P(Date|A) ──
+    const leftX = mg.l - 14;
+    leftLine.setAttribute("x1", leftX); leftLine.setAttribute("x2", leftX);
+    leftLine.setAttribute("y1", sy(lA)); leftLine.setAttribute("y2", sy(0));
+    const leftMidY = (sy(lA) + sy(0)) / 2;
+    leftText.setAttribute("x", leftX - 16); leftText.setAttribute("y", leftMidY);
+    leftText.setAttribute("transform", `rotate(-90,${leftX - 16},${leftMidY})`);
+    leftText.textContent = `P(Date|A) = ${lA.toFixed(2)}`;
+
+    // ── Right: P(Date|B) ──
+    const rightX = sx(1) + 14;
+    rightLine.setAttribute("x1", rightX); rightLine.setAttribute("x2", rightX);
+    rightLine.setAttribute("y1", sy(lB)); rightLine.setAttribute("y2", sy(0));
+    const rightMidY = (sy(lB) + sy(0)) / 2;
+    rightText.setAttribute("x", rightX + 16); rightText.setAttribute("y", rightMidY);
+    rightText.setAttribute("transform", `rotate(90,${rightX + 16},${rightMidY})`);
+    rightText.textContent = `P(Date|B) = ${lB.toFixed(2)}`;
+
+    // ── Formula ──
+    const areaA = pA * lA;
+    const areaB = pB * lB;
+    const total = areaA + areaB;
+    const posterior = total > 0 ? areaA / total : 0;
+
+    function miniRect(color, w, h, val, textColor) {
+      const maxH = 28;
+      const rw = Math.max(14, w / Math.max(w, h) * maxH * 1.5);
+      const rh = Math.max(10, h / Math.max(w, h) * maxH);
+      return `<span style="display:inline-flex;align-items:center;gap:4px;vertical-align:middle;">` +
+        `<span style="display:inline-block;width:${rw.toFixed(0)}px;height:${rh.toFixed(0)}px;` +
+        `background:${color};border-radius:3px;border:1px solid ${textColor}30;vertical-align:middle;"></span>` +
+        `<span style="color:${textColor}">${val}</span></span>`;
+    }
+
+    formulaBox.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;">
+        <span>P(A | Date) =</span>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+          <div style="padding-bottom:5px;border-bottom:2px solid ${COL.fg};">
+            ${miniRect(COL.likeA, pA, lA, areaA.toFixed(3), COL.txtA)}
+          </div>
+          <div style="padding-top:5px;display:flex;align-items:center;gap:6px;">
+            ${miniRect(COL.likeA, pA, lA, areaA.toFixed(3), COL.txtA)}
+            <span style="color:${COL.fgSub}">+</span>
+            ${miniRect(COL.likeB, pB, lB, areaB.toFixed(3), COL.txtB)}
+          </div>
+        </div>
+        <span style="color:${COL.txtA};font-size:22px;margin-left:4px;">= ${(posterior * 100).toFixed(1)}%</span>
       </div>
-      
-      <div style="padding-top: 5px; text-align: center;">
-        <span style="color: #6ecae1;">${area_alex.toFixed(3)}</span> + 
-        <span style="color: #2f7e9b;">${area_ben.toFixed(3)}</span>
-      </div>
-      
-    </div>
+    `;
+  }
 
-    <div style="font-weight: bold; color: #6ecae1; margin-left: 5px;">
-      = ${(posterior_alex * 100).toFixed(1)}%
-    </div>
-  </div>
-`
+  // ══════════════════════════════════════════════════════
+  // EVENTS
+  // ══════════════════════════════════════════════════════
+  function onInput() { SL.prior.sync(); SL.likA.sync(); SL.likB.sync(); update(); }
+  SL.prior.input.addEventListener("input", onInput);
+  SL.likA.input.addEventListener("input", onInput);
+  SL.likB.input.addEventListener("input", onInput);
+  update();
+
+  invalidation.then(() => {
+    SL.prior.input.removeEventListener("input", onInput);
+    SL.likA.input.removeEventListener("input", onInput);
+    SL.likB.input.removeEventListener("input", onInput);
+  });
+
+  wrapper.value = {};
+  return wrapper;
+})()
 ```
 
 ## Ứng dụng
@@ -802,5 +859,1390 @@ html`
 ```
 
 ## Xấp xỉ lưới
+
+Chúng ta đã 
+
+```{ojs}
+viewof bayes_grid = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. MATH
+  // ══════════════════════════════════════════════════════
+  function lgamma(x) {
+    if (x <= 0) return 0;
+    const c = [0.99999999999980993,676.5203681218851,-1259.1392167224028,
+      771.32342877765313,-176.61502916214059,12.507343278686905,
+      -0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+    let sum = c[0];
+    for (let i = 1; i < 9; i++) sum += c[i] / (x + i - 1);
+    const t = x + 6.5;
+    return 0.5 * Math.log(2 * Math.PI) + (x - 0.5) * Math.log(t) - t + Math.log(sum);
+  }
+  function lbeta(a, b) { return lgamma(a) + lgamma(b) - lgamma(a + b); }
+  function betaPDF(x, a, b) {
+    if (x <= 0 || x >= 1) return 0;
+    return Math.exp((a - 1) * Math.log(x) + (b - 1) * Math.log(1 - x) - lbeta(a, b));
+  }
+  function binomLik(p, k, n) {
+    if (p <= 0) return k === 0 ? 1 : 0;
+    if (p >= 1) return k === n ? 1 : 0;
+    return Math.exp(k * Math.log(p) + (n - k) * Math.log(1 - p));
+  }
+  function discretise(pdfFn, ps) {
+    const n = ps.length, w = 1 / n;
+    const vals = ps.map(p => pdfFn(p) * w);
+    const s = vals.reduce((a, v) => a + v, 0);
+    if (s > 0) vals.forEach((v, i) => vals[i] = v / s);
+    return vals;
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;
+  `;
+  wrapper.appendChild(injectStyle());
+
+  // ══════════════════════════════════════════════════════
+  // 3. CONTROLS
+  // ══════════════════════════════════════════════════════
+  const SL = {};
+  SL.alpha = createSlider("Prior \u03B1", 0.5, 10, 0.5, 1, "#d97706", "amber");
+  SL.beta  = createSlider("Prior \u03B2", 0.5, 10, 0.5, 1, "#d97706", "amber");
+  SL.n     = createSlider("n (trials)", 1, 30, 1, 9, "#7c3aed", "purple");
+  SL.k     = createSlider("k (observed successes)", 0, 30, 1, 6, "#7c3aed", "purple");
+  SL.grid  = createSlider("Grid points", 5, 50, 1, 10, "#1e293b", "dark");
+
+  const r1 = document.createElement("div");
+  r1.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:10px;";
+  r1.appendChild(SL.alpha.el); r1.appendChild(SL.beta.el);
+  wrapper.appendChild(r1);
+  const r2 = document.createElement("div");
+  r2.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:10px;";
+  r2.appendChild(SL.n.el); r2.appendChild(SL.k.el);
+  wrapper.appendChild(r2);
+  const r3 = document.createElement("div");
+  r3.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:12px;";
+  r3.appendChild(SL.grid.el);
+  const spacer = document.createElement("div"); spacer.style.cssText = "flex:1;min-width:120px;";
+  r3.appendChild(spacer);
+  wrapper.appendChild(r3);
+
+  const btnStep = createButton("▶  Step", "step");
+  const btnAuto = createButton("⏩  Auto", "auto");
+  const btnNorm = createButton("📊  Normalise", "go");
+  const btnReset = createButton("↺  Reset", "reset");
+  btnNorm.el.style.opacity = "0.4"; btnNorm.el.style.pointerEvents = "none";
+
+  const r4 = document.createElement("div");
+  r4.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
+  r4.appendChild(btnStep.el); r4.appendChild(btnAuto.el); r4.appendChild(btnNorm.el); r4.appendChild(btnReset.el);
+  wrapper.appendChild(r4);
+
+  const calcBox = document.createElement("div");
+  calcBox.style.cssText = `
+    width:100%;padding:10px 16px;border-radius:8px;margin-bottom:14px;
+    background:#f8fafc;border:1px solid #e2e8f0;min-height:28px;
+    font-size:14px;color:#334155;line-height:1.6;
+    font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    text-align:center;
+  `;
+  wrapper.appendChild(calcBox);
+
+  // ══════════════════════════════════════════════════════
+  // 4. SVG PANELS — Prior & Likelihood (standard)
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const PW = 300, PH = 240;
+  const mg_ = { t: 34, r: 10, b: 42, l: 46 };
+  const pw_ = PW - mg_.l - mg_.r, ph_ = PH - mg_.t - mg_.b;
+
+  function mkEl(tag, a) {
+    const e = document.createElementNS(NS, tag);
+    if (a) for (const [k, v] of Object.entries(a)) e.setAttribute(k, v);
+    return e;
+  }
+
+  function createPanel(title, titleColor, barColor, barStroke) {
+    const svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${PW} ${PH}`);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    svg.style.cssText = "flex:1;min-width:0;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;";
+    const ttl = mkEl("text", { x: String(PW / 2), y: "22", "text-anchor": "middle", fill: titleColor, "font-size": "14", "font-weight": "700" });
+    ttl.textContent = title; svg.appendChild(ttl);
+    const grids = []; for (let i = 0; i <= 3; i++) { svg.appendChild(mkEl("line", { stroke: "#e2e8f0", "stroke-width": "0.7" })); grids.push(svg.lastChild); }
+    const yLbls = []; for (let i = 0; i <= 3; i++) { svg.appendChild(mkEl("text", { "text-anchor": "end", fill: "#94a3b8", "font-size": "11", "font-family": "'SF Mono',monospace" })); yLbls.push(svg.lastChild); }
+    const bars = []; for (let i = 0; i < 50; i++) { const r = mkEl("rect", { rx: "2", fill: barColor, opacity: "0.6", stroke: barStroke, "stroke-width": "0.5" }); r.style.display = "none"; svg.appendChild(r); bars.push(r); }
+    const dots = []; for (let i = 0; i < 50; i++) { const c = mkEl("circle", { r: "5", fill: barColor, stroke: "#fff", "stroke-width": "2" }); c.style.display = "none"; svg.appendChild(c); dots.push(c); }
+    const xAx = mkEl("line", { stroke: "#94a3b8" }); svg.appendChild(xAx);
+    svg.appendChild(mkEl("line", { x1: String(mg_.l), x2: String(mg_.l), y1: String(mg_.t), y2: String(mg_.t + ph_), stroke: "#94a3b8" }));
+    const xTicks = []; for (let i = 0; i < 6; i++) { const ln = mkEl("line", { stroke: "#94a3b8", y2: "4" }); ln.style.display = "none"; svg.appendChild(ln); const t = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "11", "font-family": "'SF Mono',monospace", dy: "14" }); t.style.display = "none"; svg.appendChild(t); xTicks.push({ ln, t }); }
+    const xLbl = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "12", y: String(PH - 4) }); xLbl.textContent = "p"; svg.appendChild(xLbl);
+    return { svg, bars, dots, grids, yLbls, xAx, xTicks, xLbl, ttl };
+  }
+
+  const panelPrior = createPanel("Prior", "#d97706", "#d97706", "#b45309");
+  const panelLik = createPanel("Likelihood", "#7c3aed", "#7c3aed", "#6d28d9");
+
+  // ══════════════════════════════════════════════════════
+  // 5. POSTERIOR PANEL — dual axis: bars (left) + line (right)
+  // ══════════════════════════════════════════════════════
+  const postMg = { t: 34, r: 46, b: 42, l: 46 };
+  const postPw = PW - postMg.l - postMg.r;
+  const postPh = PH - postMg.t - postMg.b;
+
+  const postSvg = document.createElementNS(NS, "svg");
+  postSvg.setAttribute("viewBox", `0 0 ${PW} ${PH}`);
+  postSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  postSvg.style.cssText = "flex:1;min-width:0;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;";
+
+  const postTtl = mkEl("text", { x: String(PW / 2), y: "22", "text-anchor": "middle", fill: "#16a34a", "font-size": "14", "font-weight": "700" });
+  postTtl.textContent = "Posterior"; postSvg.appendChild(postTtl);
+
+  // Left grid + labels (unstd)
+  const pGrids = []; for (let i = 0; i <= 3; i++) { postSvg.appendChild(mkEl("line", { stroke: "#e2e8f0", "stroke-width": "0.7" })); pGrids.push(postSvg.lastChild); }
+  const pYLbls = []; for (let i = 0; i <= 3; i++) { postSvg.appendChild(mkEl("text", { "text-anchor": "end", fill: "#94a3b8", "font-size": "11", "font-family": "'SF Mono',monospace" })); pYLbls.push(postSvg.lastChild); }
+
+  // Bars (unstd, green)
+  const pBars = []; for (let i = 0; i < 50; i++) { const r = mkEl("rect", { rx: "2", fill: "#16a34a", opacity: "0.6", stroke: "#15803d", "stroke-width": "0.5" }); r.style.display = "none"; postSvg.appendChild(r); pBars.push(r); }
+
+  // Dots (step highlight)
+  const pDots = []; for (let i = 0; i < 50; i++) { const c = mkEl("circle", { r: "5", fill: "#16a34a", stroke: "#fff", "stroke-width": "2" }); c.style.display = "none"; postSvg.appendChild(c); pDots.push(c); }
+
+  // Normalised line + dots (overlay, red-orange, separate y-axis on right)
+  const normPath = mkEl("path", { fill: "none", stroke: "#dc2626", "stroke-width": "2.5", opacity: "0.9" });
+  normPath.style.display = "none"; postSvg.appendChild(normPath);
+  const normDots = []; for (let i = 0; i < 50; i++) { const c = mkEl("circle", { r: "4.5", fill: "#dc2626", stroke: "#fff", "stroke-width": "1.5" }); c.style.display = "none"; postSvg.appendChild(c); normDots.push(c); }
+
+  // Right axis labels (normalised)
+  const rYLbls = []; for (let i = 0; i <= 3; i++) { const t = mkEl("text", { "text-anchor": "start", fill: "#dc2626", "font-size": "11", "font-weight": "600", "font-family": "'SF Mono',monospace" }); t.style.display = "none"; postSvg.appendChild(t); rYLbls.push(t); }
+  // Right axis line
+  const rAxis = mkEl("line", { stroke: "#dc2626", "stroke-width": "1", opacity: "0.5" });
+  rAxis.style.display = "none"; postSvg.appendChild(rAxis);
+
+  // X axis
+  const pXAx = mkEl("line", { stroke: "#94a3b8" }); postSvg.appendChild(pXAx);
+  postSvg.appendChild(mkEl("line", { x1: String(postMg.l), x2: String(postMg.l), y1: String(postMg.t), y2: String(postMg.t + postPh), stroke: "#94a3b8" }));
+  const pXTicks = []; for (let i = 0; i < 6; i++) { const ln = mkEl("line", { stroke: "#94a3b8", y2: "4" }); ln.style.display = "none"; postSvg.appendChild(ln); const t = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "11", "font-family": "'SF Mono',monospace", dy: "14" }); t.style.display = "none"; postSvg.appendChild(t); pXTicks.push({ ln, t }); }
+  const pXLbl = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "12", y: String(PH - 4) }); pXLbl.textContent = "p"; postSvg.appendChild(pXLbl);
+
+  // Legend
+  const legG = mkEl("g"); legG.style.display = "none";
+  legG.appendChild(mkEl("rect", { x: String(postMg.l + 4), y: String(postMg.t + 2), width: "10", height: "10", rx: "2", fill: "#16a34a", opacity: "0.6" }));
+  const lt1 = mkEl("text", { x: String(postMg.l + 18), y: String(postMg.t + 11), fill: "#16a34a", "font-size": "9", "font-weight": "600" }); lt1.textContent = "Unstd."; legG.appendChild(lt1);
+  legG.appendChild(mkEl("line", { x1: String(postMg.l + 4), x2: String(postMg.l + 14), y1: String(postMg.t + 20), y2: String(postMg.t + 20), stroke: "#dc2626", "stroke-width": "2.5" }));
+  const lt2 = mkEl("text", { x: String(postMg.l + 18), y: String(postMg.t + 24), fill: "#dc2626", "font-size": "9", "font-weight": "600" }); lt2.textContent = "Normalised"; legG.appendChild(lt2);
+  postSvg.appendChild(legG);
+
+  const chartRow = document.createElement("div");
+  chartRow.style.cssText = "display:flex;gap:8px;width:100%;";
+  chartRow.appendChild(panelPrior.svg); chartRow.appendChild(panelLik.svg); chartRow.appendChild(postSvg);
+  wrapper.appendChild(chartRow);
+
+  // ══════════════════════════════════════════════════════
+  // 6. STATE
+  // ══════════════════════════════════════════════════════
+  let grid = [], stepIdx = -1, normalised = false, autoId = 0, running = false;
+  let fixedMaxPrior = 0.1, fixedMaxLik = 0.1, fixedMaxRaw = 0.1, fixedMaxNorm = 0.1;
+
+  function buildGrid() {
+    const nG = SL.grid.val(), a = SL.alpha.val(), b = SL.beta.val();
+    const k = Math.min(SL.k.val(), SL.n.val()), n = SL.n.val();
+    const ps = []; for (let i = 0; i < nG; i++) ps.push((i + 0.5) / nG);
+    const priorVals = discretise(p => betaPDF(p, a, b), ps);
+    const likVals = ps.map(p => binomLik(p, k, n));
+    grid = []; let rawSum = 0;
+    for (let i = 0; i < nG; i++) {
+      const raw = priorVals[i] * likVals[i]; rawSum += raw;
+      grid.push({ p: ps[i], prior: priorVals[i], lik: likVals[i], raw, postNorm: 0 });
+    }
+    if (rawSum > 0) grid.forEach(g => g.postNorm = g.raw / rawSum);
+    fixedMaxPrior = Math.max(...grid.map(g => g.prior)) * 1.2 || 0.1;
+    fixedMaxLik = Math.max(...grid.map(g => g.lik)) * 1.2 || 0.1;
+    fixedMaxRaw = Math.max(...grid.map(g => g.raw)) * 1.2 || 0.001;
+    fixedMaxNorm = Math.max(...grid.map(g => g.postNorm)) * 1.2 || 0.1;
+    stepIdx = -1; normalised = false;
+    btnNorm.el.style.opacity = "0.4"; btnNorm.el.style.pointerEvents = "none";
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 7. RENDER
+  // ══════════════════════════════════════════════════════
+  function fmtY(v) { if (v === 0) return "0"; if (v < 0.001) return v.toExponential(1); if (v < 0.01) return v.toFixed(3); return v.toFixed(2); }
+  function fmtV(v) { if (v === 0) return "0"; if (v < 0.0001) return v.toExponential(2); return v.toFixed(4); }
+
+  function renderStdPanel(panel, key, maxVal, showUpTo, highlightIdx) {
+    const nG = grid.length, barW = Math.max(3, Math.min(18, pw_ / nG * 0.8));
+    const sx = p => mg_.l + p * pw_, sy = v => mg_.t + ph_ - (v / (maxVal || 1)) * ph_, baseline = mg_.t + ph_;
+    for (let i = 0; i <= 3; i++) { const v = (maxVal / 3) * i, yy = sy(v); panel.grids[i].setAttribute("x1", mg_.l); panel.grids[i].setAttribute("x2", PW - mg_.r); panel.grids[i].setAttribute("y1", yy); panel.grids[i].setAttribute("y2", yy); panel.yLbls[i].setAttribute("x", mg_.l - 5); panel.yLbls[i].setAttribute("y", yy + 4); panel.yLbls[i].textContent = fmtY(v); }
+    for (let i = 0; i < 50; i++) { if (i < nG && i <= showUpTo) { const g = grid[i], bx = sx(g.p) - barW / 2, by = sy(g[key]); panel.bars[i].setAttribute("x", bx); panel.bars[i].setAttribute("y", by); panel.bars[i].setAttribute("width", barW); panel.bars[i].setAttribute("height", Math.max(0, baseline - by)); panel.bars[i].setAttribute("opacity", highlightIdx >= 0 && i === highlightIdx ? "1" : highlightIdx >= 0 ? "0.3" : "0.6"); panel.bars[i].style.display = ""; } else { panel.bars[i].style.display = "none"; } }
+    for (let i = 0; i < 50; i++) { if (i < nG && i === highlightIdx && i <= showUpTo) { panel.dots[i].setAttribute("cx", sx(grid[i].p)); panel.dots[i].setAttribute("cy", sy(grid[i][key])); panel.dots[i].style.display = ""; } else { panel.dots[i].style.display = "none"; } }
+    panel.xAx.setAttribute("x1", mg_.l); panel.xAx.setAttribute("x2", PW - mg_.r); panel.xAx.setAttribute("y1", baseline); panel.xAx.setAttribute("y2", baseline); panel.xLbl.setAttribute("x", mg_.l + pw_ / 2);
+    const ticks = [0, 0.25, 0.5, 0.75, 1.0];
+    for (let i = 0; i < 6; i++) { if (i < ticks.length) { const xx = sx(ticks[i]); panel.xTicks[i].ln.setAttribute("x1", xx); panel.xTicks[i].ln.setAttribute("x2", xx); panel.xTicks[i].ln.setAttribute("y1", baseline); panel.xTicks[i].ln.setAttribute("y2", baseline + 4); panel.xTicks[i].ln.style.display = ""; panel.xTicks[i].t.setAttribute("x", xx); panel.xTicks[i].t.setAttribute("y", baseline + 4); panel.xTicks[i].t.textContent = ticks[i].toFixed(2); panel.xTicks[i].t.style.display = ""; } else { panel.xTicks[i].ln.style.display = "none"; panel.xTicks[i].t.style.display = "none"; } }
+  }
+
+  function renderPostPanel() {
+    const nG = grid.length, hi = (stepIdx >= 0 && stepIdx < nG) ? stepIdx : -1;
+    const showUpTo = stepIdx >= 0 ? Math.min(stepIdx, nG - 1) : -1;
+    const barW = Math.max(3, Math.min(18, postPw / nG * 0.8));
+    const sx = p => postMg.l + p * postPw;
+    const syL = v => postMg.t + postPh - (v / (fixedMaxRaw || 1)) * postPh;
+    const syR = v => postMg.t + postPh - (v / (fixedMaxNorm || 1)) * postPh;
+    const baseline = postMg.t + postPh;
+
+    // Left grid + labels (unstd)
+    for (let i = 0; i <= 3; i++) {
+      const v = (fixedMaxRaw / 3) * i, yy = syL(v);
+      pGrids[i].setAttribute("x1", postMg.l); pGrids[i].setAttribute("x2", PW - postMg.r);
+      pGrids[i].setAttribute("y1", yy); pGrids[i].setAttribute("y2", yy);
+      pYLbls[i].setAttribute("x", postMg.l - 5); pYLbls[i].setAttribute("y", yy + 4);
+      pYLbls[i].textContent = fmtY(v);
+      pYLbls[i].setAttribute("fill", "#94a3b8");
+    }
+
+    // Bars (unstd) — always shown up to showUpTo (or all if normalised)
+    const barShowUpTo = normalised ? nG - 1 : showUpTo;
+    for (let i = 0; i < 50; i++) {
+      if (i < nG && i <= barShowUpTo) {
+        const g = grid[i], bx = sx(g.p) - barW / 2, by = syL(g.raw);
+        pBars[i].setAttribute("x", bx); pBars[i].setAttribute("y", by);
+        pBars[i].setAttribute("width", barW);
+        pBars[i].setAttribute("height", Math.max(0, baseline - by));
+        pBars[i].setAttribute("opacity",
+          normalised ? "0.35" :
+          hi >= 0 && i === hi ? "1" : hi >= 0 ? "0.3" : "0.6");
+        pBars[i].style.display = "";
+      } else { pBars[i].style.display = "none"; }
+    }
+
+    // Dots (step highlight, only during stepping)
+    for (let i = 0; i < 50; i++) {
+      if (!normalised && i < nG && i === hi && i <= barShowUpTo) {
+        pDots[i].setAttribute("cx", sx(grid[i].p)); pDots[i].setAttribute("cy", syL(grid[i].raw));
+        pDots[i].style.display = "";
+      } else { pDots[i].style.display = "none"; }
+    }
+
+    // Normalised line + dots + right axis (only after normalise)
+    if (normalised) {
+      let d = "";
+      for (let i = 0; i < nG; i++) {
+        const px = sx(grid[i].p), py = syR(grid[i].postNorm);
+        d += (i === 0 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1);
+      }
+      normPath.setAttribute("d", d); normPath.style.display = "";
+
+      for (let i = 0; i < 50; i++) {
+        if (i < nG) {
+          normDots[i].setAttribute("cx", sx(grid[i].p));
+          normDots[i].setAttribute("cy", syR(grid[i].postNorm));
+          normDots[i].style.display = "";
+        } else { normDots[i].style.display = "none"; }
+      }
+
+      // Right axis line
+      rAxis.setAttribute("x1", PW - postMg.r); rAxis.setAttribute("x2", PW - postMg.r);
+      rAxis.setAttribute("y1", postMg.t); rAxis.setAttribute("y2", baseline);
+      rAxis.style.display = "";
+
+      // Right axis labels
+      for (let i = 0; i <= 3; i++) {
+        const v = (fixedMaxNorm / 3) * i, yy = syR(v);
+        rYLbls[i].setAttribute("x", PW - postMg.r + 4); rYLbls[i].setAttribute("y", yy + 4);
+        rYLbls[i].textContent = fmtY(v);
+        rYLbls[i].style.display = "";
+      }
+
+      legG.style.display = "";
+    } else {
+      normPath.style.display = "none";
+      for (let i = 0; i < 50; i++) normDots[i].style.display = "none";
+      rAxis.style.display = "none";
+      for (let i = 0; i <= 3; i++) rYLbls[i].style.display = "none";
+      legG.style.display = "none";
+    }
+
+    // X axis
+    pXAx.setAttribute("x1", postMg.l); pXAx.setAttribute("x2", PW - postMg.r);
+    pXAx.setAttribute("y1", baseline); pXAx.setAttribute("y2", baseline);
+    pXLbl.setAttribute("x", postMg.l + postPw / 2);
+
+    const ticks = [0, 0.25, 0.5, 0.75, 1.0];
+    for (let i = 0; i < 6; i++) {
+      if (i < ticks.length) {
+        const xx = sx(ticks[i]);
+        pXTicks[i].ln.setAttribute("x1", xx); pXTicks[i].ln.setAttribute("x2", xx);
+        pXTicks[i].ln.setAttribute("y1", baseline); pXTicks[i].ln.setAttribute("y2", baseline + 4);
+        pXTicks[i].ln.style.display = "";
+        pXTicks[i].t.setAttribute("x", xx); pXTicks[i].t.setAttribute("y", baseline + 4);
+        pXTicks[i].t.textContent = ticks[i].toFixed(2); pXTicks[i].t.style.display = "";
+      } else { pXTicks[i].ln.style.display = "none"; pXTicks[i].t.style.display = "none"; }
+    }
+  }
+
+  function renderAll() {
+    const hi = (stepIdx >= 0 && stepIdx < grid.length) ? stepIdx : -1;
+    const done = stepIdx >= grid.length;
+
+    renderStdPanel(panelPrior, "prior", fixedMaxPrior, grid.length - 1, hi);
+    renderStdPanel(panelLik, "lik", fixedMaxLik, grid.length - 1, hi);
+    renderPostPanel();
+
+    const a = SL.alpha.val(), b = SL.beta.val();
+    const k = Math.min(SL.k.val(), SL.n.val()), n = SL.n.val();
+    panelPrior.ttl.textContent = `Prior: Beta(${a}, ${b})`;
+    panelLik.ttl.textContent = `Lik: k=${k} from n=${n}`;
+    postTtl.textContent = normalised ? "Posterior" : done ? "Posterior (unstandardised)" : "Posterior \u221D Prior \u00D7 Lik";
+
+    if (stepIdx < 0) {
+      calcBox.innerHTML = `Grid: <b>${grid.length}</b> points. Prior sums to <b>${grid.reduce((s, g) => s + g.prior, 0).toFixed(3)}</b>. Press <b>Step</b> or <b>Auto</b>.`;
+    } else if (stepIdx < grid.length) {
+      const g = grid[stepIdx];
+      calcBox.innerHTML = `Point ${stepIdx + 1}/${grid.length}: <b>p = ${g.p.toFixed(3)}</b> → <span style="color:#d97706">${fmtV(g.prior)}</span> \u00D7 <span style="color:#7c3aed">${fmtV(g.lik)}</span> = <span style="color:#16a34a;font-weight:700">${fmtV(g.raw)}</span>`;
+    } else if (!normalised) {
+      calcBox.innerHTML = `All <b>${grid.length}</b> points done. Sum = <b>${grid.reduce((s, g) => s + g.raw, 0).toFixed(4)}</b>. Click <b style="color:#3b82f6">Normalise</b> to get the posterior.`;
+    } else {
+      calcBox.innerHTML = `<span style="color:#16a34a;font-weight:700">\u2713 Normalised!</span> <span style="color:#16a34a">Green bars</span> = unstandardised (left axis), <span style="color:#dc2626">red line</span> = normalised posterior (right axis, sums to 1).`;
+    }
+
+    if (done && !normalised) { btnNorm.el.style.opacity = "1"; btnNorm.el.style.pointerEvents = "auto"; }
+    else { btnNorm.el.style.opacity = "0.4"; btnNorm.el.style.pointerEvents = "none"; }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 8. ACTIONS
+  // ══════════════════════════════════════════════════════
+  function doStep() { if (stepIdx >= grid.length) return; stepIdx++; renderAll(); }
+  function doNormalise() { if (normalised || stepIdx < grid.length) return; normalised = true; renderAll(); }
+  function onStep() { doStep(); }
+  function onAuto() {
+    if (running) { clearInterval(autoId); running = false; btnAuto.setText("⏩  Auto"); return; }
+    running = true; btnAuto.setText("⏸  Stop");
+    autoId = setInterval(() => { if (stepIdx >= grid.length) { clearInterval(autoId); running = false; btnAuto.setText("⏩  Auto"); return; } doStep(); }, 250);
+  }
+  function onNorm() { doNormalise(); }
+  function onReset() { clearInterval(autoId); running = false; btnAuto.setText("⏩  Auto"); buildGrid(); renderAll(); }
+
+  btnStep.el.addEventListener("click", onStep);
+  btnAuto.el.addEventListener("click", onAuto);
+  btnNorm.el.addEventListener("click", onNorm);
+  btnReset.el.addEventListener("click", onReset);
+
+  function onParam() {
+    SL.alpha.sync(); SL.beta.sync(); SL.n.sync(); SL.k.sync(); SL.grid.sync();
+    if (SL.k.val() > SL.n.val()) { SL.k.input.value = SL.n.val(); SL.k.sync(); }
+    if (!running) onReset();
+  }
+  SL.alpha.input.addEventListener("input", onParam);
+  SL.beta.input.addEventListener("input", onParam);
+  SL.n.input.addEventListener("input", onParam);
+  SL.k.input.addEventListener("input", onParam);
+  SL.grid.input.addEventListener("input", onParam);
+
+  buildGrid(); renderAll();
+
+  invalidation.then(() => {
+    clearInterval(autoId);
+    btnStep.el.removeEventListener("click", onStep);
+    btnAuto.el.removeEventListener("click", onAuto);
+    btnNorm.el.removeEventListener("click", onNorm);
+    btnReset.el.removeEventListener("click", onReset);
+    SL.alpha.input.removeEventListener("input", onParam);
+    SL.beta.input.removeEventListener("input", onParam);
+    SL.n.input.removeEventListener("input", onParam);
+    SL.k.input.removeEventListener("input", onParam);
+    SL.grid.input.removeEventListener("input", onParam);
+    grid = [];
+  });
+
+  wrapper.value = {};
+  return wrapper;
+})()
+```
+
+## Markov chain Monte Carlo
+
+```{ojs}
+viewof grid_vs_mcmc = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. TARGET DISTRIBUTIONS
+  // ══════════════════════════════════════════════════════
+  function logPostNormal(x, y) {
+    const mx = 0.5, my = 0.4, sx = 0.15, sy = 0.12, rho = 0.6;
+    const z = ((x - mx) / sx) ** 2 - 2 * rho * ((x - mx) / sx) * ((y - my) / sy) + ((y - my) / sy) ** 2;
+    return -z / (2 * (1 - rho * rho));
+  }
+  function logPostBanana(x, y) {
+    return -0.5 * ((1 - x * 4) ** 2 + 8 * (y * 4 - (x * 4) ** 2) ** 2) * 0.3;
+  }
+  function logPostBimodal(x, y) {
+    const g1 = Math.exp(-((x - 0.3) ** 2 + (y - 0.3) ** 2) / (2 * 0.08 ** 2));
+    const g2 = Math.exp(-((x - 0.7) ** 2 + (y - 0.7) ** 2) / (2 * 0.1 ** 2));
+    return Math.log(g1 + g2 + 1e-30);
+  }
+  const targets = { "Correlated Normal": logPostNormal, "Banana-shaped": logPostBanana, "Bimodal": logPostBimodal };
+
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  wrapper.appendChild(injectStyle());
+
+  const extra = document.createElement("style");
+  extra.textContent = `
+    .gm-select{padding:7px 12px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#334155;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;width:100%;appearance:auto;}
+    .gm-select:focus{outline:2px solid #3b82f6;outline-offset:1px;}
+    .gm-select-label{font-size:11px;font-weight:600;color:#64748b;letter-spacing:0.3px;text-transform:uppercase;margin-bottom:5px;display:block;}
+    .gm-prog-track{height:10px;background:#e2e8f0;border-radius:5px;overflow:hidden;flex:1;}
+    .gm-prog-fill{height:100%;border-radius:5px;transition:width 0.05s;}
+  `;
+  wrapper.appendChild(extra);
+
+  // ══════════════════════════════════════════════════════
+  // 3. CONTROLS
+  // ══════════════════════════════════════════════════════
+  const selCol = document.createElement("div");
+  selCol.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:160px;";
+  const selLbl = document.createElement("label"); selLbl.className = "gm-select-label"; selLbl.textContent = "Target Distribution";
+  const selDist = document.createElement("select"); selDist.className = "gm-select";
+  for (const name of Object.keys(targets)) { const o = document.createElement("option"); o.value = name; o.textContent = name; selDist.appendChild(o); }
+  selCol.appendChild(selLbl); selCol.appendChild(selDist);
+
+  const SL = {};
+  SL.gridN = createSlider("Grid per axis", 5, 40, 1, 15, "#3b82f6", "blue");
+  SL.mcmcN = createSlider("MCMC samples", 100, 2000, 50, 500, "#dc2626", "red");
+  SL.speed = createSlider("Evals per frame", 1, 30, 1, 8, "#1e293b", "dark");
+  SL.dim   = createSlider("Dimensions", 2, 8, 1, 2, "#1e293b", "dark");
+
+  const r1 = document.createElement("div"); r1.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:10px;align-items:flex-end;";
+  r1.appendChild(selCol); r1.appendChild(SL.dim.el);
+  wrapper.appendChild(r1);
+  const r2 = document.createElement("div"); r2.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:10px;";
+  r2.appendChild(SL.gridN.el); r2.appendChild(SL.mcmcN.el);
+  wrapper.appendChild(r2);
+  const r2b = document.createElement("div"); r2b.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:12px;";
+  r2b.appendChild(SL.speed.el);
+  const sp2 = document.createElement("div"); sp2.style.cssText = "flex:1;min-width:120px;";
+  r2b.appendChild(sp2);
+  wrapper.appendChild(r2b);
+
+  const btnRun = createButton("▶  Run Both", "step");
+  const btnReset = createButton("↺  Reset", "reset");
+  const r3 = document.createElement("div"); r3.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
+  r3.appendChild(btnRun.el); r3.appendChild(btnReset.el);
+  wrapper.appendChild(r3);
+
+  // ══════════════════════════════════════════════════════
+  // 4. PROGRESS BARS
+  // ══════════════════════════════════════════════════════
+  const progRow = document.createElement("div"); progRow.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:14px;";
+
+  function makeProgBar(label, color) {
+    const col = document.createElement("div"); col.style.cssText = "flex:1;display:flex;flex-direction:column;gap:4px;";
+    const head = document.createElement("div"); head.style.cssText = "display:flex;justify-content:space-between;align-items:baseline;";
+    const lbl = document.createElement("span"); lbl.style.cssText = `font-size:11px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.3px;`;
+    lbl.textContent = label;
+    const status = document.createElement("span"); status.style.cssText = `font-size:12px;font-weight:700;color:${color};font-family:"SF Mono",monospace;`;
+    head.appendChild(lbl); head.appendChild(status);
+    const track = document.createElement("div"); track.className = "gm-prog-track";
+    const fill = document.createElement("div"); fill.className = "gm-prog-fill"; fill.style.background = color; fill.style.width = "0%";
+    track.appendChild(fill);
+    // Total label
+    const total = document.createElement("div"); total.style.cssText = `font-size:11px;color:#94a3b8;font-family:"SF Mono",monospace;`;
+    col.appendChild(head); col.appendChild(track); col.appendChild(total);
+    return { el: col, fill, status, total };
+  }
+
+  const progGrid = makeProgBar("Grid", "#3b82f6");
+  const progMCMC = makeProgBar("MCMC", "#dc2626");
+  progRow.appendChild(progGrid.el); progRow.appendChild(progMCMC.el);
+  wrapper.appendChild(progRow);
+
+  // ══════════════════════════════════════════════════════
+  // 5. TWO CANVASES
+  // ══════════════════════════════════════════════════════
+  const CW = 380, CH = 380;
+
+  function makeCanvas(label, color) {
+    const col = document.createElement("div"); col.style.cssText = "flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;position:relative;";
+    const lbl = document.createElement("div"); lbl.style.cssText = `font-size:14px;font-weight:700;color:${color};margin-bottom:6px;text-align:center;`;
+    lbl.textContent = label;
+    const cvs = document.createElement("canvas"); cvs.width = CW; cvs.height = CH;
+    cvs.style.cssText = "width:100%;border-radius:10px;border:1px solid #e2e8f0;";
+    // Done overlay
+    const badge = document.createElement("div");
+    badge.style.cssText = `
+      position:absolute;top:34px;left:50%;transform:translateX(-50%);
+      padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;
+      font-family:"SF Mono",monospace;display:none;z-index:1;
+    `;
+    col.appendChild(lbl); col.appendChild(cvs); col.appendChild(badge);
+    return { col, cvs, lbl, ctx: cvs.getContext("2d"), badge };
+  }
+
+  const canvasRow = document.createElement("div"); canvasRow.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:14px;";
+  const cGrid = makeCanvas("Grid Approximation", "#3b82f6");
+  const cMCMC = makeCanvas("MCMC (Metropolis-Hastings)", "#dc2626");
+  canvasRow.appendChild(cGrid.col); canvasRow.appendChild(cMCMC.col);
+  wrapper.appendChild(canvasRow);
+
+  // Dimension box
+  const dimBox = document.createElement("div");
+  dimBox.style.cssText = `
+    width:100%;padding:10px 16px;border-radius:8px;
+    background:#f8fafc;border:1px solid #e2e8f0;
+    font-size:14px;color:#334155;line-height:1.7;
+    font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    text-align:center;
+  `;
+  wrapper.appendChild(dimBox);
+
+  // ══════════════════════════════════════════════════════
+  // 6. CONTOUR + DATA
+  // ══════════════════════════════════════════════════════
+  let contourImg = null;
+
+  function buildContour(logPost) {
+    const R = 100, data = new Float64Array(R * R);
+    let maxV = -Infinity;
+    for (let yi = 0; yi < R; yi++) for (let xi = 0; xi < R; xi++) {
+      const v = logPost((xi + 0.5) / R, 1 - (yi + 0.5) / R);
+      data[yi * R + xi] = v; if (v > maxV) maxV = v;
+    }
+    const img = new ImageData(R, R);
+    for (let i = 0; i < R * R; i++) {
+      const t = Math.exp(data[i] - maxV);
+      img.data[i * 4] = Math.round(250 - t * 110);
+      img.data[i * 4 + 1] = Math.round(250 - t * 170);
+      img.data[i * 4 + 2] = Math.round(255 - t * 50);
+      img.data[i * 4 + 3] = 255;
+    }
+    contourImg = img;
+  }
+
+  function drawContour(ctx) {
+    if (!contourImg) return;
+    const tmp = document.createElement("canvas"); tmp.width = 100; tmp.height = 100;
+    tmp.getContext("2d").putImageData(contourImg, 0, 0);
+    ctx.imageSmoothingEnabled = true; ctx.drawImage(tmp, 0, 0, CW, CH);
+  }
+
+  let allGridPts = [], allMcmcPts = [], mcmcAcc = 0;
+
+  function precompute() {
+    const logPost = targets[selDist.value];
+    const gN = SL.gridN.val();
+    const dim = SL.dim.val();
+    buildContour(logPost);
+
+    // Grid: n^dim total, but we only visualise the 2D slice
+    // For the animation we simulate n^dim eval count but only have n^2 visual points
+    allGridPts = [];
+    let maxLP = -Infinity;
+    for (let yi = 0; yi < gN; yi++) for (let xi = 0; xi < gN; xi++) {
+      const x = (xi + 0.5) / gN, y = (yi + 0.5) / gN;
+      const lp = logPost(x, y);
+      allGridPts.push({ x, y, lp }); if (lp > maxLP) maxLP = lp;
+    }
+    allGridPts.forEach(p => p.w = Math.exp(p.lp - maxLP));
+    const sumW = allGridPts.reduce((s, p) => s + p.w, 0);
+    allGridPts.forEach(p => p.w /= sumW);
+
+    // MCMC
+    const nSamp = SL.mcmcN.val();
+    const propSD = 0.05;
+    allMcmcPts = []; mcmcAcc = 0;
+    let cx = 0.5, cy = 0.5, clp = logPost(cx, cy);
+    for (let i = 0; i < 200; i++) {
+      const nx = cx + (Math.random() - 0.5) * 2 * propSD;
+      const ny = cy + (Math.random() - 0.5) * 2 * propSD;
+      if (nx >= 0 && nx <= 1 && ny >= 0 && ny <= 1) {
+        const nlp = logPost(nx, ny);
+        if (Math.log(Math.random()) < nlp - clp) { cx = nx; cy = ny; clp = nlp; }
+      }
+    }
+    for (let i = 0; i < nSamp; i++) {
+      const nx = cx + (Math.random() - 0.5) * 2 * propSD;
+      const ny = cy + (Math.random() - 0.5) * 2 * propSD;
+      if (nx >= 0 && nx <= 1 && ny >= 0 && ny <= 1) {
+        const nlp = logPost(nx, ny);
+        if (Math.log(Math.random()) < nlp - clp) { cx = nx; cy = ny; clp = nlp; mcmcAcc++; }
+      }
+      allMcmcPts.push({ x: cx, y: cy });
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 7. DRAW
+  // ══════════════════════════════════════════════════════
+  function drawGridUpTo(ctx, nVisual) {
+    drawContour(ctx);
+    const gN = SL.gridN.val();
+    const maxW = Math.max(...allGridPts.map(p => p.w));
+    ctx.strokeStyle = "rgba(59,130,246,0.12)"; ctx.lineWidth = 0.5;
+    for (let i = 0; i <= gN; i++) {
+      const v = i / gN * CW;
+      ctx.beginPath(); ctx.moveTo(v, 0); ctx.lineTo(v, CH); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, v); ctx.lineTo(CW, v); ctx.stroke();
+    }
+    const n = Math.min(nVisual, allGridPts.length);
+    for (let i = 0; i < n; i++) {
+      const p = allGridPts[i], px = p.x * CW, py = (1 - p.y) * CH;
+      const r = 1.5 + (p.w / maxW) * 6, alpha = 0.2 + (p.w / maxW) * 0.8;
+      ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(59,130,246,${alpha.toFixed(2)})`; ctx.fill();
+    }
+    if (n > 0 && n < allGridPts.length) {
+      const p = allGridPts[n - 1];
+      ctx.beginPath(); ctx.arc(p.x * CW, (1 - p.y) * CH, 6, 0, Math.PI * 2);
+      ctx.fillStyle = "#3b82f6"; ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+    }
+  }
+
+  function drawMcmcUpTo(ctx, n) {
+    drawContour(ctx);
+    if (n < 1) return;
+    ctx.strokeStyle = "rgba(220,38,38,0.07)"; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(allMcmcPts[0].x * CW, (1 - allMcmcPts[0].y) * CH);
+    for (let i = 1; i < n; i++) ctx.lineTo(allMcmcPts[i].x * CW, (1 - allMcmcPts[i].y) * CH);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(220,38,38,0.3)"; ctx.beginPath();
+    for (let i = 0; i < n; i++) { const px = allMcmcPts[i].x * CW, py = (1 - allMcmcPts[i].y) * CH; ctx.moveTo(px + 2, py); ctx.arc(px, py, 2, 0, Math.PI * 2); }
+    ctx.fill();
+    const last = allMcmcPts[n - 1];
+    ctx.beginPath(); ctx.arc(last.x * CW, (1 - last.y) * CH, 5, 0, Math.PI * 2);
+    ctx.fillStyle = "#dc2626"; ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 2; ctx.stroke();
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 8. ANIMATION — same eval/sec rate, different totals
+  // ══════════════════════════════════════════════════════
+  let animId = 0, animating = false;
+  let gridEvals = 0, mcmcEvals = 0;
+  let gridTotal = 0, mcmcTotal = 0;
+
+  function fmtN(v) {
+    if (v >= 1e12) return v.toExponential(1);
+    if (v >= 1e6) return (v / 1e6).toFixed(1) + "M";
+    if (v >= 1e3) return (v / 1e3).toFixed(1) + "K";
+    return String(v);
+  }
+
+  function updateUI() {
+    const gPct = Math.min(100, gridEvals / gridTotal * 100);
+    const mPct = Math.min(100, mcmcEvals / mcmcTotal * 100);
+    progGrid.fill.style.width = gPct.toFixed(1) + "%";
+    progMCMC.fill.style.width = mPct.toFixed(1) + "%";
+
+    const gDone = gridEvals >= gridTotal;
+    const mDone = mcmcEvals >= mcmcTotal;
+
+    progGrid.status.textContent = gDone ? "\u2713 Done" : `${fmtN(gridEvals)} / ${fmtN(gridTotal)}`;
+    progGrid.status.style.color = gDone ? "#16a34a" : "#3b82f6";
+    progGrid.total.textContent = `Need ${fmtN(gridTotal)} evals (${SL.gridN.val()}^${SL.dim.val()})`;
+
+    progMCMC.status.textContent = mDone ? "\u2713 Done" : `${mcmcEvals} / ${mcmcTotal}`;
+    progMCMC.status.style.color = mDone ? "#16a34a" : "#dc2626";
+    progMCMC.total.textContent = `Need ${fmtN(mcmcTotal)} evals (same in any dimension)`;
+
+    // Badges
+    if (mDone && !gDone) {
+      cMCMC.badge.textContent = "\u2713 MCMC finished!";
+      cMCMC.badge.style.cssText += "display:block;background:rgba(22,163,74,0.9);color:#fff;";
+      cGrid.badge.textContent = `Still computing... ${gPct.toFixed(0)}%`;
+      cGrid.badge.style.cssText += "display:block;background:rgba(59,130,246,0.85);color:#fff;";
+    } else if (gDone && mDone) {
+      cGrid.badge.textContent = "\u2713 Done";
+      cGrid.badge.style.cssText += "display:block;background:rgba(22,163,74,0.9);color:#fff;";
+      cMCMC.badge.textContent = "\u2713 Done";
+      cMCMC.badge.style.cssText += "display:block;background:rgba(22,163,74,0.9);color:#fff;";
+    }
+
+    // Dimension box
+    const ratio = gridTotal / mcmcTotal;
+    dimBox.innerHTML =
+      `<b style="color:#3b82f6">Grid</b> needs <b>${fmtN(gridTotal)}</b> evals` +
+      ` &ensp;vs&ensp; <b style="color:#dc2626">MCMC</b> needs <b>${fmtN(mcmcTotal)}</b> evals` +
+      (ratio > 2 ? ` &ensp;\u2014&ensp; <b>Grid is ${ratio >= 100 ? fmtN(Math.round(ratio)) : ratio.toFixed(1)}\u00D7 slower!</b>` : "");
+  }
+
+  function animate() {
+    const speed = SL.speed.val();
+
+    // Both advance by same number of evaluations per frame
+    gridEvals = Math.min(gridEvals + speed, gridTotal);
+    mcmcEvals = Math.min(mcmcEvals + speed, mcmcTotal);
+
+    // Map grid evals to visual points (grid has n^d evals but only n^2 visual points)
+    const n2 = allGridPts.length;
+    const gridVisual = Math.min(n2, Math.floor(gridEvals / gridTotal * n2));
+    const mcmcVisual = Math.min(allMcmcPts.length, mcmcEvals);
+
+    drawGridUpTo(cGrid.ctx, gridVisual);
+    drawMcmcUpTo(cMCMC.ctx, mcmcVisual);
+    updateUI();
+
+    if (gridEvals < gridTotal || mcmcEvals < mcmcTotal) {
+      animId = requestAnimationFrame(animate);
+    } else {
+      animating = false; btnRun.setText("▶  Run Both");
+    }
+  }
+
+  function run() {
+    if (animating) { cancelAnimationFrame(animId); animating = false; btnRun.setText("▶  Run Both"); return; }
+    precompute();
+
+    gridTotal = Math.pow(SL.gridN.val(), SL.dim.val());
+    mcmcTotal = SL.mcmcN.val();
+    gridEvals = 0; mcmcEvals = 0;
+
+    cGrid.badge.style.display = "none";
+    cMCMC.badge.style.display = "none";
+
+    animating = true; btnRun.setText("⏸  Pause");
+    animId = requestAnimationFrame(animate);
+  }
+
+  function reset() {
+    cancelAnimationFrame(animId); animating = false; btnRun.setText("▶  Run Both");
+    gridEvals = 0; mcmcEvals = 0;
+    allGridPts = []; allMcmcPts = [];
+
+    const logPost = targets[selDist.value];
+    buildContour(logPost);
+    drawContour(cGrid.ctx); drawContour(cMCMC.ctx);
+
+    cGrid.badge.style.display = "none"; cMCMC.badge.style.display = "none";
+    progGrid.fill.style.width = "0%"; progMCMC.fill.style.width = "0%";
+    progGrid.status.textContent = "—"; progMCMC.status.textContent = "—";
+
+    gridTotal = Math.pow(SL.gridN.val(), SL.dim.val());
+    mcmcTotal = SL.mcmcN.val();
+    progGrid.total.textContent = `Need ${fmtN(gridTotal)} evals (${SL.gridN.val()}^${SL.dim.val()})`;
+    progMCMC.total.textContent = `Need ${fmtN(mcmcTotal)} evals (same in any dimension)`;
+
+    const ratio = gridTotal / mcmcTotal;
+    dimBox.innerHTML =
+      `<b style="color:#3b82f6">Grid</b> needs <b>${fmtN(gridTotal)}</b> evals` +
+      ` &ensp;vs&ensp; <b style="color:#dc2626">MCMC</b> needs <b>${fmtN(mcmcTotal)}</b> evals` +
+      (ratio > 2 ? ` &ensp;\u2014&ensp; <b>Grid is ${ratio >= 100 ? fmtN(Math.round(ratio)) : ratio.toFixed(1)}\u00D7 slower!</b>` : "");
+  }
+
+  btnRun.el.addEventListener("click", run);
+  btnReset.el.addEventListener("click", reset);
+
+  function onParam() { SL.gridN.sync(); SL.mcmcN.sync(); SL.speed.sync(); SL.dim.sync(); if (!animating) reset(); }
+  SL.gridN.input.addEventListener("input", onParam);
+  SL.mcmcN.input.addEventListener("input", onParam);
+  SL.speed.input.addEventListener("input", onParam);
+  SL.dim.input.addEventListener("input", onParam);
+  selDist.addEventListener("change", () => { if (!animating) reset(); });
+
+  reset();
+
+  invalidation.then(() => {
+    cancelAnimationFrame(animId);
+    btnRun.el.removeEventListener("click", run);
+    btnReset.el.removeEventListener("click", reset);
+    SL.gridN.input.removeEventListener("input", onParam);
+    SL.mcmcN.input.removeEventListener("input", onParam);
+    SL.speed.input.removeEventListener("input", onParam);
+    SL.dim.input.removeEventListener("input", onParam);
+    allGridPts = []; allMcmcPts = []; contourImg = null;
+  });
+
+  wrapper.value = {};
+  return wrapper;
+})()
+```
+
+
+```{ojs}
+viewof mcmc_steps = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. TARGET DISTRIBUTIONS (1D, unnormalised)
+  // ══════════════════════════════════════════════════════
+  function gaussPDF(x, mu, sig) {
+    return Math.exp(-0.5 * ((x - mu) / sig) ** 2);
+  }
+
+  const targetFns = {
+    "Normal(0.5, 0.15)": x => gaussPDF(x, 0.5, 0.15),
+    "Bimodal": x => 0.6 * gaussPDF(x, 0.3, 0.08) + 0.4 * gaussPDF(x, 0.75, 0.1),
+    "Skewed": x => gaussPDF(x, 0.35, 0.1) * (1 + 2 * x),
+    "Uniform-ish": x => (x > 0.15 && x < 0.85) ? 1 : 0.05,
+  };
+
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  wrapper.appendChild(injectStyle());
+
+  const extra = document.createElement("style");
+  extra.textContent = `
+    .mc-select{padding:7px 12px;border-radius:8px;border:1px solid #d1d5db;background:#fff;color:#334155;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;width:100%;appearance:auto;}
+    .mc-select:focus{outline:2px solid #3b82f6;outline-offset:1px;}
+    .mc-select-label{font-size:11px;font-weight:600;color:#64748b;letter-spacing:0.3px;text-transform:uppercase;margin-bottom:5px;display:block;}
+    .mc-step-box{width:100%;border-radius:10px;overflow:hidden;margin-bottom:14px;border:2px solid #e2e8f0;}
+    .mc-step-header{display:flex;gap:0;}
+    .mc-step-tab{flex:1;padding:8px 4px;text-align:center;font-size:12px;font-weight:700;
+      font-family:"SF Mono",monospace;cursor:default;transition:all 0.15s;color:#94a3b8;background:#f8fafc;}
+    .mc-step-tab.active{color:#fff;}
+    .mc-step-tab.done{opacity:0.6;}
+    .mc-step-body{padding:12px 16px;font-size:14px;line-height:1.7;
+      font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+      background:#fff;min-height:60px;color:#334155;}
+  `;
+  wrapper.appendChild(extra);
+
+  // ══════════════════════════════════════════════════════
+  // 3. CONTROLS
+  // ══════════════════════════════════════════════════════
+  const selCol = document.createElement("div");
+  selCol.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:160px;";
+  const selLbl = document.createElement("label"); selLbl.className = "mc-select-label"; selLbl.textContent = "Target Distribution";
+  const selDist = document.createElement("select"); selDist.className = "mc-select";
+  for (const name of Object.keys(targetFns)) { const o = document.createElement("option"); o.value = name; o.textContent = name; selDist.appendChild(o); }
+  selCol.appendChild(selLbl); selCol.appendChild(selDist);
+
+  const SL = {};
+  SL.propSD = createSlider("Proposal width (\u03C3)", 0.02, 0.30, 0.01, 0.10, "#7c3aed", "purple");
+
+  const r1 = document.createElement("div"); r1.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:12px;align-items:flex-end;";
+  r1.appendChild(selCol); r1.appendChild(SL.propSD.el);
+  wrapper.appendChild(r1);
+
+  // Buttons
+  const btnNext = createButton("▶  Next Sub-step", "step");
+  const btnFull = createButton("⏩  Full Step", "auto");
+  const btnAuto = createButton("🔄  Auto (×50)", "go");
+  const btnReset = createButton("↺  Reset", "reset");
+
+  const r2 = document.createElement("div"); r2.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
+  r2.appendChild(btnNext.el); r2.appendChild(btnFull.el); r2.appendChild(btnAuto.el); r2.appendChild(btnReset.el);
+  wrapper.appendChild(r2);
+
+  // ══════════════════════════════════════════════════════
+  // 4. STEP INDICATOR (5 tabs)
+  // ══════════════════════════════════════════════════════
+  const stepNames = ["① Position", "② Propose", "③ Evaluate", "④ Accept?", "⑤ Record"];
+  const stepColors = ["#3b82f6", "#7c3aed", "#d97706", "#dc2626", "#16a34a"];
+
+  const stepBox = document.createElement("div"); stepBox.className = "mc-step-box";
+  const stepHeader = document.createElement("div"); stepHeader.className = "mc-step-header";
+  const tabs = [];
+  for (let i = 0; i < 5; i++) {
+    const t = document.createElement("div"); t.className = "mc-step-tab"; t.textContent = stepNames[i];
+    stepHeader.appendChild(t); tabs.push(t);
+  }
+  const stepBody = document.createElement("div"); stepBody.className = "mc-step-body";
+  stepBox.appendChild(stepHeader); stepBox.appendChild(stepBody);
+  wrapper.appendChild(stepBox);
+
+  // ══════════════════════════════════════════════════════
+  // 5. SVG — TARGET + PROPOSAL + MARKERS
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const SW = 920, SH = 300;
+  const mg = { t: 20, r: 20, b: 40, l: 50 };
+  const sw = SW - mg.l - mg.r, sh = SH - mg.t - mg.b;
+
+  function mkEl(tag, a) {
+    const e = document.createElementNS(NS, tag);
+    if (a) for (const [k, v] of Object.entries(a)) e.setAttribute(k, v);
+    return e;
+  }
+
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${SW} ${SH}`);
+  svg.style.cssText = `width:100%;max-width:${SW}px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:10px;`;
+
+  // Target curve (filled)
+  const targetFill = mkEl("path", { fill: "#e0e7ff", opacity: "0.5", stroke: "none" });
+  svg.appendChild(targetFill);
+  const targetPath = mkEl("path", { fill: "none", stroke: "#475569", "stroke-width": "2.5" });
+  svg.appendChild(targetPath);
+
+  // Proposal distribution (dashed bell curve)
+  const propFill = mkEl("path", { fill: "#f3e8ff", opacity: "0.4", stroke: "none" });
+  propFill.style.display = "none"; svg.appendChild(propFill);
+  const propPath = mkEl("path", { fill: "none", stroke: "#7c3aed", "stroke-width": "2", "stroke-dasharray": "6,4" });
+  propPath.style.display = "none"; svg.appendChild(propPath);
+
+  // Grid + axes
+  const gridLines = [];
+  for (let i = 0; i <= 4; i++) { const l = mkEl("line", { stroke: "#e2e8f0", "stroke-width": "0.7" }); svg.appendChild(l); gridLines.push(l); }
+  const yLbls = [];
+  for (let i = 0; i <= 4; i++) { const t = mkEl("text", { "text-anchor": "end", fill: "#94a3b8", "font-size": "11", "font-family": "'SF Mono',monospace" }); svg.appendChild(t); yLbls.push(t); }
+
+  svg.appendChild(mkEl("line", { x1: String(mg.l), x2: String(mg.l), y1: String(mg.t), y2: String(mg.t + sh), stroke: "#94a3b8" }));
+  const xAx = mkEl("line", { stroke: "#94a3b8" }); svg.appendChild(xAx);
+  const xTicks = [];
+  for (let i = 0; i < 11; i++) {
+    const ln = mkEl("line", { stroke: "#94a3b8", y2: "4" }); svg.appendChild(ln);
+    const t = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "11", "font-family": "'SF Mono',monospace", dy: "15" }); svg.appendChild(t);
+    xTicks.push({ ln, t });
+  }
+
+  // Current position marker (blue dot + vertical line)
+  const curLine = mkEl("line", { stroke: "#3b82f6", "stroke-width": "2", "stroke-dasharray": "4,3", opacity: "0.7" });
+  curLine.style.display = "none"; svg.appendChild(curLine);
+  const curDot = mkEl("circle", { r: "8", fill: "#3b82f6", stroke: "#fff", "stroke-width": "2.5" });
+  curDot.style.display = "none"; svg.appendChild(curDot);
+  const curLabel = mkEl("text", { "text-anchor": "middle", fill: "#3b82f6", "font-size": "12", "font-weight": "700", "font-family": "'SF Mono',monospace" });
+  curLabel.style.display = "none"; svg.appendChild(curLabel);
+
+  // Proposed position marker (purple dot + vertical line)
+  const propLine = mkEl("line", { stroke: "#7c3aed", "stroke-width": "2", "stroke-dasharray": "4,3", opacity: "0.7" });
+  propLine.style.display = "none"; svg.appendChild(propLine);
+  const propDot = mkEl("circle", { r: "8", fill: "#7c3aed", stroke: "#fff", "stroke-width": "2.5" });
+  propDot.style.display = "none"; svg.appendChild(propDot);
+  const propLabel = mkEl("text", { "text-anchor": "middle", fill: "#7c3aed", "font-size": "12", "font-weight": "700", "font-family": "'SF Mono',monospace" });
+  propLabel.style.display = "none"; svg.appendChild(propLabel);
+
+  // Accept/reject marker
+  const decisionText = mkEl("text", { "text-anchor": "middle", "font-size": "18", "font-weight": "700" });
+  decisionText.style.display = "none"; svg.appendChild(decisionText);
+
+  // Arrow from current to proposed
+  const arrow = mkEl("line", { "stroke-width": "2", "marker-end": "url(#arrowhead)" });
+  arrow.style.display = "none"; svg.appendChild(arrow);
+  // Arrowhead marker
+  const defs = mkEl("defs");
+  const marker = mkEl("marker", { id: "arrowhead", markerWidth: "10", markerHeight: "7", refX: "10", refY: "3.5", orient: "auto" });
+  const arrowPoly = mkEl("polygon", { points: "0 0, 10 3.5, 0 7", fill: "#7c3aed" });
+  marker.appendChild(arrowPoly); defs.appendChild(marker); svg.appendChild(defs);
+
+  // Y-axis label
+  const yLabel = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "12", x: "16", y: String(mg.t + sh / 2), transform: `rotate(-90,16,${mg.t + sh / 2})` });
+  yLabel.textContent = "p(\u03B8)"; svg.appendChild(yLabel);
+
+  wrapper.appendChild(svg);
+
+  // ══════════════════════════════════════════════════════
+  // 6. HISTOGRAM SVG
+  // ══════════════════════════════════════════════════════
+  const HW = 920, HH = 180;
+  const hm = { t: 20, r: 20, b: 36, l: 50 };
+  const hw = HW - hm.l - hm.r, hh = HH - hm.t - hm.b;
+
+  const hSvg = document.createElementNS(NS, "svg");
+  hSvg.setAttribute("viewBox", `0 0 ${HW} ${HH}`);
+  hSvg.style.cssText = `width:100%;max-width:${HW}px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;`;
+
+  const hTtl = mkEl("text", { x: String(HW / 2), y: "15", "text-anchor": "middle", fill: "#16a34a", "font-size": "13", "font-weight": "700" });
+  hTtl.textContent = "Collected Samples"; hSvg.appendChild(hTtl);
+
+  // Bars
+  const NBINS = 40;
+  const hBars = [];
+  for (let i = 0; i < NBINS; i++) {
+    const r = mkEl("rect", { rx: "1", fill: "#16a34a", opacity: "0.5", stroke: "#15803d", "stroke-width": "0.5" });
+    r.style.display = "none"; hSvg.appendChild(r); hBars.push(r);
+  }
+  // Overlay target line on histogram
+  const hTargetPath = mkEl("path", { fill: "none", stroke: "#475569", "stroke-width": "1.5", "stroke-dasharray": "4,3", opacity: "0.5" });
+  hSvg.appendChild(hTargetPath);
+  // Hist x-axis
+  const hXAx = mkEl("line", { stroke: "#94a3b8" }); hSvg.appendChild(hXAx);
+  const hXTicks = [];
+  for (let i = 0; i < 11; i++) {
+    const ln = mkEl("line", { stroke: "#94a3b8", y2: "4" }); hSvg.appendChild(ln);
+    const t = mkEl("text", { "text-anchor": "middle", fill: "#64748b", "font-size": "11", "font-family": "'SF Mono',monospace", dy: "15" }); hSvg.appendChild(t);
+    hXTicks.push({ ln, t });
+  }
+  // Stats
+  const hStats = mkEl("text", { x: String(HW - 10), y: String(hm.t + 10), "text-anchor": "end", fill: "#64748b", "font-size": "11", "font-family": "'SF Mono',monospace" });
+  hSvg.appendChild(hStats);
+
+  wrapper.appendChild(hSvg);
+
+  // ══════════════════════════════════════════════════════
+  // 7. STATE
+  // ══════════════════════════════════════════════════════
+  let currentX = 0.5;
+  let proposedX = 0;
+  let pCurrent = 0, pProposed = 0;
+  let alpha = 0, u = 0, accepted = false;
+  let subStep = 0; // 0..4 (position, propose, evaluate, accept?, record)
+  let samples = [];
+  let totalProposed = 0, totalAccepted = 0;
+  let autoId = 0, autoRunning = false;
+
+  function targetFn() { return targetFns[selDist.value]; }
+
+  // ══════════════════════════════════════════════════════
+  // 8. DRAW TARGET CURVE
+  // ══════════════════════════════════════════════════════
+  let targetMaxY = 1;
+
+  function drawTarget() {
+    const fn = targetFn();
+    // Compute max for scaling
+    targetMaxY = 0;
+    for (let i = 0; i <= 200; i++) {
+      const x = i / 200;
+      const v = fn(x);
+      if (v > targetMaxY) targetMaxY = v;
+    }
+    targetMaxY *= 1.2;
+
+    const sx = x => mg.l + x * sw;
+    const sy = y => mg.t + sh - (y / targetMaxY) * sh;
+    const baseline = mg.t + sh;
+
+    // Target filled area
+    let dFill = `M${sx(0)},${baseline}`;
+    let dLine = "";
+    for (let i = 0; i <= 200; i++) {
+      const x = i / 200, y = fn(x);
+      const px = sx(x), py = sy(y);
+      dFill += `L${px.toFixed(1)},${py.toFixed(1)}`;
+      dLine += (i === 0 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1);
+    }
+    dFill += `L${sx(1)},${baseline}Z`;
+    targetFill.setAttribute("d", dFill);
+    targetPath.setAttribute("d", dLine);
+
+    // Grid
+    for (let i = 0; i <= 4; i++) {
+      const v = (targetMaxY / 4) * i, yy = sy(v);
+      gridLines[i].setAttribute("x1", mg.l); gridLines[i].setAttribute("x2", SW - mg.r);
+      gridLines[i].setAttribute("y1", yy); gridLines[i].setAttribute("y2", yy);
+      yLbls[i].setAttribute("x", mg.l - 6); yLbls[i].setAttribute("y", yy + 4);
+      yLbls[i].textContent = v.toFixed(2);
+    }
+
+    // X axis
+    xAx.setAttribute("x1", mg.l); xAx.setAttribute("x2", SW - mg.r);
+    xAx.setAttribute("y1", baseline); xAx.setAttribute("y2", baseline);
+    for (let i = 0; i <= 10; i++) {
+      const x = i / 10, px = sx(x);
+      xTicks[i].ln.setAttribute("x1", px); xTicks[i].ln.setAttribute("x2", px);
+      xTicks[i].ln.setAttribute("y1", baseline); xTicks[i].ln.setAttribute("y2", baseline + 4);
+      xTicks[i].t.setAttribute("x", px); xTicks[i].t.setAttribute("y", baseline + 4);
+      xTicks[i].t.textContent = x.toFixed(1);
+    }
+
+    // Histogram x-axis
+    const hBaseline = hm.t + hh;
+    hXAx.setAttribute("x1", hm.l); hXAx.setAttribute("x2", HW - hm.r);
+    hXAx.setAttribute("y1", hBaseline); hXAx.setAttribute("y2", hBaseline);
+    for (let i = 0; i <= 10; i++) {
+      const x = i / 10, px = hm.l + x * hw;
+      hXTicks[i].ln.setAttribute("x1", px); hXTicks[i].ln.setAttribute("x2", px);
+      hXTicks[i].ln.setAttribute("y1", hBaseline); hXTicks[i].ln.setAttribute("y2", hBaseline + 4);
+      hXTicks[i].t.setAttribute("x", px); hXTicks[i].t.setAttribute("y", hBaseline + 4);
+      hXTicks[i].t.textContent = x.toFixed(1);
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 9. DRAW MARKERS
+  // ══════════════════════════════════════════════════════
+  function drawMarkers() {
+    const fn = targetFn();
+    const sx = x => mg.l + x * sw;
+    const sy = y => mg.t + sh - (y / targetMaxY) * sh;
+    const baseline = mg.t + sh;
+
+    // Current position
+    if (subStep >= 0) {
+      const px = sx(currentX), py = sy(fn(currentX));
+      curLine.setAttribute("x1", px); curLine.setAttribute("x2", px);
+      curLine.setAttribute("y1", py); curLine.setAttribute("y2", baseline);
+      curLine.style.display = "";
+      curDot.setAttribute("cx", px); curDot.setAttribute("cy", py);
+      curDot.style.display = "";
+      curLabel.setAttribute("x", px); curLabel.setAttribute("y", py - 14);
+      curLabel.textContent = `current = ${currentX.toFixed(3)}`;
+      curLabel.style.display = "";
+    }
+
+    // Proposal distribution bell
+    if (subStep >= 1) {
+      const propSig = SL.propSD.val();
+      // Draw proposal gaussian centered at currentX
+      let pFill = `M${sx(0)},${baseline}`;
+      let pLine = "";
+      const propScale = targetMaxY * 0.35; // scale proposal to ~35% of target height
+      for (let i = 0; i <= 200; i++) {
+        const x = i / 200;
+        const y = gaussPDF(x, currentX, propSig) * propScale;
+        const px = sx(x), py = sy(y);
+        pFill += `L${px.toFixed(1)},${py.toFixed(1)}`;
+        pLine += (i === 0 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1);
+      }
+      pFill += `L${sx(1)},${baseline}Z`;
+      propFill.setAttribute("d", pFill); propFill.style.display = "";
+      propPath.setAttribute("d", pLine); propPath.style.display = "";
+    } else {
+      propFill.style.display = "none"; propPath.style.display = "none";
+    }
+
+    // Proposed point
+    if (subStep >= 1) {
+      const px = sx(proposedX), py = sy(fn(proposedX));
+      propLine.setAttribute("x1", px); propLine.setAttribute("x2", px);
+      propLine.setAttribute("y1", py); propLine.setAttribute("y2", baseline);
+      propLine.style.display = "";
+      propDot.setAttribute("cx", px); propDot.setAttribute("cy", py);
+      propDot.style.display = "";
+      propLabel.setAttribute("x", px); propLabel.setAttribute("y", py - 14);
+      propLabel.textContent = `proposed = ${proposedX.toFixed(3)}`;
+      propLabel.style.display = "";
+
+      // Arrow
+      const cpx = sx(currentX), cpy = sy(fn(currentX));
+      arrow.setAttribute("x1", cpx); arrow.setAttribute("y1", cpy);
+      arrow.setAttribute("x2", px); arrow.setAttribute("y2", py);
+      arrow.setAttribute("stroke", "#7c3aed");
+      arrow.style.display = "";
+      arrowPoly.setAttribute("fill", "#7c3aed");
+    } else {
+      propLine.style.display = "none"; propDot.style.display = "none";
+      propLabel.style.display = "none"; arrow.style.display = "none";
+    }
+
+    // Decision text
+    if (subStep >= 3) {
+      const px = sx((currentX + proposedX) / 2);
+      decisionText.setAttribute("x", px);
+      decisionText.setAttribute("y", mg.t + 16);
+      if (subStep === 3) {
+        decisionText.textContent = `\u03B1 = ${alpha.toFixed(3)}, u = ${u.toFixed(3)} → ${accepted ? "u < \u03B1" : "u \u2265 \u03B1"}`;
+        decisionText.setAttribute("fill", accepted ? "#16a34a" : "#dc2626");
+      } else {
+        decisionText.textContent = accepted ? "\u2713 Accepted — move!" : "\u2717 Rejected — stay";
+        decisionText.setAttribute("fill", accepted ? "#16a34a" : "#dc2626");
+      }
+      decisionText.style.display = "";
+    } else {
+      decisionText.style.display = "none";
+    }
+
+    // After record step, color the dots
+    if (subStep === 4) {
+      if (accepted) {
+        propDot.setAttribute("fill", "#16a34a"); propDot.setAttribute("r", "10");
+        curDot.setAttribute("fill", "#94a3b8"); curDot.setAttribute("opacity", "0.4");
+      } else {
+        curDot.setAttribute("fill", "#16a34a"); curDot.setAttribute("r", "10");
+        propDot.setAttribute("fill", "#94a3b8"); propDot.setAttribute("opacity", "0.4");
+      }
+    } else {
+      curDot.setAttribute("fill", "#3b82f6"); curDot.setAttribute("r", "8"); curDot.setAttribute("opacity", "1");
+      propDot.setAttribute("fill", "#7c3aed"); propDot.setAttribute("r", "8"); propDot.setAttribute("opacity", "1");
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 10. DRAW HISTOGRAM
+  // ══════════════════════════════════════════════════════
+  function drawHistogram() {
+    const hBaseline = hm.t + hh;
+    if (samples.length === 0) {
+      for (let i = 0; i < NBINS; i++) hBars[i].style.display = "none";
+      hTargetPath.style.display = "none";
+      hStats.textContent = "";
+      hTtl.textContent = "Collected Samples (0)";
+      return;
+    }
+
+    const bins = new Int32Array(NBINS);
+    for (const s of samples) {
+      const bi = Math.min(NBINS - 1, Math.max(0, Math.floor(s * NBINS)));
+      bins[bi]++;
+    }
+    const maxBin = Math.max(...bins) * 1.2 || 1;
+    const barW = hw / NBINS;
+
+    for (let i = 0; i < NBINS; i++) {
+      if (bins[i] > 0) {
+        const bx = hm.l + i * barW;
+        const bh = (bins[i] / maxBin) * hh;
+        hBars[i].setAttribute("x", bx); hBars[i].setAttribute("y", hBaseline - bh);
+        hBars[i].setAttribute("width", Math.max(1, barW - 1)); hBars[i].setAttribute("height", bh);
+        hBars[i].style.display = "";
+      } else { hBars[i].style.display = "none"; }
+    }
+
+    // Overlay target (scaled to match histogram)
+    const fn = targetFn();
+    let tMax = 0;
+    for (let i = 0; i < NBINS; i++) { const x = (i + 0.5) / NBINS; const v = fn(x); if (v > tMax) tMax = v; }
+    const scale = (maxBin > 0 && tMax > 0) ? (Math.max(...bins) / tMax) : 1;
+
+    let d = "";
+    for (let i = 0; i <= 200; i++) {
+      const x = i / 200, v = fn(x) * scale;
+      const px = hm.l + x * hw, py = hBaseline - (v / maxBin) * hh;
+      d += (i === 0 ? "M" : "L") + px.toFixed(1) + "," + py.toFixed(1);
+    }
+    hTargetPath.setAttribute("d", d); hTargetPath.style.display = "";
+
+    const rate = totalProposed > 0 ? (totalAccepted / totalProposed * 100).toFixed(0) : "—";
+    hStats.textContent = `Acceptance: ${rate}%`;
+    hTtl.textContent = `Collected Samples (${samples.length})`;
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 11. STEP TABS
+  // ══════════════════════════════════════════════════════
+  function updateTabs() {
+    for (let i = 0; i < 5; i++) {
+      tabs[i].className = "mc-step-tab";
+      tabs[i].style.background = "#f8fafc";
+      tabs[i].style.color = "#94a3b8";
+      if (i < subStep) {
+        tabs[i].className = "mc-step-tab done";
+        tabs[i].style.background = stepColors[i]; tabs[i].style.color = "#fff"; tabs[i].style.opacity = "0.4";
+      } else if (i === subStep) {
+        tabs[i].className = "mc-step-tab active";
+        tabs[i].style.background = stepColors[i]; tabs[i].style.color = "#fff"; tabs[i].style.opacity = "1";
+      }
+    }
+
+    const fn = targetFn();
+    const fmtP = v => v < 0.001 ? v.toExponential(2) : v.toFixed(4);
+
+    if (subStep === 0) {
+      stepBody.innerHTML =
+        `We are at <b style="color:#3b82f6">\u03B8 = ${currentX.toFixed(3)}</b> ` +
+        `where the target density is <b>p(\u03B8) = ${fmtP(fn(currentX))}</b>.`;
+    } else if (subStep === 1) {
+      stepBody.innerHTML =
+        `Propose a new value from <b style="color:#7c3aed">Normal(\u03B8, \u03C3\u00B2)</b> = Normal(${currentX.toFixed(3)}, ${SL.propSD.val().toFixed(2)}\u00B2).<br>` +
+        `Drew <b style="color:#7c3aed">\u03B8* = ${proposedX.toFixed(3)}</b>. ` +
+        `The dashed purple curve shows the proposal distribution.`;
+    } else if (subStep === 2) {
+      stepBody.innerHTML =
+        `Evaluate the target at both points:<br>` +
+        `<b style="color:#3b82f6">p(\u03B8) = ${fmtP(pCurrent)}</b> &ensp;(current) &ensp;&ensp; ` +
+        `<b style="color:#7c3aed">p(\u03B8*) = ${fmtP(pProposed)}</b> &ensp;(proposed)<br>` +
+        `Acceptance ratio: <b>\u03B1 = min(1, p(\u03B8*)/p(\u03B8)) = min(1, ${(pProposed / pCurrent).toFixed(4)}) = ${alpha.toFixed(4)}</b>`;
+    } else if (subStep === 3) {
+      stepBody.innerHTML =
+        `Draw <b>u ~ Uniform(0,1)</b> = <b>${u.toFixed(4)}</b>.<br>` +
+        (accepted
+          ? `<b style="color:#16a34a">u = ${u.toFixed(4)} < \u03B1 = ${alpha.toFixed(4)} → Accept!</b> Move to \u03B8* = ${proposedX.toFixed(3)}.`
+          : `<b style="color:#dc2626">u = ${u.toFixed(4)} \u2265 \u03B1 = ${alpha.toFixed(4)} → Reject.</b> Stay at \u03B8 = ${currentX.toFixed(3)}.`);
+    } else if (subStep === 4) {
+      const recorded = accepted ? proposedX : currentX;
+      stepBody.innerHTML =
+        `Record <b style="color:#16a34a">\u03B8 = ${recorded.toFixed(3)}</b> as sample #${samples.length}. ` +
+        (accepted ? "Moved to the proposed point." : "Stayed at the current point (recorded again).") +
+        `<br>Click <b>Next</b> to start the next iteration.`;
+    }
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 12. ACTIONS
+  // ══════════════════════════════════════════════════════
+  function doSubStep() {
+    const fn = targetFn();
+    const propSig = SL.propSD.val();
+
+    if (subStep === 0) {
+      // Position: already set, move to propose
+      subStep = 1;
+      // Generate proposal
+      proposedX = currentX + (Math.random() - 0.5) * 2 * propSig * 2.5; // ~Normal approx
+      // Better: Box-Muller
+      const u1 = Math.random(), u2 = Math.random();
+      proposedX = currentX + propSig * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      proposedX = Math.max(0.001, Math.min(0.999, proposedX));
+    } else if (subStep === 1) {
+      // Evaluate
+      subStep = 2;
+      pCurrent = fn(currentX);
+      pProposed = fn(proposedX);
+      alpha = Math.min(1, pProposed / Math.max(pCurrent, 1e-30));
+    } else if (subStep === 2) {
+      // Accept/reject decision
+      subStep = 3;
+      u = Math.random();
+      accepted = u < alpha;
+      totalProposed++;
+      if (accepted) totalAccepted++;
+    } else if (subStep === 3) {
+      // Record
+      subStep = 4;
+      const recorded = accepted ? proposedX : currentX;
+      samples.push(recorded);
+      if (accepted) currentX = proposedX;
+    } else if (subStep === 4) {
+      // Start next iteration
+      subStep = 0;
+    }
+
+    drawMarkers();
+    updateTabs();
+    drawHistogram();
+  }
+
+  function doFullStep() {
+    // Run through remaining sub-steps of current iteration + if at start, do full
+    if (subStep === 4) doSubStep(); // advance to next iter
+    while (subStep !== 4) doSubStep();
+  }
+
+  function doAuto50() {
+    if (autoRunning) { clearInterval(autoId); autoRunning = false; btnAuto.setText("🔄  Auto (×50)"); return; }
+    autoRunning = true; btnAuto.setText("⏸  Stop");
+    let count = 0;
+    autoId = setInterval(() => {
+      doFullStep();
+      if (subStep === 4) doSubStep(); // advance
+      count++;
+      if (count >= 50) { clearInterval(autoId); autoRunning = false; btnAuto.setText("🔄  Auto (×50)"); }
+    }, 80);
+  }
+
+  function doReset() {
+    clearInterval(autoId); autoRunning = false; btnAuto.setText("🔄  Auto (×50)");
+    currentX = 0.5; subStep = 0; samples = [];
+    totalProposed = 0; totalAccepted = 0;
+    drawTarget(); drawMarkers(); updateTabs(); drawHistogram();
+  }
+
+  btnNext.el.addEventListener("click", doSubStep);
+  btnFull.el.addEventListener("click", () => { doFullStep(); });
+  btnAuto.el.addEventListener("click", doAuto50);
+  btnReset.el.addEventListener("click", doReset);
+
+  function onParam() { SL.propSD.sync(); }
+  SL.propSD.input.addEventListener("input", onParam);
+  selDist.addEventListener("change", doReset);
+
+  // Init
+  doReset();
+
+  invalidation.then(() => {
+    clearInterval(autoId);
+    btnNext.el.removeEventListener("click", doSubStep);
+    btnFull.el.removeEventListener("click", doFullStep);
+    btnAuto.el.removeEventListener("click", doAuto50);
+    btnReset.el.removeEventListener("click", doReset);
+    SL.propSD.input.removeEventListener("input", onParam);
+    samples = [];
+  });
+
+  wrapper.value = {};
+  return wrapper;
+})()
+```
 
 

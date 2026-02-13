@@ -1,7 +1,4 @@
----
-title: "Lời cảm ơn"
-format: html
----
+# Lời cảm ơn {.unnumbered}
 
 Em Thịnh xin gửi lời cảm ơn chân thành đến:
 

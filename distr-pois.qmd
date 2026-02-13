@@ -1,0 +1,331 @@
+---
+title: "Phân phối Poisson"
+format: html
+---
+
+```{ojs}
+//| echo: false
+import { createSlider, createButton, injectStyle } from "./_slider.js"
+```
+
+
+
+```{ojs}
+//| echo: false
+
+viewof binom_poisson = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. MATH
+  // ══════════════════════════════════════════════════════
+  const lcCache=new Map();
+  function lc(n,k){
+    if(k<0||k>n)return -Infinity;if(k>n-k)k=n-k;
+    const key=(n<<16)|k;if(lcCache.has(key))return lcCache.get(key);
+    let r=0;for(let i=0;i<k;i++)r+=Math.log(n-i)-Math.log(i+1);
+    lcCache.set(key,r);return r;
+  }
+  function binPMF(x,n,p){
+    if(x<0||x>n)return 0;if(p<=0)return x===0?1:0;if(p>=1)return x===n?1:0;
+    return Math.exp(lc(n,x)+x*Math.log(p)+(n-x)*Math.log(1-p));
+  }
+  function poisPMF(k,lam){
+    if(k<0||lam<=0)return k===0?1:0;
+    let logP=-lam;for(let i=1;i<=k;i++)logP+=Math.log(lam)-Math.log(i);
+    return Math.exp(logP);
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER + STYLE
+  // ══════════════════════════════════════════════════════
+  const wrapper=document.createElement("div");
+  wrapper.style.cssText=`
+    display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:900px;margin:0 auto;
+  `;
+  
+  // Load slider
+  wrapper.appendChild(injectStyle());
+
+  const SL={};
+  SL.lam=createSlider("\u03BB (messages/hour)",0.5,8,0.5,3,"#7c3aed","purple");
+  SL.n=createSlider("n (time slices)",2,200,1,5,"#3b82f6","blue");
+
+  const ctrlRow=document.createElement("div");
+  ctrlRow.style.cssText="display:flex;gap:28px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
+  ctrlRow.appendChild(SL.lam.el);ctrlRow.appendChild(SL.n.el);
+  wrapper.appendChild(ctrlRow);
+
+  // Info box
+  const infoBox=document.createElement("div");
+  infoBox.style.cssText=`
+    width:100%;padding:10px 16px;border-radius:8px;margin-bottom:14px;
+    background:#faf5ff;border:1px solid #e9d5ff;
+    font-size:14px;color:#4c1d95;line-height:1.6;
+    font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+  `;
+  wrapper.appendChild(infoBox);
+
+  // ══════════════════════════════════════════════════════
+  // 4. TIMELINE SVG
+  // ══════════════════════════════════════════════════════
+  const NS="http://www.w3.org/2000/svg";
+
+  const TW=760,TH=100;
+  const tmg={l:50,r:20,t:14,b:32};
+  const tcw=TW-tmg.l-tmg.r;
+
+  const tSvg=document.createElementNS(NS,"svg");
+  tSvg.setAttribute("viewBox",`0 0 ${TW} ${TH}`);
+  tSvg.style.cssText=`width:100%;max-width:${TW}px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;margin-bottom:14px;`;
+
+  function el(tag,a){const e=document.createElementNS(NS,tag);if(a)for(const[k,v]of Object.entries(a))e.setAttribute(k,v);return e;}
+
+  // Slot pool
+  const TPOOL=200;
+  const tSlots=[];
+  for(let i=0;i<TPOOL;i++){
+    const r=el("rect",{y:String(tmg.t),rx:"1"});
+    r.style.display="none";tSvg.appendChild(r);tSlots.push(r);
+  }
+
+  // Axis
+  const tAxisLine=el("line",{stroke:"#94a3b8","stroke-width":"1"});
+  tSvg.appendChild(tAxisLine);
+  const tLabelStart=el("text",{"text-anchor":"middle",fill:"#475569","font-size":"13","font-weight":"600","font-family":"'SF Mono',monospace"});
+  tLabelStart.textContent="0";
+  const tLabelEnd=el("text",{"text-anchor":"middle",fill:"#475569","font-size":"13","font-weight":"600","font-family":"'SF Mono',monospace"});
+  tLabelEnd.textContent="1 hour";
+  tSvg.appendChild(tLabelStart);tSvg.appendChild(tLabelEnd);
+
+  // Tick labels
+  const tTickPool=[];
+  for(let i=0;i<20;i++){
+    const t=el("text",{"text-anchor":"middle",fill:"#94a3b8","font-size":"11","font-family":"'SF Mono',monospace"});
+    t.style.display="none";tSvg.appendChild(t);tTickPool.push(t);
+  }
+
+  // Message icons
+  const msgPool=[];
+  for(let i=0;i<30;i++){
+    const t=el("text",{"text-anchor":"middle","font-size":"16",fill:"#7c3aed"});
+    t.textContent="\uD83D\uDCAC";t.style.display="none";tSvg.appendChild(t);msgPool.push(t);
+  }
+
+  wrapper.appendChild(tSvg);
+
+  // ══════════════════════════════════════════════════════
+  // 5. DISTRIBUTION CHART SVG
+  // ══════════════════════════════════════════════════════
+  const CW=760,CH=340;
+  const cmg={t:24,r:20,b:52,l:60};
+  const ccw=CW-cmg.l-cmg.r,cch=CH-cmg.t-cmg.b;
+
+  const cSvg=document.createElementNS(NS,"svg");
+  cSvg.setAttribute("viewBox",`0 0 ${CW} ${CH}`);
+  cSvg.style.cssText=`width:100%;max-width:${CW}px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;`;
+
+  // Grid
+  const gridLines=[];
+  for(let i=0;i<=4;i++){const l=el("line",{stroke:"#e2e8f0","stroke-width":"0.7"});cSvg.appendChild(l);gridLines.push(l);}
+  const yLabels=[];
+  for(let i=0;i<=4;i++){const t=el("text",{"text-anchor":"end",fill:"#94a3b8","font-size":"12","font-family":"'SF Mono',monospace"});cSvg.appendChild(t);yLabels.push(t);}
+
+  // Binomial bars
+  const BPOOL=30;
+  const bBars=[];
+  for(let i=0;i<BPOOL;i++){
+    const r=el("rect",{rx:"2",fill:"#3b82f6",opacity:"0.55",stroke:"#2563eb","stroke-width":"0.5"});
+    r.style.display="none";cSvg.appendChild(r);bBars.push(r);
+  }
+
+  // Poisson line + dots
+  const pPath=el("path",{fill:"none",stroke:"#7c3aed","stroke-width":"2.5",opacity:"0.9"});
+  cSvg.appendChild(pPath);
+  const pDots=[];
+  for(let i=0;i<BPOOL;i++){
+    const c=el("circle",{r:"5",fill:"#7c3aed",stroke:"#fff","stroke-width":"1.5"});
+    c.style.display="none";cSvg.appendChild(c);pDots.push(c);
+  }
+
+  // Axes
+  const xAx=el("line",{stroke:"#94a3b8"});cSvg.appendChild(xAx);
+  const xTickPool=[];
+  for(let i=0;i<20;i++){
+    const ln=el("line",{stroke:"#94a3b8",y2:"5"});ln.style.display="none";cSvg.appendChild(ln);
+    const t=el("text",{"text-anchor":"middle",fill:"#475569","font-size":"13","font-family":"'SF Mono',monospace",dy:"18"});t.style.display="none";cSvg.appendChild(t);
+    xTickPool.push({ln,t});
+  }
+  cSvg.appendChild(el("line",{x1:String(cmg.l),x2:String(cmg.l),y1:String(cmg.t),y2:String(cmg.t+cch),stroke:"#94a3b8"}));
+  const xLbl=el("text",{"text-anchor":"middle",fill:"#475569","font-size":"14",y:String(CH-6)});
+  xLbl.textContent="Number of messages (k)";cSvg.appendChild(xLbl);
+  const yLbl=el("text",{"text-anchor":"middle",fill:"#475569","font-size":"14",x:"16",y:String(cmg.t+cch/2),transform:`rotate(-90,16,${cmg.t+cch/2})`});
+  yLbl.textContent="P(X = k)";cSvg.appendChild(yLbl);
+
+  // Legend
+  const legR=el("rect",{x:String(CW-200),y:"10",width:"16",height:"12",rx:"2",fill:"#3b82f6",opacity:"0.55"});
+  const legT1=el("text",{x:String(CW-178),y:"21",fill:"#475569","font-size":"13","font-weight":"600"});legT1.textContent="Binomial";
+  const legC=el("circle",{cx:String(CW-192),cy:"36",r:"5",fill:"#7c3aed"});
+  const legL=el("line",{x1:String(CW-200),x2:String(CW-184),y1:"36",y2:"36",stroke:"#7c3aed","stroke-width":"2.5"});
+  const legT2=el("text",{x:String(CW-178),y:"40",fill:"#475569","font-size":"13","font-weight":"600"});legT2.textContent="Poisson";
+  cSvg.appendChild(legR);cSvg.appendChild(legT1);cSvg.appendChild(legL);cSvg.appendChild(legC);cSvg.appendChild(legT2);
+
+  wrapper.appendChild(cSvg);
+
+  // ══════════════════════════════════════════════════════
+  // 6. SEEDED RNG
+  // ══════════════════════════════════════════════════════
+  let rngState=42;
+  function seedRng(s){rngState=s;}
+  function rng(){rngState=(rngState*16807)%2147483647;return(rngState-1)/2147483646;}
+
+  // ══════════════════════════════════════════════════════
+  // 7. RENDER
+  // ══════════════════════════════════════════════════════
+  function render(){
+    const lam=SL.lam.val();
+    const n=SL.n.val();
+    const p=Math.min(lam/n,1);
+
+    // Info
+    infoBox.innerHTML=
+      `Divide <b>1 hour</b> into <b style="color:#3b82f6">n = ${n}</b> intervals. `+
+      `Each has <b>p = \u03BB/n = ${lam.toFixed(1)}/${n} = ${p.toFixed(4)}</b> chance of a message.<br>`+
+      `<b style="color:#3b82f6">Binom(${n}, ${p.toFixed(4)})</b> approximates `+
+      `<b style="color:#7c3aed">Poisson(\u03BB = ${lam.toFixed(1)})</b>.`;
+
+    // ── Timeline ──
+    seedRng(12345);
+    const slotW=tcw/n;
+    const barH=40;
+    const axisY=tmg.t+barH+8;
+    let mi=0;
+
+    for(let i=0;i<TPOOL;i++){
+      if(i<n){
+        const isMsg=rng()<p;
+        const x=tmg.l+i*slotW;
+        tSlots[i].setAttribute("x",x);
+        tSlots[i].setAttribute("y",tmg.t);
+        tSlots[i].setAttribute("width",Math.max(0.5,slotW-Math.min(1.5,slotW*0.1)));
+        tSlots[i].setAttribute("height",barH);
+        tSlots[i].setAttribute("fill",isMsg?"#7c3aed":"#e2e8f0");
+        tSlots[i].setAttribute("opacity",isMsg?"0.8":"0.5");
+        tSlots[i].style.display="";
+        if(isMsg&&mi<30){
+          msgPool[mi].setAttribute("x",x+slotW/2);
+          msgPool[mi].setAttribute("y",tmg.t-1);
+          msgPool[mi].style.display=slotW>8?"":"none";
+          mi++;
+        }
+      }else{tSlots[i].style.display="none";}
+    }
+    for(;mi<30;mi++)msgPool[mi].style.display="none";
+
+    tAxisLine.setAttribute("x1",tmg.l);tAxisLine.setAttribute("x2",tmg.l+tcw);
+    tAxisLine.setAttribute("y1",axisY);tAxisLine.setAttribute("y2",axisY);
+    tLabelStart.setAttribute("x",tmg.l);tLabelStart.setAttribute("y",axisY+18);
+    tLabelEnd.setAttribute("x",tmg.l+tcw);tLabelEnd.setAttribute("y",axisY+18);
+
+    const tStep=n<=10?1:n<=30?5:n<=60?10:20;
+    let tti=0;
+    for(let i=tStep;i<n&&tti<20;i+=tStep){
+      const x=tmg.l+i*slotW;
+      tTickPool[tti].setAttribute("x",x);
+      tTickPool[tti].setAttribute("y",axisY+16);
+      tTickPool[tti].textContent=i;
+      tTickPool[tti].style.display="";
+      tti++;
+    }
+    for(;tti<20;tti++)tTickPool[tti].style.display="none";
+
+    // ── Distribution chart ──
+    const hiK=Math.max(Math.ceil(lam+4*Math.sqrt(lam)),8);
+    let maxY=0;
+    const bVals=[],pVals=[];
+    for(let k=0;k<=hiK;k++){
+      const bv=binPMF(k,n,p),pv=poisPMF(k,lam);
+      bVals.push(bv);pVals.push(pv);
+      if(bv>maxY)maxY=bv;if(pv>maxY)maxY=pv;
+    }
+    maxY*=1.18;if(maxY<0.01)maxY=0.1;
+
+    const sx=k=>cmg.l+(k/hiK)*ccw;
+    const sy=y=>cmg.t+cch-(y/maxY)*cch;
+    const barW=Math.max(2,Math.min(28,ccw/hiK*0.6));
+    const baseline=sy(0);
+
+    for(let i=0;i<=4;i++){
+      const v=(maxY/4)*i,yy=sy(v);
+      gridLines[i].setAttribute("x1",cmg.l);gridLines[i].setAttribute("x2",CW-cmg.r);
+      gridLines[i].setAttribute("y1",yy);gridLines[i].setAttribute("y2",yy);
+      yLabels[i].setAttribute("x",cmg.l-8);yLabels[i].setAttribute("y",yy+4);
+      yLabels[i].textContent=v.toFixed(v<0.01?3:2);
+    }
+
+    for(let i=0;i<BPOOL;i++){
+      if(i<=hiK){
+        const bx=sx(i)-barW/2,by=sy(bVals[i]);
+        bBars[i].setAttribute("x",bx);bBars[i].setAttribute("y",by);
+        bBars[i].setAttribute("width",barW);
+        bBars[i].setAttribute("height",Math.max(0,baseline-by));
+        bBars[i].style.display="";
+      }else{bBars[i].style.display="none";}
+    }
+
+    let d="";
+    for(let k=0;k<=hiK;k++){
+      const px=sx(k),py=sy(pVals[k]);
+      d+=(k===0?"M":"L")+px.toFixed(1)+","+py.toFixed(1);
+      if(k<BPOOL){pDots[k].setAttribute("cx",px);pDots[k].setAttribute("cy",py);pDots[k].style.display="";}
+    }
+    for(let k=hiK+1;k<BPOOL;k++)pDots[k].style.display="none";
+    pPath.setAttribute("d",d);
+
+    xAx.setAttribute("x1",cmg.l);xAx.setAttribute("x2",CW-cmg.r);
+    xAx.setAttribute("y1",baseline);xAx.setAttribute("y2",baseline);
+    xLbl.setAttribute("x",cmg.l+ccw/2);
+
+    let ti=0;
+    for(let k=0;k<=hiK&&ti<20;k++){
+      const xx=sx(k);
+      xTickPool[ti].ln.setAttribute("x1",xx);xTickPool[ti].ln.setAttribute("x2",xx);
+      xTickPool[ti].ln.setAttribute("y1",baseline);xTickPool[ti].ln.setAttribute("y2",baseline+5);
+      xTickPool[ti].ln.style.display="";
+      xTickPool[ti].t.setAttribute("x",xx);xTickPool[ti].t.setAttribute("y",baseline+5);
+      xTickPool[ti].t.textContent=k;xTickPool[ti].t.style.display="";
+      ti++;
+    }
+    for(;ti<20;ti++){xTickPool[ti].ln.style.display="none";xTickPool[ti].t.style.display="none";}
+
+    legT1.textContent="Binom("+n+", "+(p<0.01?p.toExponential(1):p.toFixed(3))+")";
+    legT2.textContent="Poisson("+lam.toFixed(1)+")";
+
+    wrapper.value={lam,n,p};
+    wrapper.dispatchEvent(new Event("input",{bubbles:true}));
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 8. EVENTS
+  // ══════════════════════════════════════════════════════
+  let rafId=0;
+  function schedule(){cancelAnimationFrame(rafId);rafId=requestAnimationFrame(render);}
+  function onLam(){SL.lam.sync();schedule();}
+  function onN(){SL.n.sync();schedule();}
+  SL.lam.input.addEventListener("input",onLam);
+  SL.n.input.addEventListener("input",onN);
+
+  render();
+
+  invalidation.then(()=>{
+    cancelAnimationFrame(rafId);
+    SL.lam.input.removeEventListener("input",onLam);
+    SL.n.input.removeEventListener("input",onN);
+    lcCache.clear();
+  });
+
+  wrapper.value={};
+  return wrapper;
+})()
+```
+

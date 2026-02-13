@@ -13,10 +13,17 @@ book:
   chapters:
     - index.qmd
     - prob.qmd
+    - distr.qmd
+    - part: distr-d.qmd
+      chapters:
+        - distr-bin.qmd
+        - distr-pois.qmd
+    - part: distr-c.qmd
+      chapters: 
+        - distr-exp.qmd
+        - distr-pl.qmd
+    - lik.qmd
     - bayes.qmd
-    - distr-shape.qmd
-    - distr-d.qmd
-    - distr-c.qmd
     - thanks.qmd
     - references.qmd
 

@@ -354,6 +354,7 @@ Bảng Galton (Galton board) là một tấm bảng dựng đứng, được đ�
 
 ```{ojs}
 //| echo: false
+
 viewof galton_sharp = Inputs.form({
   rows: Inputs.range([8, 20], {value: 10, step: 1, label: "Số hàng đinh"}),
   speed: Inputs.range([0.5, 3], {value: 2, step: 0.1, label: "Tốc độ"}),
