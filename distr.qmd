@@ -1,7 +1,14 @@
 ---
 title: "Phân phối xác suất"
 format: html
+execute: 
+  echo: false
 ---
+
+```{ojs}
+import { createSlider, createButton, injectStyle } from "./_slider.js"
+d3 = require("d3@7")
+```
 
 ## Định nghĩa
 
@@ -25,111 +32,652 @@ Mỗi biến ngẫu nhiên có 1 phân phối xác suất. Do có 2 loại biế
 
 ### 
 
-## Moments
+### Joint distribution
 
-Xác suất của mỗi giá trị trong một phân phối được xác định bằng hàm mật độ xác suất (với biến liên tục) hoặc hàm khối lượng xác suất (với biến rời rạc).
 
-Hình dạng của phân phối là hình dạng của các hàm số này, được xác định bằng những giá trị gọi là mô-men (moment) của hàm. Thuật ngữ này được mượn từ Vật lý: mô-men (hay mô-men lực) còn gọi là lực xoắn, là lực làm quay một vật thể quanh một điểm tựa. Tưởng tượng một cái mỏ lết quay quanh một con ốc.
+## Moment
 
-![](img/moment-physics.svg)
+Hình dạng của một phân phối được xác định bởi các giá trị gọi là moment. Thuật ngữ này được mượn từ vật lý: mô-men (hay mô-men lực) là đại lượng đo khả năng làm quay của một lực quanh một điểm tựa.
 
-Trong thống kê, moment đo lường vị trí của phân phối so với một điểm mốc. Đối với một biến ngẫu nhiên $X$, moment cấp $n$ quanh điểm $a$ (the $n$-th moment about $a$) là:
+Trong vật lý, moment ($M$) được tính bằng:
+
+$$M = \underbrace{d}_{\text{Khoảng cách đến điểm tựa}} \times \underbrace{F}_{\text{Lực tác dụng}}$$
+
+Trong thống kê, hãy tưởng tượng trục số như một cái bập bênh. Mỗi giá trị $x$ là một vị trí trên thanh đòn, và "sức nặng" tại điểm đó chính là xác suất xảy ra của nó. Khi đó, ta thấy sự tương đồng với moment trong vật lý:
+
+- Lực ($F$): Tương ứng với Xác suất $f(x)$ (hoặc $\mathbb{P}(X=x)$). Giá trị nào có xác suất càng cao thì "lực" đè xuống càng nặng.
+
+- Khoảng cách đến điểm tựa ($d$): Tương ứng với $(x - a)$ là khoảng cách từ giá trị dữ liệu $x$ tới một điểm mốc $a$ (ví dụ: gốc 0 hoặc giá trị trung bình).
+
+Tổng hợp lại, moment chính là tổng (hoặc tích phân) của các tích số giữa khoảng cách và xác suất. Trong ngôn ngữ thống kê, phép tổng có trọng số này chính là Kỳ vọng ($E$).
+
+Công thức moment bậc $n$ quanh điểm $a$ được viết là:
+
+$$E[(X - a)^n] = \begin{cases} \sum (x_i - a)^n \mathbb{P}(x_i) & \text{(Rời rạc)} \\ \int_{-\infty}^{\infty} (x - a)^n f(x) dx & \text{(Liên tục)} \end{cases}$$
+
+::: {.callout-important}
+Ký hiệu $E[g(X)]$ chính là định nghĩa toán học của việc lấy giá trị $g(X)$ nhân với xác suất rồi cộng lại. Bất cứ khi nào thấy "Lấy một giá trị, nhân với xác suất của nó, rồi cộng hết lại", thì đó chính là Kỳ vọng ($E$).
+:::
+
+Một cách tổng quát, với một biến ngẫu nhiên $X$, moment bậc $n$ quanh điểm $a$ (the $n$-th moment about $a$) là:
 
 $$E[(X - a)^n]$$
 
 Có 2 loại moment:
 
--   Moment gốc (raw moment, xoay quanh điểm 0): khi $a = 0$, moment là $E[X^n]$.
--   Moment tập trung (central moment, xoay quanh giá trị trung bình): khi $a = E[X]$, moment là $E[(X - E[X])^n]$.
+-   Moment gốc (raw moment, lấy mốc là điểm 0): khi $a = 0$, moment là $E[X^n]$.
+-   Moment tập trung (central moment, lấy mốc là giá trị trung bình): khi $a = E[X]$, moment là $E[(X - E[X])^n]$.
 
-Cấp của moment có thể từ 0 đến $\infty$. Nếu biết hết toàn bộ các moment sẽ có thể vẽ lại chính xác hình dạng của đồ thị phân phối đó. Chúng ta thường quan tâm tới 4 loại moment sau:
+Bậc của moment có thể từ 0 đến $\infty$. Chúng ta thường quan tâm tới 4 loại moment sau:
 
 | Loại moment | Kí hiệu | Tên thường gọi | Ý nghĩa |
 |----|----|----|----|
-| Gốc cấp 1 | $E[X]$ | Kỳ vọng (Mean) | Vị trí (tâm của phân phối) |
-| Tập trung cấp 2 | $E[(X - E[X])^2]$ | Phương sai (Variance) | Độ phân tán (dữ liệu biến động thế nào) |
-| Tập trung cấp 3 | $E[(X - E[X])^3]$ | Độ lệch (Skewness)\* | Tính bất đối xứng (bên nào có đuôi dài hơn) |
-| Tập trung cấp 4 | $E[(X - E[X])^4]$ | Độ nhọn (Kurtosis)\* | Độ dày của đuôi |
+| Gốc bậc 1 | $E[X]$ | Kỳ vọng (Mean) | Vị trí (tâm của phân phối) |
+| Tập trung bậc 2 | $E[(X - E[X])^2]$ | Phương sai (Variance) | Độ phân tán (dữ liệu biến động thế nào) |
+| Tập trung bậc 3 | $E[(X - E[X])^3]$ | Độ lệch (Skewness)\* | Tính bất đối xứng (bên nào có đuôi dài hơn) |
+| Tập trung bậc 4 | $E[(X - E[X])^4]$ | Độ nhọn (Kurtosis)\* | Độ dày của đuôi |
 
 *Độ lệch và Độ nhọn thường được chuẩn hóa (standardised) bằng cách chia cho độ lệch chuẩn $\sigma$, ý nghĩa là gấp bao nhiêu lần độ lệch chuẩn.
 
-```{r}
-#| echo: false
-#| message: false
-library(plotly)
+```{ojs}
+viewof moment_seesaw = {
 
-# 1. SETTINGS
-mu <- 2  # The new mean
-sigma <- 1
+  // ═══════════════════════════════════════════════════
+  // CONFIG
+  // ═══════════════════════════════════════════════════
+  const W = 780, H = 420;
+  const COL = {
+    beam: "#FFB300", beamStroke: "#F9A825",
+    pivot: "#F4511E", pivotStroke: "#D84315",
+    block: "#EF5350", blockStroke: "#C62828",
+    blockAlt: "#FF7043", blockAltStroke: "#E64A19",
+    dist: "#1565C0",
+    force: "#00897B",
+    moment: "#7B1FA2",
+    ref: "#E91E63",
+    bg: "#fff", sub: "#78909C", txt: "#263238",
+    snap: "#43A047",
+  };
 
-# 2. Define the grid (Shifted to center around the new mean)
-# Range is now roughly [mu - 3, mu + 3]
-x <- seq(mu - 3, mu + 3, length.out = 100)
-y <- seq(mu - 3, mu + 3, length.out = 100)
+  // Distribution presets
+  const distributions = {
+    "Đối xứng (Symmetric)": [
+      { x: 1, freq: 1 }, { x: 2, freq: 3 }, { x: 3, freq: 5 },
+      { x: 4, freq: 7 }, { x: 5, freq: 5 }, { x: 6, freq: 3 }, { x: 7, freq: 1 },
+    ],
+    "Lệch phải (Right-skewed)": [
+      { x: 1, freq: 7 }, { x: 2, freq: 5 }, { x: 3, freq: 4 },
+      { x: 4, freq: 3 }, { x: 5, freq: 2 }, { x: 7, freq: 1 },
+    ],
+    "Lệch trái (Left-skewed)": [
+      { x: 1, freq: 1 }, { x: 3, freq: 2 }, { x: 4, freq: 3 },
+      { x: 5, freq: 4 }, { x: 6, freq: 5 }, { x: 7, freq: 7 },
+    ],
+    "Đều (Uniform)": [
+      { x: 1, freq: 4 }, { x: 2, freq: 4 }, { x: 3, freq: 4 },
+      { x: 4, freq: 4 }, { x: 5, freq: 4 }, { x: 6, freq: 4 },
+    ],
+    "Hai đỉnh (Bimodal)": [
+      { x: 1, freq: 6 }, { x: 2, freq: 4 }, { x: 3, freq: 1 },
+      { x: 5, freq: 1 }, { x: 6, freq: 4 }, { x: 7, freq: 6 },
+    ],
+    "Đuôi nặng (Heavy-tailed)": [
+      { x: 0, freq: 2 }, { x: 2, freq: 1 }, { x: 3, freq: 3 },
+      { x: 4, freq: 6 }, { x: 5, freq: 3 }, { x: 6, freq: 1 }, { x: 8, freq: 2 },
+    ],
+  };
 
-# 3. Calculate density
-# We subtract 'mu' from x and y in the formula
-z <- outer(x, y, function(x, y) {
-  (1 / (2 * pi * sigma^2)) * exp(-0.5 * ((x - mu)^2 + (y - mu)^2) / sigma^2)
-})
+  let dataPoints = distributions["Lệch phải (Right-skewed)"].map(d => ({ ...d }));
 
-# Peak height (constant for standard normal, but good to keep dynamic)
-z_peak <- (1 / (2 * pi * sigma^2))
+  const outer = document.createElement("div");
+  outer.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:820px;margin:0 auto;`;
+  outer.appendChild(injectStyle());
 
-# 4. Create the Plot
-plot_ly() |>
-  add_surface(x = ~x, y = ~y, z = ~z, 
-              colorscale = "Viridis",
-              opacity = 0.5,
-              showscale = FALSE) |>
-  
-  # Update the Vertical Line to sit at (2, 2)
-  add_trace(
-    type = "scatter3d",
-    mode = "lines",
-    x = c(0, 0),  # Position X = 2
-    y = c(0, 0),  # Position Y = 2
-    z = c(0, z_peak),
-    line = list(color = "blue", width = 5),
-    name = "(0, 0)"
-  ) |>
-  
-  add_trace(
-    type = "scatter3d",
-    mode = "lines",
-    x = c(mu, mu),  # Position X = 2
-    y = c(mu, mu),  # Position Y = 2
-    z = c(0, z_peak),
-    line = list(color = "black", width = 5),
-    name = "Mean"
-  ) |>
-  
-  layout(
-    scene = list(
-      xaxis = list(title = "X"),
-      yaxis = list(title = "Y"),
-      zaxis = list(title = "Density"),
-      camera = list(
-        eye = list(x = 1.5, y = -1.5, z = 1.2)
-      )
-    )
-  )
+  // ═══════════════════════════════════════════════════
+  // STATE
+  // ═══════════════════════════════════════════════════
+  let useCenter = false;
+  let momentOrder = 1;
+  let pivotValue = 0;
+  let isDragging = false;
+  let activeDist = "Lệch phải (Right-skewed)";
+
+  // ═══════════════════════════════════════════════════
+  // CONTROLS
+  // ═══════════════════════════════════════════════════
+
+  // Distribution selector
+  const distRow = document.createElement("div");
+  distRow.style.cssText = "display:flex;gap:6px;width:100%;margin-bottom:10px;flex-wrap:wrap;align-items:center;";
+  const distLabel = document.createElement("span");
+  distLabel.style.cssText = `font-size:13px;font-weight:700;color:${COL.sub};margin-right:4px;`;
+  distLabel.textContent = "Dữ liệu:";
+  distRow.appendChild(distLabel);
+
+  const distBtns = {};
+  Object.keys(distributions).forEach(name => {
+    const b = document.createElement("button");
+    b.style.cssText = `padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;
+      font-family:inherit;cursor:pointer;transition:all 0.15s;border:1.5px solid #B0BEC5;
+      background:#fff;color:${COL.txt};`;
+    b.textContent = name;
+    b.addEventListener("click", () => {
+      activeDist = name;
+      dataPoints = distributions[name].map(d => ({ ...d }));
+      if (useCenter) pivotValue = computeMean();
+      else pivotValue = 0;
+      update();
+    });
+    distBtns[name] = b;
+    distRow.appendChild(b);
+  });
+  outer.appendChild(distRow);
+
+  function styleDistBtn(btn, active) {
+    btn.style.background = active ? COL.txt : "#fff";
+    btn.style.color = active ? "#fff" : COL.txt;
+    btn.style.borderColor = active ? COL.txt : "#B0BEC5";
+  }
+
+  // Mode row
+  const modeRow = document.createElement("div");
+  modeRow.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:8px;";
+
+  function mkModeBtn(text) {
+    const b = document.createElement("button");
+    b.style.cssText = `flex:1;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:700;
+      font-family:inherit;cursor:pointer;transition:all 0.15s;border:2px solid ${COL.ref};
+      background:#fff;color:${COL.ref};`;
+    b.textContent = text;
+    return b;
+  }
+  const btnRaw = mkModeBtn("a = 0  (Moment gốc)");
+  const btnCentral = mkModeBtn("a = μ  (Moment tập trung)");
+  modeRow.appendChild(btnRaw);
+  modeRow.appendChild(btnCentral);
+  outer.appendChild(modeRow);
+
+  function styleModeBtn(btn, active) {
+    btn.style.background = active ? COL.ref : "#fff";
+    btn.style.color = active ? "#fff" : COL.ref;
+    btn.style.borderColor = COL.ref;
+  }
+
+  // Order tabs (always shown)
+  const orderRow = document.createElement("div");
+  orderRow.style.cssText = "display:flex;gap:8px;width:100%;margin-bottom:8px;align-items:center;";
+  const orderLabel = document.createElement("span");
+  orderLabel.style.cssText = `font-size:13px;font-weight:700;color:${COL.sub};margin-right:4px;`;
+  orderLabel.textContent = "Bậc (Order):";
+  orderRow.appendChild(orderLabel);
+
+  const orderBtns = [];
+  const orderDefs = [
+    { n: 1, label: "n = 1" },
+    { n: 2, label: "n = 2" },
+    { n: 3, label: "n = 3" },
+    { n: 4, label: "n = 4" },
+  ];
+  orderDefs.forEach(od => {
+    const b = document.createElement("button");
+    b.style.cssText = `padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;
+      font-family:inherit;cursor:pointer;transition:all 0.15s;border:2px solid ${COL.moment};
+      background:#fff;color:${COL.moment};`;
+    b.textContent = od.label;
+    b.addEventListener("click", () => {
+      if (!useCenter && od.n > 1) return; // raw mode: only n=1
+      if (useCenter && od.n < 2) return;  // central mode: only n>=2
+      momentOrder = od.n;
+      update();
+    });
+    orderBtns.push({ el: b, n: od.n });
+    orderRow.appendChild(b);
+  });
+  outer.appendChild(orderRow);
+
+  function styleOrderBtn(btn, n, active, enabled) {
+    if (!enabled) {
+      btn.style.background = "#f5f5f5";
+      btn.style.color = "#ccc";
+      btn.style.borderColor = "#e0e0e0";
+      btn.style.cursor = "not-allowed";
+    } else if (active) {
+      btn.style.background = COL.moment;
+      btn.style.color = "#fff";
+      btn.style.borderColor = COL.moment;
+      btn.style.cursor = "pointer";
+    } else {
+      btn.style.background = "#fff";
+      btn.style.color = COL.moment;
+      btn.style.borderColor = COL.moment;
+      btn.style.cursor = "pointer";
+    }
+  }
+
+  // Mode events
+  btnRaw.addEventListener("click", () => {
+    useCenter = false; pivotValue = 0; momentOrder = 1;
+    update();
+  });
+  btnCentral.addEventListener("click", () => {
+    useCenter = true; pivotValue = computeMean();
+    if (momentOrder < 2) momentOrder = 2;
+    update();
+  });
+
+  // Drag hint
+  const hintRow = document.createElement("div");
+  hintRow.style.cssText = `font-size:12px;color:${COL.sub};margin-bottom:6px;width:100%;text-align:center;font-style:italic;`;
+  hintRow.textContent = "💡 Kéo chân đế của bập bênh để thay đổi điểm mốc";
+  outer.appendChild(hintRow);
+
+  // ═══════════════════════════════════════════════════
+  // SVG
+  // ═══════════════════════════════════════════════════
+  const svg = d3.create("svg")
+    .attr("viewBox", [0, 0, W, H])
+    .style("width", "100%").style("max-width", W + "px")
+    .style("background", COL.bg);
+
+  const defs = svg.append("defs");
+
+  // Arrow markers
+  function addArrow(id, color) {
+    defs.append("marker").attr("id", id)
+      .attr("viewBox", "0 0 10 7").attr("refX", 9).attr("refY", 3.5)
+      .attr("markerWidth", 10).attr("markerHeight", 7).attr("orient", "auto")
+      .append("polygon").attr("points", "0 0.5, 9 3.5, 0 6.5").attr("fill", color);
+  }
+  addArrow("arrDistR", COL.dist);
+  addArrow("arrForce", COL.force);
+  defs.append("marker").attr("id", "arrDistL")
+    .attr("viewBox", "0 0 10 7").attr("refX", 1).attr("refY", 3.5)
+    .attr("markerWidth", 10).attr("markerHeight", 7).attr("orient", "auto")
+    .append("polygon").attr("points", "10 0.5, 1 3.5, 10 6.5").attr("fill", COL.dist);
+
+  // ── LAYOUT ──
+  const beamCX = W / 2, beamCY = 290;
+  const beamHalfW = 330, beamH = 16;
+  const blockSize = 22;
+  const pivotH = 70, pivotW = 60;
+
+  // ── FORMULA (top) ──
+  const formulaText = svg.append("text")
+    .attr("x", W / 2).attr("y", 26)
+    .attr("text-anchor", "middle").attr("font-size", 18).attr("font-weight", 700)
+    .attr("font-family", "'SF Mono',SFMono-Regular,Menlo,monospace");
+  const formulaSub = svg.append("text")
+    .attr("x", W / 2).attr("y", 50)
+    .attr("text-anchor", "middle").attr("font-size", 14).attr("fill", COL.sub);
+
+  // ── BALANCE BADGE (top right) ──
+  const balanceG = svg.append("g").style("display", "none");
+  const balanceBg = balanceG.append("rect").attr("rx", 10).attr("fill", COL.snap);
+  const balanceTxt = balanceG.append("text").attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+    .attr("fill", "#fff").attr("font-size", 14).attr("font-weight", 700).text("Cân bằng!");
+
+  // ── SCENE GROUP (rotates) ──
+  const sceneG = svg.append("g");
+
+  // Beam
+  sceneG.append("rect")
+    .attr("x", beamCX - beamHalfW).attr("y", beamCY - beamH / 2)
+    .attr("width", beamHalfW * 2).attr("height", beamH)
+    .attr("rx", 5).attr("fill", COL.beam).attr("stroke", COL.beamStroke).attr("stroke-width", 1.5);
+
+  const tickG = sceneG.append("g");
+  const blocksG = sceneG.append("g");
+
+  // ── PIVOT ──
+  const pivotTriG = svg.append("g").style("cursor", "ew-resize");
+  pivotTriG.append("polygon")
+    .attr("points", `0,0 ${-pivotW / 2 - 12},${pivotH + 12} ${pivotW / 2 + 12},${pivotH + 12}`)
+    .attr("fill", "transparent");
+  pivotTriG.append("polygon")
+    .attr("class", "pivot-tri")
+    .attr("points", `0,4 ${-pivotW / 2},${pivotH} ${pivotW / 2},${pivotH}`)
+    .attr("fill", COL.pivot).attr("stroke", COL.pivotStroke).attr("stroke-width", 1.5).attr("stroke-linejoin", "round");
+  pivotTriG.append("circle").attr("cx", 0).attr("cy", 8).attr("r", 8)
+    .attr("fill", "#fff").attr("stroke", COL.pivotStroke).attr("stroke-width", 1.5);
+  pivotTriG.append("circle").attr("cx", 0).attr("cy", 8).attr("r", 3.5).attr("fill", COL.pivot);
+
+  // ── ANNOTATIONS ──
+  const annoG = svg.append("g");
+
+  // Ref line & pill
+  const refLine = annoG.append("line").attr("stroke", COL.ref).attr("stroke-width", 1.5).attr("stroke-dasharray", "5,3");
+  const refPill = annoG.append("g");
+  const refPillBg = refPill.append("rect").attr("rx", 10).attr("fill", COL.ref);
+  const refPillTxt = refPill.append("text").attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+    .attr("fill", "#fff").attr("font-size", 14).attr("font-weight", 700);
+
+  // Hover annotations
+  const distAnnoG = annoG.append("g").style("display", "none");
+  const distLine1 = distAnnoG.append("line").attr("stroke", COL.dist).attr("stroke-width", 2)
+    .attr("marker-start", "url(#arrDistL)").attr("marker-end", "url(#arrDistR)");
+  const distPill = distAnnoG.append("g");
+  const distPillBg = distPill.append("rect").attr("rx", 8).attr("fill", COL.dist);
+  const distPillTxt = distPill.append("text").attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+    .attr("fill", "#fff").attr("font-size", 12).attr("font-weight", 700)
+    .attr("font-family", "'SF Mono',monospace");
+  const forceArrow = distAnnoG.append("line").attr("stroke", COL.force).attr("stroke-width", 2.5)
+    .attr("marker-end", "url(#arrForce)");
+  const forcePill = distAnnoG.append("g");
+  const forcePillBg = forcePill.append("rect").attr("rx", 8).attr("fill", COL.force);
+  const forcePillTxt = forcePill.append("text").attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+    .attr("fill", "#fff").attr("font-size", 12).attr("font-weight", 700);
+
+  // ── CONTRIBUTION BARS ──
+  const contribG = svg.append("g");
+
+  outer.appendChild(svg.node());
+
+  // ═══════════════════════════════════════════════════
+  // X-SCALE
+  // ═══════════════════════════════════════════════════
+  let xScale;
+  function buildXScale() {
+    const allX = dataPoints.map(d => d.x);
+    const xMin = Math.min(0, ...allX) - 1;
+    const xMax = Math.max(...allX) + 1;
+    xScale = d3.scaleLinear()
+      .domain([xMin, xMax])
+      .range([beamCX - beamHalfW + 24, beamCX + beamHalfW - 24]);
+  }
+
+  // ═══════════════════════════════════════════════════
+  // COMPUTE
+  // ═══════════════════════════════════════════════════
+  function computeMean() {
+    let sumF = 0, sumFX = 0;
+    for (const d of dataPoints) { sumF += d.freq; sumFX += d.freq * d.x; }
+    return sumF > 0 ? sumFX / sumF : 0;
+  }
+  function computeMoment(n, center) {
+    let sumF = 0, sumM = 0;
+    for (const d of dataPoints) { sumF += d.freq; sumM += d.freq * Math.pow(d.x - center, n); }
+    return sumF > 0 ? sumM / sumF : 0;
+  }
+
+  // ═══════════════════════════════════════════════════
+  // HOVER
+  // ═══════════════════════════════════════════════════
+  function showAnnotation(d) {
+    const n = momentOrder;
+    const center = pivotValue;
+    const refPx = xScale(center);
+    const hlPx = xScale(d.x);
+    const topOfStack = beamCY - beamH / 2 - d.freq * (blockSize + 2) - 2;
+    const distY = topOfStack - 14;
+
+    if (Math.abs(hlPx - refPx) > 20) {
+      distLine1.attr("x1", refPx).attr("y1", distY).attr("x2", hlPx).attr("y2", distY).style("display", "");
+      const distMidX = (refPx + hlPx) / 2;
+      const distVal = (d.x - center);
+      const distTxt = n > 1
+        ? `(${distVal.toFixed(1)})${["", "", "\u00B2", "\u00B3", "\u2074"][n]}`
+        : `${distVal.toFixed(1)}`;
+      distPillTxt.text(`d = ${distTxt}`);
+      const dtw = distTxt.length * 7 + 50;
+      distPillBg.attr("x", distMidX - dtw / 2).attr("y", distY - 22).attr("width", dtw).attr("height", 20);
+      distPillTxt.attr("x", distMidX).attr("y", distY - 12);
+      distPill.style("display", "");
+    } else {
+      distLine1.style("display", "none");
+      distPill.style("display", "none");
+    }
+
+    const forceArrowX = hlPx + blockSize / 2 + 10;
+    const forceY1 = topOfStack + 4;
+    const forceLen = 16 + d.freq * 10;
+    forceArrow.attr("x1", forceArrowX).attr("y1", forceY1)
+      .attr("x2", forceArrowX).attr("y2", forceY1 + forceLen).style("display", "");
+    forcePillTxt.text(`f = ${d.freq}`);
+    const ftw = 58;
+    forcePillBg.attr("x", forceArrowX - ftw / 2).attr("y", forceY1 + forceLen + 3).attr("width", ftw).attr("height", 20);
+    forcePillTxt.attr("x", forceArrowX).attr("y", forceY1 + forceLen + 13);
+    forcePill.style("display", "");
+    distAnnoG.style("display", "");
+  }
+
+  function hideAnnotation() {
+    distAnnoG.style("display", "none");
+  }
+
+  // ═══════════════════════════════════════════════════
+  // DRAG
+  // ═══════════════════════════════════════════════════
+  const pivotDrag = d3.drag()
+    .on("start", function () {
+      isDragging = true;
+      pivotTriG.select(".pivot-tri").attr("fill", "#FF8A65");
+    })
+    .on("drag", function (event) {
+      const px = Math.max(beamCX - beamHalfW + 24, Math.min(beamCX + beamHalfW - 24, event.x));
+      pivotValue = Math.round(xScale.invert(px) * 10) / 10;
+      update(true);
+    })
+    .on("end", function () {
+      isDragging = false;
+      pivotTriG.select(".pivot-tri").attr("fill", COL.pivot);
+      const mean = computeMean();
+      if (Math.abs(pivotValue - mean) < 0.2) {
+        pivotValue = mean; useCenter = true;
+        if (momentOrder < 2) momentOrder = 2;
+      } else if (Math.abs(pivotValue) < 0.2) {
+        pivotValue = 0; useCenter = false; momentOrder = 1;
+      }
+      update();
+    });
+  pivotTriG.call(pivotDrag);
+
+  // ═══════════════════════════════════════════════════
+  // UPDATE
+  // ═══════════════════════════════════════════════════
+  function update(noTransition) {
+    const n = momentOrder;
+    const mean = computeMean();
+    const center = pivotValue;
+    const momentVal = computeMoment(n, center);
+
+    const isExactlyRaw = Math.abs(center) < 0.001;
+    const isExactlyCentral = Math.abs(center - mean) < 0.001;
+
+    // Controls
+    styleModeBtn(btnRaw, !useCenter);
+    styleModeBtn(btnCentral, useCenter);
+    Object.entries(distBtns).forEach(([name, btn]) => styleDistBtn(btn, name === activeDist));
+
+    // Order buttons: enable/disable based on mode
+    orderBtns.forEach(ob => {
+      const enabled = useCenter ? ob.n >= 2 : ob.n === 1;
+      styleOrderBtn(ob.el, ob.n, ob.n === n, enabled);
+    });
+
+    buildXScale();
+    const allX = dataPoints.map(d => d.x);
+    const xMin = Math.min(0, ...allX) - 1;
+    const xMax = Math.max(...allX) + 1;
+
+    // Pivot
+    const pivotPx = xScale(center);
+    if (noTransition) {
+      pivotTriG.attr("transform", `translate(${pivotPx}, ${beamCY})`);
+    } else {
+      pivotTriG.transition().duration(500).ease(d3.easeCubicOut)
+        .attr("transform", `translate(${pivotPx}, ${beamCY})`);
+    }
+
+    // Tilt
+    const m1 = computeMoment(1, center);
+    const tiltDeg = Math.max(-12, Math.min(12, m1 * 4));
+    if (noTransition) {
+      sceneG.attr("transform", `rotate(${tiltDeg}, ${pivotPx}, ${beamCY})`);
+    } else {
+      sceneG.transition().duration(500).ease(d3.easeCubicOut)
+        .attr("transform", `rotate(${tiltDeg}, ${pivotPx}, ${beamCY})`);
+    }
+
+    // Balance badge — top right
+    const isBalanced = Math.abs(m1) < 0.05;
+    if (isBalanced) {
+      const bw = 110, bh = 26;
+      balanceBg.attr("x", W - bw - 14).attr("y", 12).attr("width", bw).attr("height", bh);
+      balanceTxt.attr("x", W - bw / 2 - 14).attr("y", 25);
+      balanceG.style("display", "");
+    } else {
+      balanceG.style("display", "none");
+    }
+
+    // Ticks
+    tickG.selectAll("*").remove();
+    for (let x = Math.ceil(xMin); x <= Math.floor(xMax); x++) {
+      const tx = xScale(x);
+      tickG.append("line").attr("x1", tx).attr("x2", tx)
+        .attr("y1", beamCY - beamH / 2 - 4).attr("y2", beamCY - beamH / 2)
+        .attr("stroke", COL.beamStroke).attr("stroke-width", 1.2);
+      tickG.append("text").attr("x", tx).attr("y", beamCY + beamH / 2 + 14)
+        .attr("text-anchor", "middle").attr("font-size", 12).attr("fill", COL.sub)
+        .attr("font-family", "'SF Mono',monospace").text(x);
+    }
+
+    // Blocks
+    blocksG.selectAll("*").remove();
+    dataPoints.forEach((d) => {
+      const bx = xScale(d.x);
+      for (let f = 0; f < d.freq; f++) {
+        const by = beamCY - beamH / 2 - (f + 1) * (blockSize + 2) - 2;
+        const g = blocksG.append("g").style("cursor", "pointer");
+        g.append("rect")
+          .attr("x", bx - blockSize / 2).attr("y", by)
+          .attr("width", blockSize).attr("height", blockSize)
+          .attr("rx", 4)
+          .attr("fill", COL.blockAlt).attr("stroke", COL.blockAltStroke).attr("stroke-width", 1.2);
+        g.on("mouseenter", () => {
+          blocksG.selectAll("g").each(function () {
+            const rect = d3.select(this).select("rect");
+            const rx = +rect.attr("x") + blockSize / 2;
+            if (Math.abs(rx - bx) < 1) {
+              rect.attr("fill", COL.block).attr("stroke", COL.blockStroke);
+            }
+          });
+          showAnnotation(d);
+        });
+        g.on("mouseleave", () => {
+          blocksG.selectAll("g").each(function () {
+            const rect = d3.select(this).select("rect");
+            rect.attr("fill", COL.blockAlt).attr("stroke", COL.blockAltStroke);
+          });
+          hideAnnotation();
+        });
+      }
+    });
+
+    // Ref line & pill
+    const refPx = xScale(center);
+    const refTopY = 78;
+    refLine.attr("x1", refPx).attr("x2", refPx).attr("y1", refTopY).attr("y2", beamCY + 6);
+    let refTxt = isExactlyCentral ? `a = μ = ${mean.toFixed(2)}`
+      : isExactlyRaw ? "c = 0"
+      : `a = ${center.toFixed(2)}`;
+    refPillTxt.text(refTxt);
+    const refTW = refTxt.length * 8 + 20;
+    refPillBg.attr("x", refPx - refTW / 2).attr("y", refTopY - 14).attr("width", refTW).attr("height", 26);
+    refPillTxt.attr("x", refPx).attr("y", refTopY - 1);
+
+    hideAnnotation();
+
+    // Contribution bars (n >= 2)
+    contribG.selectAll("*").remove();
+    if (n >= 2) {
+      const contributions = dataPoints.filter(d => d.freq > 0).map(d => {
+        const dist = d.x - center;
+        return { x: d.x, val: d.freq * Math.pow(dist, n) };
+      });
+      const maxAbs = Math.max(1e-9, ...contributions.map(c => Math.abs(c.val)));
+      const barMaxH = 45;
+      const barW = 18;
+      const barBaseY = beamCY + pivotH + 42;
+      const supN = ["", "\u00B9", "\u00B2", "\u00B3", "\u2074"][n];
+
+      contribG.append("line")
+        .attr("x1", xScale(xMin + 0.3)).attr("x2", xScale(xMax - 0.3))
+        .attr("y1", barBaseY).attr("y2", barBaseY)
+        .attr("stroke", "#CFD8DC").attr("stroke-width", 1);
+
+
+      contributions.forEach(c => {
+        const bx = xScale(c.x);
+        const h = (Math.abs(c.val) / maxAbs) * barMaxH;
+        const isPos = c.val >= 0;
+        const barColor = n === 3 ? (isPos ? "#42A5F5" : "#EF5350") : COL.moment;
+
+        contribG.append("rect")
+          .attr("x", bx - barW / 2)
+          .attr("y", isPos ? barBaseY - h : barBaseY)
+          .attr("width", barW).attr("height", Math.max(1, h))
+          .attr("rx", 3).attr("fill", barColor).attr("opacity", 0.75);
+
+        contribG.append("text")
+          .attr("x", bx).attr("y", isPos ? barBaseY - h - 4 : barBaseY + h + 11)
+          .attr("text-anchor", "middle").attr("font-size", 9).attr("fill", COL.sub)
+          .attr("font-family", "'SF Mono',monospace")
+          .text(c.val.toFixed(1));
+      });
+    }
+
+    // Formula
+    const supN = ["", "\u00B9", "\u00B2", "\u00B3", "\u2074"][n];
+    const typeName = isExactlyCentral ? "Moment tập trung" : isExactlyRaw ? "Moment gốc" : "Moment";
+    const momentNames = {
+      1: { c: "Trung bình (Mean)", r: "Trung bình (Mean)" },
+      2: { c: "Phương sai (Variance)", r: "" },
+      3: { c: "Độ lệch (Skewness)", r: "" },
+      4: { c: "Độ nhọn (Kurtosis)", r: "" }
+    };
+    const mName = isExactlyCentral ? (momentNames[n]?.c || "") : (momentNames[n]?.r || "");
+
+    formulaText.html("");
+    formulaText.append("tspan").attr("fill", COL.moment).text(`${typeName} (n=${n})`);
+    if (mName) formulaText.append("tspan").attr("fill", COL.sub).attr("font-size", 15).text(`  —  ${mName}`);
+
+    formulaSub.html("");
+    formulaSub.append("tspan").attr("fill", COL.moment).text("μ");
+    formulaSub.append("tspan").attr("fill", COL.moment).attr("font-size", 10).attr("dy", 3).text(n);
+    formulaSub.append("tspan").attr("dy", -3).attr("fill", COL.txt).text(" = Σ ");
+    formulaSub.append("tspan").attr("fill", COL.force).text("fᵢ");
+    formulaSub.append("tspan").attr("fill", COL.txt).text("·");
+    formulaSub.append("tspan").attr("fill", COL.dist).text("(xᵢ−c)");
+    formulaSub.append("tspan").attr("fill", COL.moment).attr("font-size", 10).attr("dy", -4).text(n);
+    formulaSub.append("tspan").attr("dy", 4).attr("fill", COL.txt).text(" / N");
+    formulaSub.append("tspan").attr("fill", COL.moment).attr("font-weight", 700).text(` = ${momentVal.toFixed(4)}`);
+  }
+
+  // ═══════════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════════
+  update();
+  invalidation.then(() => {});
+  outer.value = {};
+  return outer;
+}
 ```
 
-
-### Moment gốc cấp 1
+### Moment gốc bậc 1
 
 Cho biết vị trí trọng tâm của phân phối nằm ở đâu so với điểm 0.
 
 $$E[X] = \frac{\sum^N_{i = 1}x_i}{N} = \sum^N_{i = 1}x_i \mathbb{P}(x_i)$$
 
-### Moment tập trung cấp 2
+### Moment tập trung bậc 2
 
 Cho biết khoảng cách của từng giá trị trong phân phối so với giá trị trung bình. Phép bình phương giúp ngăn chặn các độ lệch âm và dương triệt tiêu lẫn nhau.
 
 $$E[(X - E[X])^2] = E[X^2] - (E[X])^2$$
 
-### Moment tập trung cấp 3
+### Moment tập trung bậc 3
 
 Thường được gọi là Độ lệch (Skewness). Nó phản ánh sự không đối xứng.
 
@@ -137,7 +685,7 @@ $$E\left[\left(\frac{X - E[X]}{\sigma}\right)^3\right]$$
 
 Lũy thừa bậc 3 giữ nguyên dấu (số âm mũ 3 vẫn là âm)
 
-### Moment tập trung cấp 4
+### Moment tập trung bậc 4
 
 Thường được gọi là Độ nhọn (Kurtosis). Tên gọi này bắt nguồn từ tiếng Hy Lạp: κυρτός - kyrtos, nghĩa là "cong, vòm".
 
@@ -147,9 +695,9 @@ Lũy thừa bậc 4 làm cho những giá trị nhỏ (gần trung bình) trở 
 
 Leptokurtic (tiền tố lepto- nghĩa là nhỏ, mảnh khảnh): độ nhọn > 3.
 
+## Tại sao lại học moment?
 
-
-
+Dùng method of moments để xác định điểm bắt đầu của tham số ước lượng bằng MLE [@bolker2008]. Sẽ áp dụng ở bài likelihood.
 
 Estimate
 
