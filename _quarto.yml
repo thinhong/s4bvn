@@ -20,6 +20,8 @@ book:
         - distr-pois.qmd
     - part: distr-c.qmd
       chapters: 
+        - distr-norm.qmd
+        - distr-lnorm.qmd
         - distr-exp.qmd
         - distr-pl.qmd
     - lik.qmd

@@ -39,14 +39,14 @@ export function injectStyle(prefix = "sl") {
 
   // ── Slider color variants ──
   const colors = {
-    dark:   "#1e293b",
-    blue:   "#3b82f6",
-    red:    "#dc2626",
-    green:  "#16a34a",
-    amber:  "#d97706",
+    dark: "#1e293b",
+    blue: "#3b82f6",
+    red: "#dc2626",
+    green: "#16a34a",
+    amber: "#d97706",
     purple: "#7c3aed",
-    teal:   "#0891b2",
-    gray:   "#475569"
+    teal: "#0891b2",
+    gray: "#475569"
   };
   for (const [name, hex] of Object.entries(colors)) {
     style.textContent += `
@@ -116,7 +116,7 @@ export function createSlider(label, min, max, step, val, color, cls, prefix = "s
 
   return {
     el: row, input, valSpan, fill,
-    val()  { return +input.value; },
+    val() { return +input.value; },
     sync() {
       const v = +input.value;
       valSpan.textContent = fmt(v);
@@ -124,9 +124,10 @@ export function createSlider(label, min, max, step, val, color, cls, prefix = "s
       fill.style.width = Math.max(0, Math.min(100, pct)) + "%";
     },
     update(v, lo, hi) {
-      valSpan.textContent = fmt(v);
       if (lo != null) input.min = lo;
       if (hi != null) input.max = hi;
+      input.value = v;
+      valSpan.textContent = fmt(v);
       const pct = ((v - Number(input.min)) / (Number(input.max) - Number(input.min))) * 100;
       fill.style.width = Math.max(0, Math.min(100, pct)) + "%";
     }

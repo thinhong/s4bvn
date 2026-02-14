@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>7&nbsp; Hàm hợp lý – Statistics for babies</title>
+<title>9&nbsp; Hàm hợp lý – Statistics for babies</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -178,7 +178,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lik.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lik.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -255,14 +255,26 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./distr-norm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối bình thường</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./distr-lnorm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối log-normal</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./distr-exp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối mũ</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Phân phối mũ</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./distr-pl.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối quy tắc lũy thừa</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Phân phối quy tắc lũy thừa</span></span></a>
   </div>
 </li>
       </ul>
@@ -270,13 +282,13 @@ window.Quarto = {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lik.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./bayes.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -301,12 +313,12 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#định-nghĩa" id="toc-định-nghĩa" class="nav-link active" data-scroll-target="#định-nghĩa"><span class="header-section-number">7.1</span> Định nghĩa</a></li>
-  <li><a href="#đường-cong-hợp-lý" id="toc-đường-cong-hợp-lý" class="nav-link" data-scroll-target="#đường-cong-hợp-lý"><span class="header-section-number">7.2</span> Đường cong hợp lý</a></li>
-  <li><a href="#tỉ-số-hợp-lý" id="toc-tỉ-số-hợp-lý" class="nav-link" data-scroll-target="#tỉ-số-hợp-lý"><span class="header-section-number">7.3</span> Tỉ số hợp lý</a></li>
-  <li><a href="#phép-kiểm-tỉ-số-hợp-lý" id="toc-phép-kiểm-tỉ-số-hợp-lý" class="nav-link" data-scroll-target="#phép-kiểm-tỉ-số-hợp-lý"><span class="header-section-number">7.4</span> Phép kiểm tỉ số hợp lý</a></li>
-  <li><a href="#khoảng-tin-cậy" id="toc-khoảng-tin-cậy" class="nav-link" data-scroll-target="#khoảng-tin-cậy"><span class="header-section-number">7.5</span> Khoảng tin cậy</a></li>
-  <li><a href="#tính-định-danh" id="toc-tính-định-danh" class="nav-link" data-scroll-target="#tính-định-danh"><span class="header-section-number">7.6</span> Tính định danh</a></li>
+  <li><a href="#định-nghĩa" id="toc-định-nghĩa" class="nav-link active" data-scroll-target="#định-nghĩa"><span class="header-section-number">9.1</span> Định nghĩa</a></li>
+  <li><a href="#đường-cong-hợp-lý" id="toc-đường-cong-hợp-lý" class="nav-link" data-scroll-target="#đường-cong-hợp-lý"><span class="header-section-number">9.2</span> Đường cong hợp lý</a></li>
+  <li><a href="#tỉ-số-hợp-lý" id="toc-tỉ-số-hợp-lý" class="nav-link" data-scroll-target="#tỉ-số-hợp-lý"><span class="header-section-number">9.3</span> Tỉ số hợp lý</a></li>
+  <li><a href="#phép-kiểm-tỉ-số-hợp-lý" id="toc-phép-kiểm-tỉ-số-hợp-lý" class="nav-link" data-scroll-target="#phép-kiểm-tỉ-số-hợp-lý"><span class="header-section-number">9.4</span> Phép kiểm tỉ số hợp lý</a></li>
+  <li><a href="#khoảng-tin-cậy" id="toc-khoảng-tin-cậy" class="nav-link" data-scroll-target="#khoảng-tin-cậy"><span class="header-section-number">9.5</span> Khoảng tin cậy</a></li>
+  <li><a href="#tính-định-danh" id="toc-tính-định-danh" class="nav-link" data-scroll-target="#tính-định-danh"><span class="header-section-number">9.6</span> Tính định danh</a></li>
   </ul>
 </nav>
     </div>
@@ -315,7 +327,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></h1>
+<h1 class="title"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></h1>
 </div>
 
 
@@ -340,8 +352,8 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<section id="định-nghĩa" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="định-nghĩa"><span class="header-section-number">7.1</span> Định nghĩa</h2>
+<section id="định-nghĩa" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="định-nghĩa"><span class="header-section-number">9.1</span> Định nghĩa</h2>
 <p><span class="math display">\[\mathcal{L}(\theta \mid x) = \mathbb{P}(x \mid \theta)\]</span></p>
 <p>Hàm hợp lý (Likelihood function) là xác suất quan sát được dữ liệu <span class="math inline">\(x\)</span> nếu mô hình với tham số <span class="math inline">\(\theta\)</span> là đúng.</p>
 <p>Likelihood được sử dụng khi chúng ta <strong>đã có dữ liệu</strong> <span class="math inline">\(x\)</span>, và muốn tìm <span class="math inline">\(\theta\)</span> hợp lý nhất với dữ liệu này.</p>
@@ -740,11 +752,11 @@ Important
 </div>
 </div>
 </section>
-<section id="đường-cong-hợp-lý" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="đường-cong-hợp-lý"><span class="header-section-number">7.2</span> Đường cong hợp lý</h2>
+<section id="đường-cong-hợp-lý" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="đường-cong-hợp-lý"><span class="header-section-number">9.2</span> Đường cong hợp lý</h2>
 </section>
-<section id="tỉ-số-hợp-lý" class="level2" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="tỉ-số-hợp-lý"><span class="header-section-number">7.3</span> Tỉ số hợp lý</h2>
+<section id="tỉ-số-hợp-lý" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="tỉ-số-hợp-lý"><span class="header-section-number">9.3</span> Tỉ số hợp lý</h2>
 <p>Giả sử ta có các mô hình <span class="math inline">\(\theta_1, \theta_2 \dots\)</span> và một bộ dữ liệu <span class="math inline">\(x\)</span>. Để xác định mô hình nào giải thích dữ liệu tốt hơn, ta so sánh khả năng sinh ra dữ liệu <span class="math inline">\(x\)</span> của từng mô hình.</p>
 <p>Tỉ số hợp lý (likelihood ratio) được tính bằng cách chia các giá trị likelihood này cho nhau, nhằm định lượng mức độ ủng hộ của dữ liệu đối với mô hình này so với mô hình kia <span class="citation" data-cites="bolker2008">(<a href="references.html#ref-bolker2008" role="doc-biblioref">Bolker 2008</a>)</span>.</p>
 <p><span class="math display">\[LR = \frac{\mathcal{L}(\theta_1 \mid x)}{\mathcal{L}(\theta_2 \mid x)}\]</span></p>
@@ -753,14 +765,14 @@ Important
 <li><span class="math inline">\(LR &lt; 1\)</span>: dữ liệu <span class="math inline">\(x\)</span> cho thấy <span class="math inline">\(\theta_2\)</span> hợp lý hơn</li>
 </ul>
 </section>
-<section id="phép-kiểm-tỉ-số-hợp-lý" class="level2" data-number="7.4">
-<h2 data-number="7.4" class="anchored" data-anchor-id="phép-kiểm-tỉ-số-hợp-lý"><span class="header-section-number">7.4</span> Phép kiểm tỉ số hợp lý</h2>
+<section id="phép-kiểm-tỉ-số-hợp-lý" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="phép-kiểm-tỉ-số-hợp-lý"><span class="header-section-number">9.4</span> Phép kiểm tỉ số hợp lý</h2>
 <p>Phép kiểm tỉ số hợp lý (Likelihood Ratio Test, LRT) is a procedure to compare two models.</p>
 <p><span class="math display">\[2 \left[ \text{neglog}(\mathcal{L}_2) - \text{neglog}(\mathcal{L}_1) \right] \sim \chi^2_r\]</span></p>
 <p>Với <span class="math inline">\(r\)</span> là số parameter đang ước lượng.</p>
 </section>
-<section id="khoảng-tin-cậy" class="level2" data-number="7.5">
-<h2 data-number="7.5" class="anchored" data-anchor-id="khoảng-tin-cậy"><span class="header-section-number">7.5</span> Khoảng tin cậy</h2>
+<section id="khoảng-tin-cậy" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="khoảng-tin-cậy"><span class="header-section-number">9.5</span> Khoảng tin cậy</h2>
 <p>Nguyên lý: Tìm tập hợp các giá trị tham số sao cho mô hình fit dữ liệu kém hơn mức tối ưu, nhưng nằm trong giới hạn chấp nhận được.</p>
 <p>Theo định lý Wilks, sự chênh lệch log-likelihood tuân theo phân phối Chi-bình phương (<span class="math inline">\(\chi^2\)</span>).</p>
 <p><span class="math display">\[2 \left[ \text{NLL}(\theta) - \text{NLL}_{\min} \right] \le \chi^2_k(1-\alpha)\]</span></p>
@@ -1233,8 +1245,8 @@ Important
 </div>
 <p>Khoảng tin cậy đo lường mức độ không chắc chắn của tham số ước lượng. Khoảng tin cậy 95% <span class="math inline">\([\theta_{\text{lower}}, \theta_{\text{upper}}]\)</span> của 1 tham số ước lượng <span class="math inline">\(\hat{\theta}\)</span> được diễn giải là: giá trị thực <span class="math inline">\(\theta^*\)</span> nằm trong <span class="math inline">\([\theta_{\text{lower}}, \theta_{\text{upper}}]\)</span> với xác suất là 95% <span class="citation" data-cites="raue2010">(<a href="references.html#ref-raue2010" role="doc-biblioref">Raue et al. 2010</a>)</span>.</p>
 </section>
-<section id="tính-định-danh" class="level2" data-number="7.6">
-<h2 data-number="7.6" class="anchored" data-anchor-id="tính-định-danh"><span class="header-section-number">7.6</span> Tính định danh</h2>
+<section id="tính-định-danh" class="level2" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="tính-định-danh"><span class="header-section-number">9.6</span> Tính định danh</h2>
 <p>Tính định danh (identifiability) của một tham số <span class="math inline">\(\theta_i\)</span> được định nghĩa như sau <span class="citation" data-cites="raue2010">(<a href="references.html#ref-raue2010" role="doc-biblioref">Raue et al. 2010</a>)</span>:</p>
 <ul>
 <li><p>Tính định danh cấu trúc (structurally identifiable): nếu ước lượng <span class="math inline">\(\hat{\theta}_i\)</span> của nó là cực tiểu duy nhất của hàm <span class="math inline">\(\chi^2(\theta)\)</span>.</p></li>
@@ -1697,12 +1709,12 @@ window._ojs.runtime.interpretFromScriptTags();
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./distr-pl.html" class="pagination-link" aria-label="Phân phối quy tắc lũy thừa">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối quy tắc lũy thừa</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Phân phối quy tắc lũy thừa</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./bayes.html" class="pagination-link" aria-label="Bayesian">
-        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Bayesian</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Bayesian</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

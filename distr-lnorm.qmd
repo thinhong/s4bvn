@@ -1,0 +1,68 @@
+---
+title: "Phân phối log-normal"
+format: html
+---
+
+### Biến tỉ số
+
+Biến tỉ số (ratio scale variables) là loại biến mà các đơn vị được đo lường trên thang tỉ số. Loại biến này có các đặc điểm sau [@motulsky2025]:
+
+1.  Không tồn tại giá trị âm. Biến chỉ có thể nhận các giá trị dương
+
+2.  Giá trị 0 mang ý nghĩa tuyệt đối: Số 0 hoặc đại diện cho sự vắng mặt hoàn toàn của biến đó (không có), hoặc là một giới hạn tiệm cận.
+
+-   0 = không có: Cân nặng hoặc chiều dài. Cân nặng bằng 0 nghĩa là không có trọng lượng. Chiều cao bằng 0 nghĩa là không có chiều cao.
+
+-   0 = tiệm cận: Các chỉ số như EC50 hoặc Km. Các tham số này về lý thuyết không thể bằng 0, nhưng giá trị của chúng có thể cực nhỏ và tiến dần về 0.
+
+3.  Chuyển đổi đơn vị chỉ dùng phép Nhân hoặc Chia
+
+4.  Việc tính tỉ số (ratio) mang ý nghĩa thực tiễn: Ví dụ, 4 cm dài gấp đôi 2 cm; 6 lít nước nhiều gấp 3 lần 2 lít nước
+
+Khi 1 biến là biến tỉ số thì sự khác biệt cần phải được đo bằng tỉ số (gấp bao nhiêu lần, bằng phép chia) chứ không phải là chênh lệch bao nhiêu giá trị (phép trừ).
+
+Ví dụ: Nhiệt độ không phải là biến tỉ số
+
+1.  Có giá trị âm
+
+2.  Điểm 0 là quy ước, không phải tuyệt đối. 0°C không có nghĩa là "không có nhiệt độ"
+
+3.  Công thức chuyển đổi từ độ C sang độ F
+
+$$^\circ C = (^\circ F - 32) \times \frac{5}{9}$$
+
+4.  Tỉ số (ratio) không có ý nghĩa thực tiễn: 200°C không nóng gấp đôi 100°C. Sự thay đổi nhiệt độ phải được diễn đạt dưới dạng chênh lệch bao nhiêu giá trị (hiệu số).
+
+::: callout-note
+Biến nào là biến tỉ số? Tại sao?
+
+-   Tuổi
+-   Nồng độ kháng thể
+-   Khoảng thời gian
+-   Chỉ số IQ
+-   Tải lượng virus (viral load)
+:::
+
+Khi log(biến) có phân phối chuẩn
+
+Khi có outliers làm cho phân phối bị lệch phải.
+
+### Tại sao dùng log?
+
+$$\log(a \times b) = \log(a) + \log(b)$$
+
+### Cơ chế tạo ra log-normal
+
+Đặc trưng của phân phối log-normal là phép nhân.
+
+Định lý giới hạn trung tâm cho biết rằng **tổng** của nhiều biến ngẫu nhiên độc lập sẽ tạo ra phân phối Chuẩn. Tương tự, **tích** của nhiều biến ngẫu nhiên sẽ tạo ra phân phối log-normal [@motulsky2025]. Đây được gọi là Quy luật Tác động Tỉ lệ (Law of Proportionate Effect).
+
+Một số cơ chế tạo ra phân phối này [@koch1966]:
+
+- Sự tăng trưởng tích lũy: Giá trị của bước tiếp theo là kết quả của bước hiện tại nhân với một tỉ lệ biến động ngẫu nhiên (lãi suất, tốc độ tăng trưởng)
+
+$X_{t+1} = X_t \times (1 + r)$
+
+- Sự phân mảnh: Ngược lại với quá trình tích lũy, là quá trình phá vỡ một vật thể lớn thành nhiều mảnh nhỏ. Ví dụ: Kích thước của sỏi đá trong địa chất, hoặc các mảnh vụn khi nghiền bánh quy.
+
+- Sự phân chia sinh học: tế bào phân chia

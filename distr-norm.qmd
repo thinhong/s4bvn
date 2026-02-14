@@ -1,0 +1,657 @@
+---
+title: "Phân phối bình thường"
+format: html
+execute:
+  echo: false
+---
+
+```{ojs}
+import { createSlider, createButton, injectStyle } from "./_slider.js"
+d3 = require("d3@7")
+jStat = require("jstat@1.9.6")
+```
+
+```{ojs}
+viewof clt = {
+
+  // ═══════════════════════════════════════════════════
+  // CONFIG
+  // ═══════════════════════════════════════════════════
+  const W_LEFT = 520, W_RIGHT = 520, H = 420;
+  const MARGIN = { top: 40, right: 20, bottom: 50, left: 55 };
+  const BLOCK_SIZE = 8;
+
+
+  const COL = {
+    pdf: "#6366f1", pdfFill: "rgba(99,102,241,0.12)",
+    sample: "#f97316", sampleStroke: "#ea580c",
+    mean: "#dc2626",
+    block: "#6366f1", blockNew: "#f59e0b", blockStroke: "#4f46e5",
+    axis: "#64748b", label: "#334155", bg: "#fff",
+    gridLine: "#e2e8f0",
+  };
+
+  // ═══════════════════════════════════════════════════
+  // DISTRIBUTIONS
+  // ═══════════════════════════════════════════════════
+  const DISTRIBUTIONS = {
+    "Uniform": {
+      params: [
+        { name: "a (min)", min: 0, max: 9, step: 0.1, val: 0, color: "#0891b2", cls: "teal" },
+        { name: "b (max)", min: 0.5, max: 10, step: 0.1, val: 5, color: "#0891b2", cls: "teal" },
+      ],
+      pdf: (x, p) => {
+        const [a, b] = p;
+        return (x >= a && x <= b) ? 1 / (b - a) : 0;
+      },
+      sample: (p) => {
+        const [a, b] = p;
+        return a + Math.random() * (b - a);
+      },
+      xRange: (p) => [p[0] - 0.5, p[1] + 0.5],
+    },
+    "Exponential": {
+      params: [
+        { name: "λ", min: 0.1, max: 5, step: 0.1, val: 1, color: "#dc2626", cls: "red" },
+      ],
+      pdf: (x, p) => {
+        const lam = p[0];
+        return x >= 0 ? lam * Math.exp(-lam * x) : 0;
+      },
+      sample: (p) => {
+        return -Math.log(Math.random()) / p[0];
+      },
+      xRange: (p) => [0, Math.max(6, 5 / p[0])],
+    },
+    "Beta": {
+      params: [
+        { name: "α", min: 0.2, max: 10, step: 0.1, val: 2, color: "#16a34a", cls: "green" },
+        { name: "β", min: 0.2, max: 10, step: 0.1, val: 5, color: "#16a34a", cls: "green" },
+      ],
+      pdf: (x, p) => {
+        if (x <= 0 || x >= 1) return 0;
+        return jStat.beta.pdf(x, p[0], p[1]);
+      },
+      sample: (p) => {
+        return jStat.beta.sample(p[0], p[1]);
+      },
+      xRange: () => [-0.05, 1.05],
+    },
+  };
+
+  // ═══════════════════════════════════════════════════
+  // STATE
+  // ═══════════════════════════════════════════════════
+  let currentDist = "Uniform";
+  let allMeans = [];
+  let currentSamples = [];
+  let currentMean = null;
+  let autoTimer = null;
+
+  // ═══════════════════════════════════════════════════
+  // OUTER WRAPPER
+  // ═══════════════════════════════════════════════════
+  const outer = document.createElement("div");
+  outer.style.cssText = `display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:1120px;margin:0 auto;`;
+  outer.appendChild(injectStyle());
+
+  // ═══════════════════════════════════════════════════
+  // CONTROLS ROW
+  // ═══════════════════════════════════════════════════
+  const controlRow = document.createElement("div");
+  controlRow.style.cssText = `display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;
+    width:100%;margin-bottom:14px;padding:12px 16px;
+    background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;`;
+
+  // Distribution dropdown
+  const distCol = document.createElement("div");
+  distCol.style.cssText = "display:flex;flex-direction:column;min-width:140px;";
+  const distLbl = document.createElement("span");
+  distLbl.style.cssText = "font-size:12px;font-weight:600;color:#64748b;letter-spacing:0.3px;text-transform:uppercase;margin-bottom:5px;";
+  distLbl.textContent = "Distribution";
+  const distSelect = document.createElement("select");
+  distSelect.style.cssText = `padding:7px 10px;border-radius:8px;border:1px solid #d1d5db;
+    font-size:13px;font-weight:600;color:${COL.label};background:#fff;cursor:pointer;
+    font-family:inherit;`;
+  Object.keys(DISTRIBUTIONS).forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name; opt.textContent = name;
+    distSelect.appendChild(opt);
+  });
+  distCol.appendChild(distLbl);
+  distCol.appendChild(distSelect);
+  controlRow.appendChild(distCol);
+
+  // Parameter sliders container
+  const paramBox = document.createElement("div");
+  paramBox.style.cssText = "display:flex;gap:12px;flex:1;min-width:200px;";
+  controlRow.appendChild(paramBox);
+
+  // Sample size slider
+  const SL = {};
+
+  outer.appendChild(controlRow);
+
+  // ── Second controls row: samples + speed ──
+  const controlRow2 = document.createElement("div");
+  controlRow2.style.cssText = `display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;
+    width:100%;margin-bottom:14px;padding:12px 16px;
+    background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;`;
+
+  SL.n = createSlider("Samples (n)", 1, 100, 1, 30, "#1e293b", "dark");
+  SL.n.el.style.flex = "1 1 200px";
+  controlRow2.appendChild(SL.n.el);
+
+  // Speed slider: 1 (slowest) to 10 (fastest), maps internally to interval ms
+  SL.speed = createSlider("Speed", 1, 10, 1, 5, "#d97706", "amber");
+  SL.speed.el.style.flex = "1 1 200px";
+  controlRow2.appendChild(SL.speed.el);
+
+  // Convert speed value (1-10) to interval in ms: 10 → 50ms, 1 → 1500ms
+  function speedToInterval(v) {
+    return Math.round(1500 - (v - 1) * (1450 / 9));
+  }
+
+  outer.appendChild(controlRow2);
+
+  // ── Buttons row ──
+  const btnRow = document.createElement("div");
+  btnRow.style.cssText = `display:flex;gap:8px;width:100%;margin-bottom:14px;`;
+
+  const btnSample = createButton("▶  Sample Once", "go");
+  const btnAuto = createButton("⚡ Auto Sample", "auto");
+  const btnReset = createButton("↺  Reset", "reset");
+
+  btnRow.appendChild(btnSample.el);
+  btnRow.appendChild(btnAuto.el);
+  btnRow.appendChild(btnReset.el);
+  outer.appendChild(btnRow);
+
+  // ── Count display ──
+  const countEl = document.createElement("div");
+  countEl.style.cssText = `font-size:12px;font-weight:600;color:${COL.axis};margin-bottom:8px;width:100%;text-align:left;`;
+  countEl.textContent = "Means collected: 0";
+  outer.appendChild(countEl);
+
+  // ═══════════════════════════════════════════════════
+  // SVG PANELS
+  // ═══════════════════════════════════════════════════
+  const panelRow = document.createElement("div");
+  panelRow.style.cssText = "display:flex;gap:8px;width:100%;justify-content:center;";
+
+  // ── LEFT SVG (PDF) ──
+  const svgLeft = d3.create("svg")
+    .attr("viewBox", `0 0 ${W_LEFT} ${H}`)
+    .attr("width", "100%")
+    .style("max-width", W_LEFT + "px")
+    .style("background", COL.bg)
+    .style("border-radius", "12px")
+    .style("border", "1px solid #e2e8f0")
+    .style("flex", "1 1 480px");
+
+  // Left axes groups
+  const gLeftX = svgLeft.append("g").attr("transform", `translate(0,${H - MARGIN.bottom})`);
+  const gLeftY = svgLeft.append("g").attr("transform", `translate(${MARGIN.left},0)`);
+  const gLeftGrid = svgLeft.append("g").attr("class", "grid");
+  const gPdf = svgLeft.append("g");
+  const gSamples = svgLeft.append("g");
+  const gMean = svgLeft.append("g");
+
+  // Left title
+  svgLeft.append("text")
+    .attr("x", W_LEFT / 2).attr("y", 22)
+    .attr("text-anchor", "middle").attr("font-size", 16).attr("font-weight", 700)
+    .attr("fill", COL.label).text("Source Distribution (PDF)");
+
+  // Mean line elements
+  const meanLine = gMean.append("line")
+    .attr("stroke", COL.mean).attr("stroke-width", 2.5)
+    .attr("stroke-dasharray", "6,3").attr("opacity", 0);
+  const meanLabel = gMean.append("g").attr("opacity", 0);
+  const meanLabelBg = meanLabel.append("rect")
+    .attr("rx", 6).attr("fill", COL.mean);
+  const meanLabelTxt = meanLabel.append("text")
+    .attr("text-anchor", "middle").attr("dominant-baseline", "middle")
+    .attr("fill", "#fff").attr("font-size", 12).attr("font-weight", 700);
+
+  const leftPanel = document.createElement("div");
+  leftPanel.style.cssText = "flex:1 1 0;min-width:0;overflow:hidden;";
+  leftPanel.appendChild(svgLeft.node());
+  panelRow.appendChild(leftPanel);
+
+  // ── RIGHT SVG (Stacked histogram) ──
+  const svgRight = d3.create("svg")
+    .attr("viewBox", `0 0 ${W_RIGHT} ${H}`)
+    .attr("width", "100%")
+    .style("max-width", W_RIGHT + "px")
+    .style("background", COL.bg)
+    .style("border-radius", "12px")
+    .style("border", "1px solid #e2e8f0")
+    .style("flex", "1 1 480px");
+
+  const gRightX = svgRight.append("g").attr("transform", `translate(0,${H - MARGIN.bottom})`);
+  const gRightY = svgRight.append("g").attr("transform", `translate(${MARGIN.left},0)`);
+  const gRightGrid = svgRight.append("g").attr("class", "grid");
+  const gBlocks = svgRight.append("g");
+
+  // Right title
+  svgRight.append("text")
+    .attr("x", W_RIGHT / 2).attr("y", 22)
+    .attr("text-anchor", "middle").attr("font-size", 16).attr("font-weight", 700)
+    .attr("fill", COL.label).text("Distribution of x̄");
+
+  // Normal overlay on the right
+  const gNormalOverlay = svgRight.append("g");
+
+  const rightPanel = document.createElement("div");
+  rightPanel.style.cssText = "flex:1 1 0;min-width:0;overflow:hidden;";
+  rightPanel.appendChild(svgRight.node());
+  panelRow.appendChild(rightPanel);
+
+  outer.appendChild(panelRow);
+
+  // ═══════════════════════════════════════════════════
+  // PARAM SLIDERS (dynamic)
+  // ═══════════════════════════════════════════════════
+  let paramSliders = [];
+
+  function rebuildParamSliders() {
+    paramBox.innerHTML = "";
+    paramSliders = [];
+    const dist = DISTRIBUTIONS[currentDist];
+    dist.params.forEach(p => {
+      const sl = createSlider(p.name, p.min, p.max, p.step, p.val, p.color, p.cls);
+      sl.input.addEventListener("input", () => { sl.sync(); updatePdf(); });
+      paramSliders.push(sl);
+      paramBox.appendChild(sl.el);
+    });
+  }
+
+  function getParams() {
+    return paramSliders.map(sl => sl.val());
+  }
+
+  // ═══════════════════════════════════════════════════
+  // PDF RENDERING
+  // ═══════════════════════════════════════════════════
+  let xScaleLeft, yScaleLeft;
+
+  function updatePdf() {
+    const dist = DISTRIBUTIONS[currentDist];
+    const params = getParams();
+    const [xMin, xMax] = dist.xRange(params);
+
+    xScaleLeft = d3.scaleLinear().domain([xMin, xMax])
+      .range([MARGIN.left, W_LEFT - MARGIN.right]);
+
+    // Compute PDF values
+    const nPts = 300;
+    const step = (xMax - xMin) / nPts;
+    const pts = [];
+    let yMax = 0;
+    for (let i = 0; i <= nPts; i++) {
+      const x = xMin + i * step;
+      const y = dist.pdf(x, params);
+      if (isFinite(y) && y >= 0) {
+        pts.push({ x, y });
+        if (y > yMax) yMax = y;
+      }
+    }
+    yMax = Math.max(yMax * 1.15, 0.1);
+
+    yScaleLeft = d3.scaleLinear().domain([0, yMax])
+      .range([H - MARGIN.bottom, MARGIN.top]);
+
+    // Axes
+    gLeftX.call(d3.axisBottom(xScaleLeft).ticks(6))
+      .call(g => g.select(".domain").attr("stroke", COL.axis))
+      .call(g => g.selectAll(".tick text").attr("fill", COL.axis).attr("font-size", 13))
+      .call(g => g.selectAll(".tick line").attr("stroke", COL.axis));
+
+    gLeftY.call(d3.axisLeft(yScaleLeft).ticks(5).tickFormat(d3.format(".2f")))
+      .call(g => g.select(".domain").attr("stroke", COL.axis))
+      .call(g => g.selectAll(".tick text").attr("fill", COL.axis).attr("font-size", 13))
+      .call(g => g.selectAll(".tick line").attr("stroke", COL.axis));
+
+    // Grid
+    gLeftGrid.selectAll("*").remove();
+    yScaleLeft.ticks(6).forEach(t => {
+      gLeftGrid.append("line")
+        .attr("x1", MARGIN.left).attr("x2", W_LEFT - MARGIN.right)
+        .attr("y1", yScaleLeft(t)).attr("y2", yScaleLeft(t))
+        .attr("stroke", COL.gridLine).attr("stroke-width", 0.5);
+    });
+
+    // PDF path
+    const area = d3.area()
+      .x(d => xScaleLeft(d.x))
+      .y0(H - MARGIN.bottom)
+      .y1(d => yScaleLeft(d.y))
+      .curve(d3.curveBasis);
+
+    const line = d3.line()
+      .x(d => xScaleLeft(d.x))
+      .y(d => yScaleLeft(d.y))
+      .curve(d3.curveBasis);
+
+    gPdf.selectAll("*").remove();
+    gPdf.append("path").datum(pts)
+      .attr("d", area)
+      .attr("fill", COL.pdfFill);
+    gPdf.append("path").datum(pts)
+      .attr("d", line)
+      .attr("fill", "none").attr("stroke", COL.pdf)
+      .attr("stroke-width", 2.5);
+
+    // Re-render samples if present
+    renderSamples();
+  }
+
+  // ═══════════════════════════════════════════════════
+  // SAMPLING
+  // ═══════════════════════════════════════════════════
+  function drawOneSampleSet() {
+    const dist = DISTRIBUTIONS[currentDist];
+    const params = getParams();
+    const n = SL.n.val();
+    const samples = [];
+    for (let i = 0; i < n; i++) {
+      samples.push(dist.sample(params));
+    }
+    const mean = d3.mean(samples);
+    currentSamples = samples;
+    currentMean = mean;
+    allMeans.push(mean);
+    countEl.textContent = `Means collected: ${allMeans.length}`;
+    renderSamples();
+    updateHistogram(true);
+  }
+
+  function renderSamples() {
+    gSamples.selectAll("*").remove();
+    gMean.selectAll("line, g").attr("opacity", 0);
+
+    if (!currentSamples.length || !xScaleLeft || !yScaleLeft) return;
+
+    const dist = DISTRIBUTIONS[currentDist];
+    const params = getParams();
+
+    // Draw sample dots along the x-axis area
+    gSamples.selectAll("circle")
+      .data(currentSamples)
+      .join("circle")
+      .attr("cx", d => xScaleLeft(d))
+      .attr("cy", () => H - MARGIN.bottom - 6 - Math.random() * 16)
+      .attr("r", 3.5)
+      .attr("fill", COL.sample)
+      .attr("stroke", COL.sampleStroke)
+      .attr("stroke-width", 0.8)
+      .attr("opacity", 0.75);
+
+    // Mean line
+    if (currentMean != null) {
+      const mx = xScaleLeft(currentMean);
+      meanLine
+        .attr("x1", mx).attr("x2", mx)
+        .attr("y1", MARGIN.top).attr("y2", H - MARGIN.bottom)
+        .attr("opacity", 1);
+
+      const txt = `x̄ = ${currentMean.toFixed(3)}`;
+      meanLabelTxt.text(txt);
+      const bbox = meanLabelTxt.node().getBBox ? meanLabelTxt.node().getBBox() : { width: 70, height: 16 };
+      const pw = bbox.width + 14, ph = bbox.height + 8;
+      meanLabelBg.attr("x", -pw / 2).attr("y", -ph / 2).attr("width", pw).attr("height", ph);
+      meanLabelTxt.attr("x", 0).attr("y", 1);
+      meanLabel.attr("transform", `translate(${mx},${MARGIN.top - 14})`).attr("opacity", 1);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // RIGHT HISTOGRAM (stacked blocks)
+  // ═══════════════════════════════════════════════════
+  let xScaleRight, yScaleRight;
+  let bins = [];
+  const NUM_BINS = 35;
+
+  function computeHistBounds() {
+    const dist = DISTRIBUTIONS[currentDist];
+    const params = getParams();
+    const [xMin, xMax] = dist.xRange(params);
+    // The mean range is narrower than the full range
+    const range = xMax - xMin;
+    const n = SL.n.val();
+    // For means: they cluster more tightly
+    const shrink = Math.max(0.3, 1 / Math.sqrt(Math.max(n, 1)));
+    const center = (xMin + xMax) / 2;
+    // Use theoretical mean as center for common distributions
+    let theoMean = center;
+    if (currentDist === "Uniform") theoMean = (params[0] + params[1]) / 2;
+    else if (currentDist === "Exponential") theoMean = 1 / params[0];
+    else if (currentDist === "Beta") theoMean = params[0] / (params[0] + params[1]);
+
+    const halfSpan = (range * shrink) / 2;
+    // also ensure all existing means fit
+    let lo = theoMean - halfSpan;
+    let hi = theoMean + halfSpan;
+    if (allMeans.length > 0) {
+      lo = Math.min(lo, d3.min(allMeans) - halfSpan * 0.1);
+      hi = Math.max(hi, d3.max(allMeans) + halfSpan * 0.1);
+    }
+    return [lo, hi];
+  }
+
+  function updateHistogram(highlightLast = false) {
+    const [hMin, hMax] = computeHistBounds();
+    const binWidth = (hMax - hMin) / NUM_BINS;
+
+    // Count means per bin
+    const binCounts = new Array(NUM_BINS).fill(0);
+    allMeans.forEach(m => {
+      let idx = Math.floor((m - hMin) / binWidth);
+      if (idx < 0) idx = 0;
+      if (idx >= NUM_BINS) idx = NUM_BINS - 1;
+      binCounts[idx]++;
+    });
+
+    const maxCount = Math.max(d3.max(binCounts), 1);
+
+    // Compute block size so blocks fit nicely
+    const plotW = W_RIGHT - MARGIN.left - MARGIN.right;
+    const plotH = H - MARGIN.top - MARGIN.bottom;
+    const bw = Math.max(2, Math.floor(plotW / NUM_BINS) - 1);
+    const bh = bw; // square blocks
+
+    // How many blocks can stack vertically?
+    const maxStack = Math.max(maxCount, Math.floor(plotH / bh));
+
+    xScaleRight = d3.scaleLinear().domain([hMin, hMax])
+      .range([MARGIN.left, W_RIGHT - MARGIN.right]);
+
+    // y-scale: 0 at bottom, maxStack at top (1 unit = 1 block height)
+    const yDomainMax = Math.max(maxCount + 1, 5);
+    yScaleRight = d3.scaleLinear().domain([0, yDomainMax])
+      .range([H - MARGIN.bottom, MARGIN.top]);
+
+    // Axes
+    gRightX.call(d3.axisBottom(xScaleRight).ticks(6).tickFormat(d3.format(".2f")))
+      .call(g => g.select(".domain").attr("stroke", COL.axis))
+      .call(g => g.selectAll(".tick text").attr("fill", COL.axis).attr("font-size", 13))
+      .call(g => g.selectAll(".tick line").attr("stroke", COL.axis));
+
+    gRightY.call(d3.axisLeft(yScaleRight).ticks(5).tickFormat(d3.format("d")))
+      .call(g => g.select(".domain").attr("stroke", COL.axis))
+      .call(g => g.selectAll(".tick text").attr("fill", COL.axis).attr("font-size", 13))
+      .call(g => g.selectAll(".tick line").attr("stroke", COL.axis));
+
+    // Grid
+    gRightGrid.selectAll("*").remove();
+    yScaleRight.ticks(6).forEach(t => {
+      gRightGrid.append("line")
+        .attr("x1", MARGIN.left).attr("x2", W_RIGHT - MARGIN.right)
+        .attr("y1", yScaleRight(t)).attr("y2", yScaleRight(t))
+        .attr("stroke", COL.gridLine).attr("stroke-width", 0.5);
+    });
+
+    // Build block rects data
+    const blocks = [];
+    const lastMeanBin = currentMean != null
+      ? Math.min(NUM_BINS - 1, Math.max(0, Math.floor((currentMean - hMin) / binWidth)))
+      : -1;
+
+    // Track which block in the last bin is the newest
+    const binCounterForLast = new Array(NUM_BINS).fill(0);
+    allMeans.forEach((m, idx) => {
+      let bi = Math.floor((m - hMin) / binWidth);
+      if (bi < 0) bi = 0;
+      if (bi >= NUM_BINS) bi = NUM_BINS - 1;
+      binCounterForLast[bi]++;
+      const isLast = highlightLast && (idx === allMeans.length - 1);
+      blocks.push({
+        bin: bi,
+        stack: binCounterForLast[bi] - 1,
+        isNew: isLast,
+      });
+    });
+
+    // Draw blocks
+    gBlocks.selectAll("*").remove();
+    const blockSel = gBlocks.selectAll("rect")
+      .data(blocks)
+      .join("rect")
+      .attr("x", d => {
+        const binCenter = hMin + (d.bin + 0.5) * binWidth;
+        return xScaleRight(binCenter) - bw / 2;
+      })
+      .attr("y", d => yScaleRight(d.stack + 1))
+      .attr("width", bw)
+      .attr("height", Math.max(1, yScaleRight(0) - yScaleRight(1) - 1))
+      .attr("rx", 1)
+      .attr("fill", d => d.isNew ? COL.blockNew : COL.block)
+      .attr("stroke", d => d.isNew ? "#d97706" : COL.blockStroke)
+      .attr("stroke-width", d => d.isNew ? 1.5 : 0.5)
+      .attr("opacity", d => d.isNew ? 1 : 0.85);
+
+    // Highlight new block with glow
+    if (highlightLast) {
+      blockSel.filter(d => d.isNew)
+        .style("filter", "drop-shadow(0 0 6px rgba(245,158,11,0.7))");
+    }
+
+    // Draw theoretical normal overlay if enough means
+    gNormalOverlay.selectAll("*").remove();
+    if (allMeans.length >= 10) {
+      const sampleMeanOfMeans = d3.mean(allMeans);
+      const sampleSdOfMeans = d3.deviation(allMeans);
+      if (sampleSdOfMeans > 0) {
+        const nPts = 200;
+        const ovPts = [];
+        for (let i = 0; i <= nPts; i++) {
+          const x = hMin + (i / nPts) * (hMax - hMin);
+          const z = (x - sampleMeanOfMeans) / sampleSdOfMeans;
+          const y = (1 / (sampleSdOfMeans * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * z * z);
+          // Scale density to count: density * totalCount * binWidth
+          const yScaled = y * allMeans.length * binWidth;
+          ovPts.push({ x, y: yScaled });
+        }
+        const ovLine = d3.line()
+          .x(d => xScaleRight(d.x))
+          .y(d => yScaleRight(d.y))
+          .curve(d3.curveBasis);
+
+        gNormalOverlay.append("path")
+          .datum(ovPts)
+          .attr("d", ovLine)
+          .attr("fill", "none")
+          .attr("stroke", COL.mean)
+          .attr("stroke-width", 2)
+          .attr("stroke-dasharray", "6,4")
+          .attr("opacity", 0.7);
+
+
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════════════
+  // EVENTS
+  // ═══════════════════════════════════════════════════
+  distSelect.addEventListener("change", () => {
+    currentDist = distSelect.value;
+    rebuildParamSliders();
+    resetAll();
+  });
+
+  SL.n.input.addEventListener("input", () => {
+    SL.n.sync();
+  });
+
+  SL.speed.input.addEventListener("input", () => {
+    SL.speed.sync();
+    // If auto-sampling is active, restart with new speed
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(drawOneSampleSet, speedToInterval(SL.speed.val()));
+    }
+  });
+
+  btnSample.el.addEventListener("click", () => {
+    drawOneSampleSet();
+  });
+
+  btnAuto.el.addEventListener("click", () => {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+      btnAuto.setText("⚡ Auto Sample");
+      btnAuto.el.className = "sl-btn sl-btn-auto";
+    } else {
+      autoTimer = setInterval(drawOneSampleSet, speedToInterval(SL.speed.val()));
+      btnAuto.setText("⏸  Pause");
+      btnAuto.el.className = "sl-btn sl-btn-pause";
+    }
+  });
+
+  btnReset.el.addEventListener("click", () => {
+    resetAll();
+  });
+
+  function resetAll() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+      btnAuto.setText("⚡ Auto Sample");
+      btnAuto.el.className = "sl-btn sl-btn-auto";
+    }
+    allMeans = [];
+    currentSamples = [];
+    currentMean = null;
+    countEl.textContent = "Means collected: 0";
+    gSamples.selectAll("*").remove();
+    gMean.selectAll("line, g").attr("opacity", 0);
+    meanLine.attr("opacity", 0);
+    meanLabel.attr("opacity", 0);
+    gBlocks.selectAll("*").remove();
+    gNormalOverlay.selectAll("*").remove();
+    updatePdf();
+    updateHistogram(false);
+  }
+
+  // ═══════════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════════
+  rebuildParamSliders();
+  updatePdf();
+  updateHistogram(false);
+
+  // Cleanup on invalidation
+  invalidation.then(() => {
+    if (autoTimer) clearInterval(autoTimer);
+  });
+
+  outer.value = {};
+  return outer;
+}
+```
+

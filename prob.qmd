@@ -684,8 +684,8 @@ viewof venn = (() => {
   // CONTROLS
   // ══════════════════════════════════════════════════════
   const SL = {};
-  SL.pA = createSlider("P(A)", 0.01, 0.95, 0.01, 0.05, "#5b9bd5", "blue");
-  SL.pB = createSlider("P(B)", 0.01, 0.95, 0.01, 0.05, "#e8915a", "amber");
+  SL.pA = createSlider("P(A)", 0.01, 0.99, 0.01, 0.05, "#5b9bd5", "blue");
+  SL.pB = createSlider("P(B)", 0.01, 0.99, 0.01, 0.05, "#e8915a", "amber");
 
   const r1 = document.createElement("div"); r1.style.cssText = "display:flex;gap:20px;width:100%;margin-bottom:16px;";
   r1.appendChild(SL.pA.el); r1.appendChild(SL.pB.el);
@@ -788,7 +788,7 @@ viewof venn = (() => {
   const DIST = BX - AX;
 
   function radiusFromP(p) {
-    // Circle area = p × OMEGA_AREA
+    // Circle area = p × OMEGA_AREA  →  visually proportional to probability
     return Math.sqrt(p * OMEGA_AREA / Math.PI);
   }
 
@@ -861,23 +861,52 @@ viewof venn = (() => {
       titleText.textContent = "Độc lập";
       titleText.setAttribute("fill", "#16a34a");
     } else {
-      const dir = pAB > pApB ? "Positive" : "Negative";
       titleText.textContent = "Phụ thuộc";
       titleText.setAttribute("fill", "#d97706");
     }
   }
 
   // ══════════════════════════════════════════════════════
-  // EVENTS
+  // EVENTS  –  enforce P(A) + P(B) ≤ 1
   // ══════════════════════════════════════════════════════
-  function onInput() { SL.pA.sync(); SL.pB.sync(); update(); }
-  SL.pA.input.addEventListener("input", onInput);
-  SL.pB.input.addEventListener("input", onInput);
-  update();
+  function onInputA() {
+    SL.pA.sync();
+    const pA = SL.pA.val();
+    const maxB = Math.max(0.01, +(1 - pA).toFixed(2));
+    const curB = SL.pB.val();
+    // Clamp P(B) if the sum exceeds 1
+    if (curB > maxB) {
+      SL.pB.update(maxB, null, maxB);
+    } else {
+      // Just update the max so the slider range shrinks
+      SL.pB.update(curB, null, maxB);
+    }
+    update();
+  }
+
+  function onInputB() {
+    SL.pB.sync();
+    const pB = SL.pB.val();
+    const maxA = Math.max(0.01, +(1 - pB).toFixed(2));
+    const curA = SL.pA.val();
+    // Clamp P(A) if the sum exceeds 1
+    if (curA > maxA) {
+      SL.pA.update(maxA, null, maxA);
+    } else {
+      SL.pA.update(curA, null, maxA);
+    }
+    update();
+  }
+
+  SL.pA.input.addEventListener("input", onInputA);
+  SL.pB.input.addEventListener("input", onInputB);
+
+  // Initial constraint setup
+  onInputA();
 
   invalidation.then(() => {
-    SL.pA.input.removeEventListener("input", onInput);
-    SL.pB.input.removeEventListener("input", onInput);
+    SL.pA.input.removeEventListener("input", onInputA);
+    SL.pB.input.removeEventListener("input", onInputB);
   });
 
   wrapper.value = {};

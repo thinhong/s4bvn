@@ -85,7 +85,7 @@ viewof moment_seesaw = {
   // ═══════════════════════════════════════════════════
   // CONFIG
   // ═══════════════════════════════════════════════════
-  const W = 780, H = 420;
+  const W = 780, H = 470;
   const COL = {
     beam: "#FFB300", beamStroke: "#F9A825",
     pivot: "#F4511E", pivotStroke: "#D84315",
