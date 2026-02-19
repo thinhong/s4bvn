@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>6&nbsp; Phân phối log-normal – Statistics for babies</title>
+<title>12&nbsp; Sự không chắc chắn – Statistics for babies</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,27 +20,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-  margin-bottom: 0em;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -50,8 +30,8 @@ div.csl-indent {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./distr-exp.html" rel="next">
-<link href="./distr-norm.html" rel="prev">
+<link href="./thanks.html" rel="next">
+<link href="./mcmc.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -100,35 +80,6 @@ gtag('js', new Date());
 gtag('config', 'G-N2T5TFNFY7', { 'anonymize_ip': true});
 </script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -141,7 +92,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-c.html">Phân phối liên tục</a></li><li class="breadcrumb-item"><a href="./distr-lnorm.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối log-normal</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./unc.html"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -224,7 +175,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./distr-lnorm.html" class="sidebar-item-text sidebar-link active">
+  <a href="./distr-lnorm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối log-normal</span></span></a>
   </div>
 </li>
@@ -262,7 +213,7 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./unc.html" class="sidebar-item-text sidebar-link">
+  <a href="./unc.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span></a>
   </div>
 </li>
@@ -283,23 +234,15 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-  <li><a href="#biến-tỉ-số" id="toc-biến-tỉ-số" class="nav-link active" data-scroll-target="#biến-tỉ-số"><span class="header-section-number">6.0.1</span> Biến tỉ số</a></li>
-  <li><a href="#tại-sao-dùng-log" id="toc-tại-sao-dùng-log" class="nav-link" data-scroll-target="#tại-sao-dùng-log"><span class="header-section-number">6.0.2</span> Tại sao dùng log?</a></li>
-  <li><a href="#cơ-chế-tạo-ra-log-normal" id="toc-cơ-chế-tạo-ra-log-normal" class="nav-link" data-scroll-target="#cơ-chế-tạo-ra-log-normal"><span class="header-section-number">6.0.3</span> Cơ chế tạo ra log-normal</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-c.html">Phân phối liên tục</a></li><li class="breadcrumb-item"><a href="./distr-lnorm.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối log-normal</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối log-normal</span></h1>
+<h1 class="title"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></h1>
 </div>
 
 
@@ -316,83 +259,10 @@ window.Quarto = {
 </header>
 
 
-<section id="biến-tỉ-số" class="level3" data-number="6.0.1">
-<h3 data-number="6.0.1" class="anchored" data-anchor-id="biến-tỉ-số"><span class="header-section-number">6.0.1</span> Biến tỉ số</h3>
-<p>Biến tỉ số (ratio scale variables) là loại biến mà các đơn vị được đo lường trên thang tỉ số. Loại biến này có các đặc điểm sau <span class="citation" data-cites="motulsky2025">(<a href="references.html#ref-motulsky2025" role="doc-biblioref">Motulsky, Head, and Clarke 2025</a>)</span>:</p>
-<ol type="1">
-<li><p>Không tồn tại giá trị âm. Biến chỉ có thể nhận các giá trị dương</p></li>
-<li><p>Giá trị 0 mang ý nghĩa tuyệt đối: Số 0 hoặc đại diện cho sự vắng mặt hoàn toàn của biến đó (không có), hoặc là một giới hạn tiệm cận.</p></li>
-</ol>
-<ul>
-<li><p>0 = không có: Cân nặng hoặc chiều dài. Cân nặng bằng 0 nghĩa là không có trọng lượng. Chiều cao bằng 0 nghĩa là không có chiều cao.</p></li>
-<li><p>0 = tiệm cận: Các chỉ số như EC50 hoặc Km. Các tham số này về lý thuyết không thể bằng 0, nhưng giá trị của chúng có thể cực nhỏ và tiến dần về 0.</p></li>
-</ul>
-<ol start="3" type="1">
-<li><p>Chuyển đổi đơn vị chỉ dùng phép Nhân hoặc Chia</p></li>
-<li><p>Việc tính tỉ số (ratio) mang ý nghĩa thực tiễn: Ví dụ, 4 cm dài gấp đôi 2 cm; 6 lít nước nhiều gấp 3 lần 2 lít nước</p></li>
-</ol>
-<p>Khi 1 biến là biến tỉ số thì sự khác biệt cần phải được đo bằng tỉ số (gấp bao nhiêu lần, bằng phép chia) chứ không phải là chênh lệch bao nhiêu giá trị (phép trừ).</p>
-<p>Ví dụ: Nhiệt độ không phải là biến tỉ số</p>
-<ol type="1">
-<li><p>Có giá trị âm</p></li>
-<li><p>Điểm 0 là quy ước, không phải tuyệt đối. 0°C không có nghĩa là “không có nhiệt độ”</p></li>
-<li><p>Công thức chuyển đổi từ độ C sang độ F</p></li>
-</ol>
-<p><span class="math display">\[^\circ C = (^\circ F - 32) \times \frac{5}{9}\]</span></p>
-<ol start="4" type="1">
-<li>Tỉ số (ratio) không có ý nghĩa thực tiễn: 200°C không nóng gấp đôi 100°C. Sự thay đổi nhiệt độ phải được diễn đạt dưới dạng chênh lệch bao nhiêu giá trị (hiệu số).</li>
-</ol>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Biến nào là biến tỉ số? Tại sao?</p>
-<ul>
-<li>Tuổi</li>
-<li>Nồng độ kháng thể</li>
-<li>Khoảng thời gian</li>
-<li>Chỉ số IQ</li>
-<li>Tải lượng virus (viral load)</li>
-</ul>
-</div>
-</div>
-<p>Khi log(biến) có phân phối chuẩn</p>
-<p>Khi có outliers làm cho phân phối bị lệch phải.</p>
-</section>
-<section id="tại-sao-dùng-log" class="level3" data-number="6.0.2">
-<h3 data-number="6.0.2" class="anchored" data-anchor-id="tại-sao-dùng-log"><span class="header-section-number">6.0.2</span> Tại sao dùng log?</h3>
-<p><span class="math display">\[\log(a \times b) = \log(a) + \log(b)\]</span></p>
-</section>
-<section id="cơ-chế-tạo-ra-log-normal" class="level3" data-number="6.0.3">
-<h3 data-number="6.0.3" class="anchored" data-anchor-id="cơ-chế-tạo-ra-log-normal"><span class="header-section-number">6.0.3</span> Cơ chế tạo ra log-normal</h3>
-<p>Đặc trưng của phân phối log-normal là phép nhân.</p>
-<p>Định lý giới hạn trung tâm cho biết rằng <strong>tổng</strong> của nhiều biến ngẫu nhiên độc lập sẽ tạo ra phân phối Chuẩn. Tương tự, <strong>tích</strong> của nhiều biến ngẫu nhiên sẽ tạo ra phân phối log-normal <span class="citation" data-cites="motulsky2025">(<a href="references.html#ref-motulsky2025" role="doc-biblioref">Motulsky, Head, and Clarke 2025</a>)</span>. Đây được gọi là Quy luật Tác động Tỉ lệ (Law of Proportionate Effect).</p>
-<p>Một số cơ chế tạo ra phân phối này <span class="citation" data-cites="koch1966">(<a href="references.html#ref-koch1966" role="doc-biblioref">Koch 1966</a>)</span>:</p>
-<ul>
-<li>Sự tăng trưởng tích lũy: Giá trị của bước tiếp theo là kết quả của bước hiện tại nhân với một tỉ lệ biến động ngẫu nhiên (lãi suất, tốc độ tăng trưởng)</li>
-</ul>
-<p><span class="math inline">\(X_{t+1} = X_t \times (1 + r)\)</span></p>
-<ul>
-<li><p>Sự phân mảnh: Ngược lại với quá trình tích lũy, là quá trình phá vỡ một vật thể lớn thành nhiều mảnh nhỏ. Ví dụ: Kích thước của sỏi đá trong địa chất, hoặc các mảnh vụn khi nghiền bánh quy.</p></li>
-<li><p>Sự phân chia sinh học: tế bào phân chia</p></li>
-</ul>
+<p>Uncertainty</p>
+<p>Sự không chắc chắn đến từ dữ liệu không đầy đủ (incomplete data).</p>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
-<div id="ref-koch1966" class="csl-entry" role="listitem">
-Koch, Arthur L. 1966. <span>“The Logarithm in Biology 1. Mechanisms Generating the Log-Normal Distribution Exactly.”</span> <em>Journal of Theoretical Biology</em> 12 (2): 276–90. <a href="https://doi.org/10.1016/0022-5193(66)90119-6">https://doi.org/10.1016/0022-5193(66)90119-6</a>.
-</div>
-<div id="ref-motulsky2025" class="csl-entry" role="listitem">
-Motulsky, Harvey J., Trajen Head, and Paul B. S. Clarke. 2025. <span>“Analyzing Lognormal Data: A Nonmathematical Practical Guide.”</span> <em>Pharmacological Reviews</em> 77 (3): 100049. <a href="https://doi.org/10.1016/j.pharmr.2025.100049">https://doi.org/10.1016/j.pharmr.2025.100049</a>.
-</div>
-</div>
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -826,13 +696,13 @@ Motulsky, Harvey J., Trajen Head, and Paul B. S. Clarke. 2025. <span>“Analyzin
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./distr-norm.html" class="pagination-link" aria-label="Phân phối bình thường">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối bình thường</span></span>
+      <a href="./mcmc.html" class="pagination-link" aria-label="MCMC">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">MCMC</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./distr-exp.html" class="pagination-link" aria-label="Phân phối mũ">
-        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Phân phối mũ</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./thanks.html" class="pagination-link" aria-label="Lời cảm ơn">
+        <span class="nav-page-text">Lời cảm ơn</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

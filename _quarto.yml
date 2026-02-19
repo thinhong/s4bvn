@@ -26,6 +26,8 @@ book:
         - distr-pl.qmd
     - lik.qmd
     - bayes.qmd
+    - mcmc.qmd
+    - unc.qmd
     - thanks.qmd
     - references.qmd
 

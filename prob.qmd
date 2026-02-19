@@ -7,6 +7,7 @@ execute:
 
 ```{ojs}
 import { createButton, createSlider, injectStyle } from "./_slider.js"
+d3 = require("d3@7")
 ```
 
 ## Nguồn gốc
@@ -113,20 +114,20 @@ Phép thử ngẫu nhiên: "Tung một đồng xu hai lần"
 ```{ojs}
 viewof sample_space = (() => {
   // ══════════════════════════════════════════════════════
-  // 1. DATA: Toss coin twice → 4 sample points
+  // 1. DATA
   // ══════════════════════════════════════════════════════
   const pts = [
-    { id: 0, c1: "H", c2: "H", label: "HH", heads: 2 },
-    { id: 1, c1: "H", c2: "T", label: "HT", heads: 1 },
-    { id: 2, c1: "T", c2: "H", label: "TH", heads: 1 },
-    { id: 3, c1: "T", c2: "T", label: "TT", heads: 0 },
+    { id: 0, c1: "N", c2: "N", label: "NN", heads: 2 },
+    { id: 1, c1: "N", c2: "S", label: "NS", heads: 1 },
+    { id: 2, c1: "S", c2: "N", label: "SN", heads: 1 },
+    { id: 3, c1: "S", c2: "S", label: "SS", heads: 0 },
   ];
 
   const events = [
-    { name: "Exactly 1 Head",  color: "#7c3aed", test: p => p.heads === 1 },
-    { name: "At Least 1 Head", color: "#3b82f6", test: p => p.heads >= 1 },
-    { name: "Both Same",       color: "#d97706", test: p => p.c1 === p.c2 },
-    { name: "No Heads",        color: "#dc2626", test: p => p.heads === 0 },
+    { name: "Đúng 1 mặt Ngửa",  color: "#7c3aed", test: p => p.heads === 1 },
+    { name: "Ít nhất 1 mặt Ngửa", color: "#3b82f6", test: p => p.heads >= 1 },
+    { name: "Hai mặt giống nhau",        color: "#d97706", test: p => p.c1 === p.c2 },
+    { name: "Không có mặt Ngửa",         color: "#dc2626", test: p => p.heads === 0 },
   ];
 
   // ══════════════════════════════════════════════════════
@@ -185,7 +186,7 @@ viewof sample_space = (() => {
   const omLabelBg = mkEl("rect", { x: String(omX), y: String(omY), width: "210", height: "32", rx: "8", fill: "transparent" });
   omLabelG.appendChild(omLabelBg);
   const omLabel = mkEl("text", { x: String(omX + 12), y: String(omY + 22), fill: "#1e293b", "font-size": "16", "font-weight": "700" });
-  omLabel.textContent = "\u03A9 = { HH, HT, TH, TT }"; omLabelG.appendChild(omLabel);
+  omLabel.textContent = "\u03A9 = { NN, NS, SN, SS }"; omLabelG.appendChild(omLabel);
   svg.appendChild(omLabelG);
 
   // Event region (dashed rect, behind dots)
@@ -196,10 +197,10 @@ viewof sample_space = (() => {
 
   // Dot positions: spread nicely
   const dotPositions = [
-    { x: 170, y: 140 },  // HH
-    { x: 340, y: 110 },  // HT
-    { x: 340, y: 220 },  // TH
-    { x: 510, y: 175 },  // TT
+    { x: 170, y: 140 },  // NN
+    { x: 340, y: 110 },  // NS
+    { x: 340, y: 220 },  // SN
+    { x: 510, y: 175 },  // SS
   ];
 
   // Dots
@@ -222,9 +223,9 @@ viewof sample_space = (() => {
     for (let ci = 0; ci < 2; ci++) {
       const face = ci === 0 ? p.c1 : p.c2;
       const cy = ci === 0 ? coinY1 : coinY2;
-      const coinBg = mkEl("circle", { cx: String(pos.x - 10), cy: String(cy), r: String(coinR), fill: face === "H" ? "#fef3c7" : "#e0e7ff", stroke: face === "H" ? "#d97706" : "#6366f1", "stroke-width": "1.5" });
+      const coinBg = mkEl("circle", { cx: String(pos.x - 10), cy: String(cy), r: String(coinR), fill: face === "N" ? "#fef3c7" : "#e0e7ff", stroke: face === "N" ? "#d97706" : "#6366f1", "stroke-width": "1.5" });
       g.appendChild(coinBg);
-      const coinTxt = mkEl("text", { x: String(pos.x - 10), y: String(cy + 1), "text-anchor": "middle", "dominant-baseline": "middle", fill: face === "H" ? "#92400e" : "#4338ca", "font-size": "9", "font-weight": "700", "font-family": "'SF Mono',monospace" });
+      const coinTxt = mkEl("text", { x: String(pos.x - 10), y: String(cy + 1), "text-anchor": "middle", "dominant-baseline": "middle", fill: face === "N" ? "#92400e" : "#4338ca", "font-size": "9", "font-weight": "700", "font-family": "'SF Mono',monospace" });
       coinTxt.textContent = face; g.appendChild(coinTxt);
     }
 
@@ -255,7 +256,7 @@ viewof sample_space = (() => {
   explainBox.style.cssText = `width:100%;padding:12px 18px;border-radius:10px;margin-bottom:14px;
     background:#fff;border:2px solid #e2e8f0;font-size:14px;color:#334155;line-height:1.7;
     text-align:center;min-height:24px;transition:all 0.2s;`;
-  explainBox.innerHTML = `Hover over the diagram to explore. <b>\u03A9</b> = sample space, each circle = sample point <b>\u03C9</b>.`;
+  explainBox.innerHTML = `Bấm vào biểu đồ để tìm hiểu. <b>\u03A9</b> = không gian mẫu, mỗi vòng tròn = điểm mẫu <b>\u03C9</b>.`;
   wrapper.appendChild(explainBox);
 
   // ══════════════════════════════════════════════════════
@@ -282,7 +283,7 @@ viewof sample_space = (() => {
   tossBtn.style.cssText = `padding:12px 28px;border-radius:12px;border:2px solid #dc2626;
     background:#fef2f2;color:#dc2626;font-size:16px;font-weight:700;
     cursor:pointer;font-family:inherit;transition:all 0.15s;`;
-  tossBtn.textContent = "\uD83E\uDE99  Toss Twice!";
+  tossBtn.textContent = "\uD83E\uDE99  Tung 2 lần";
   tossBtn.addEventListener("mouseenter", () => tossBtn.style.background = "#fee2e2");
   tossBtn.addEventListener("mouseleave", () => tossBtn.style.background = "#fef2f2");
 
@@ -294,7 +295,7 @@ viewof sample_space = (() => {
   // ══════════════════════════════════════════════════════
   const evTitle = document.createElement("div");
   evTitle.style.cssText = "font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px;width:100%;text-align:left;";
-  evTitle.textContent = "Events (subsets of \u03A9) — click to highlight";
+  evTitle.textContent = "Các biến cố (tập con của \u03A9)";
   wrapper.appendChild(evTitle);
 
   const evRow = document.createElement("div"); evRow.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:10px;flex-wrap:wrap;";
@@ -339,7 +340,7 @@ viewof sample_space = (() => {
       dotEls[i].c.setAttribute("fill", "#eef2ff"); dotEls[i].c.setAttribute("stroke", "#1e293b");
     }
     explainBox.style.borderColor = "#1e293b";
-    explainBox.innerHTML = `<b style="color:#1e293b">\u03A9 (Sample Space)</b> = {HH, HT, TH, TT} — the set of <b>all 4 possible outcomes</b> when tossing a coin twice.`;
+    explainBox.innerHTML = `<b style="color:#1e293b">\u03A9 (Không gian mẫu)</b> = {NN, NS, SN, SS}: tập hợp <b>tất cả 4 kết quả có thể xảy ra</b> khi tung đồng xu hai lần.`;
   }
 
   function highlightPoint(i) {
@@ -350,7 +351,7 @@ viewof sample_space = (() => {
     dotEls[i].c.setAttribute("stroke-width", "3"); dotEls[i].ring.setAttribute("stroke", "#16a34a");
     dotEls[i].t.setAttribute("fill", "#16a34a");
     explainBox.style.borderColor = "#16a34a";
-    explainBox.innerHTML = `<b style="color:#16a34a">\u03C9 = ${p.label}</b> is a <b>sample point</b> — one element of \u03A9. Toss 1 = ${p.c1}, Toss 2 = ${p.c2} (${p.heads} head${p.heads !== 1 ? "s" : ""}).`;
+    explainBox.innerHTML = `<b style="color:#16a34a">\u03C9 = ${p.label}</b> là một <b>điểm mẫu</b>: một phần tử của \u03A9. Lần 1 = ${p.c1}, Lần 2 = ${p.c2} (${p.heads} mặt Ngửa).`;
   }
 
   function highlightEvent() {
@@ -364,7 +365,7 @@ viewof sample_space = (() => {
 
     if (activeEvent < 0) {
       explainBox.style.borderColor = "#e2e8f0";
-      explainBox.innerHTML = `Click an event card to highlight its members on the diagram.`;
+      explainBox.innerHTML = `Bấm vào một biến cố để xem cách thể hiện trên biểu đồ.`;
       showOutcome();
       return;
     }
@@ -405,12 +406,12 @@ viewof sample_space = (() => {
     if (outcomeIdx >= 0) {
       showOutcome();
       const inEv = ev.test(pts[outcomeIdx]);
-      outcomeNote = ` Your outcome <b>${pts[outcomeIdx].label}</b> is ${inEv ? `<b style="color:${ev.color}">\u2208 in this event</b>` : `<b>\u2209 not in this event</b>`}.`;
+      outcomeNote = ` Kết quả <b>${pts[outcomeIdx].label}</b> của bạn ${inEv ? `<b style="color:${ev.color}">\u2208 thuộc biến cố này</b>` : `<b>\u2209 không thuộc biến cố này</b>`}.`;
     }
 
     explainBox.style.borderColor = ev.color;
-    explainBox.innerHTML = `<b style="color:${ev.color}">Event: "${ev.name}"</b> = {${members.map(i => pts[i].label).join(", ")}} — ` +
-      `<b>${members.length}</b> out of 4 sample points. P = ${members.length}/4 = <b>${(members.length/4).toFixed(2)}</b>.${outcomeNote}`;
+    explainBox.innerHTML = `<b style="color:${ev.color}">Biến cố: "${ev.name}"</b> = {${members.map(i => pts[i].label).join(", ")}}: ` +
+      `<b>${members.length}</b> trong số 4 điểm mẫu. P = ${members.length}/4 = <b>${(members.length/4).toFixed(2)}</b>.${outcomeNote}`;
   }
 
   function clearHighlight() {
@@ -418,7 +419,7 @@ viewof sample_space = (() => {
     showOutcome();
     if (activeEvent >= 0) { highlightEvent(); return; }
     explainBox.style.borderColor = "#e2e8f0";
-    explainBox.innerHTML = `Hover over the diagram to explore. <b>\u03A9</b> = sample space, each circle = sample point <b>\u03C9</b>.`;
+    explainBox.innerHTML = `Bấm biểu đồ để khám phá. <b>\u03A9</b> = không gian mẫu, mỗi vòng tròn = điểm mẫu <b>\u03C9</b>.`;
   }
 
   function showOutcome() {
@@ -426,7 +427,7 @@ viewof sample_space = (() => {
     const pos = dotPositions[outcomeIdx];
     outRing.setAttribute("cx", pos.x); outRing.setAttribute("cy", pos.y); outRing.style.display = "";
     outLabel.setAttribute("x", pos.x); outLabel.setAttribute("y", pos.y - 56);
-    outLabel.textContent = `Outcome: ${pts[outcomeIdx].label}`; outLabel.style.display = "";
+    outLabel.textContent = `Kết quả: ${pts[outcomeIdx].label}`; outLabel.style.display = "";
   }
 
   // Omega hover (on the label or the background margins)
@@ -441,7 +442,7 @@ viewof sample_space = (() => {
   // ══════════════════════════════════════════════════════
   function setCoin(coinEl, face) {
     coinEl.coin.textContent = face;
-    if (face === "H") {
+    if (face === "N") {
       coinEl.coin.style.background = "#fef3c7"; coinEl.coin.style.borderColor = "#d97706"; coinEl.coin.style.color = "#92400e";
     } else {
       coinEl.coin.style.background = "#e0e7ff"; coinEl.coin.style.borderColor = "#6366f1"; coinEl.coin.style.color = "#4338ca";
@@ -493,11 +494,11 @@ viewof sample_space = (() => {
 
     // Which events contain this outcome
     const inEvents = events.filter(ev => ev.test(p)).map(ev => ev.name);
-    const evStr = inEvents.length > 0 ? ` Belongs to: <b>${inEvents.join(", ")}</b>.` : " Doesn't belong to any defined event.";
+    const evStr = inEvents.length > 0 ? ` Thuộc biến cố: <b>${inEvents.join(", ")}</b>.` : " Không thuộc bất kỳ biến cố nào đã định nghĩa.";
 
     explainBox.style.borderColor = "#dc2626";
-    explainBox.innerHTML = `<b style="color:#dc2626">Outcome: ${p.label}</b> — Toss 1 = ${p.c1}, Toss 2 = ${p.c2} (${p.heads} head${p.heads !== 1 ? "s" : ""}). ` +
-      `This is the sample point that <b>actually occurred</b>.${evStr}`;
+    explainBox.innerHTML = `<b style="color:#dc2626">Kết quả: ${p.label}</b> Lần 1 = ${p.c1}, Lần 2 = ${p.c2} (${p.heads} mặt Ngửa). ` +
+      `Đây là điểm mẫu <b>thực sự đã xảy ra</b>.${evStr}`;
 
     // Update event card highlights
     for (let ei = 0; ei < events.length; ei++) {
@@ -539,99 +540,119 @@ Là khi không có khoảng trống giữa các giá trị.
 Ví dụ: $[0,1]$
 
 ```{ojs}
-//| echo: false
+viewof radialFlood = {
+  // ═══════════════════ CONFIG ═══════════════════
+  const N=100, CX=0.5, CY=0.4;
+  const C={sel:"#1565C0",selLight:"#90CAF9",unsel:"#CFD8DC",
+    flood:"#1565C0",txt:"#212121",sub:"#9E9E9E",border:"#E0E0E0"};
+  const mono="'SF Mono',SFMono-Regular,Menlo,monospace";
 
-viewof prob_radial_flood = Inputs.range([0, 1], {
-  label: "Xác suất", 
-  step: 0.01, 
-  value: 0.3
-})
+  // ═══════════════════ DATA ═══════════════════
+  const rng=d3.randomLcg(42);
+  const people=Array.from({length:N},(_,i)=>{
+    const x=rng(), y=rng();
+    const dx=x-CX, dy=y-CY;
+    return {id:i,x,y,dist:dx*dx+dy*dy};
+  }).sort((a,b)=>a.dist-b.dist);
 
-// 1. CONFIGURATION
-radial_config_flood = ({
-  center: {x: 0.5, y: 0.2}, 
-  n: 100
-})
+  // ═══════════════════ WRAPPER ═══════════════════
+  const outer=document.createElement("div");
+  outer.style.cssText=`display:flex;flex-direction:column;align-items:center;gap:12px;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:860px;margin:0 auto;`;
+  if(!document.querySelector('link[href*="Inter"]')){
+    const lk=document.createElement('link');lk.rel='stylesheet';
+    lk.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap';
+    document.head.appendChild(lk);
+  }
+  outer.appendChild(injectStyle());
 
-// 2. GENERATE STATIC PEOPLE
-people_radial_flood = {
-  const rng = d3.randomLcg(42); 
-  return Array.from({length: radial_config_flood.n}, (_, i) => ({
-    id: i,
-    x: rng(), 
-    y: rng() * 0.4 
-  }));
+  // ═══════════════════ SLIDER ═══════════════════
+  const SL=createSlider("Xác suất",0,1,0.01,0.30,C.sel,"blue");
+  const slRow=document.createElement("div");
+  slRow.style.cssText="width:100%;max-width:340px;";
+  slRow.appendChild(SL.el);
+  outer.appendChild(slRow);
+
+  // ═══════════════════ SVG ═══════════════════
+  const W=820,H=380,pad=30;
+  const svg=d3.create("svg").attr("viewBox",`0 0 ${W} ${H}`)
+    .style("width","100%").style("max-width",W+"px")
+    .style("border-radius","14px").style("background","#FAFAFA")
+    .style("border",`1.5px solid ${C.border}`);
+
+  const xS=d3.scaleLinear().domain([0,1]).range([pad,W-pad]);
+  const yS=d3.scaleLinear().domain([0,1]).range([pad,H-pad]);
+
+  // Clip to box so flood circle doesn't overflow
+  const clipId="flood-clip-"+Math.random().toString(36).slice(2,8);
+  svg.append("defs").append("clipPath").attr("id",clipId)
+    .append("rect").attr("x",0).attr("y",0).attr("width",W).attr("height",H)
+    .attr("rx",14);
+
+  // Radial gradient for smooth continuous feel
+  const gradId="flood-grad-"+Math.random().toString(36).slice(2,8);
+  const grad=svg.select("defs").append("radialGradient").attr("id",gradId);
+  grad.append("stop").attr("offset","0%").attr("stop-color",C.flood).attr("stop-opacity",0.32);
+  grad.append("stop").attr("offset","55%").attr("stop-color",C.flood).attr("stop-opacity",0.18);
+  grad.append("stop").attr("offset","85%").attr("stop-color",C.flood).attr("stop-opacity",0.08);
+  grad.append("stop").attr("offset","100%").attr("stop-color",C.flood).attr("stop-opacity",0);
+
+  // ── CONTINUOUS LAYER: expanding radial shade ──
+  const cxPx=xS(CX), cyPx=yS(CY);
+  const corners=[[0,0],[W,0],[0,H],[W,H]];
+  const maxR=Math.max(...corners.map(([x,y])=>Math.sqrt((x-cxPx)**2+(y-cyPx)**2)));
+
+  const floodCircle=svg.append("circle")
+    .attr("cx",cxPx).attr("cy",cyPx).attr("r",0)
+    .attr("fill",`url(#${gradId})`).attr("clip-path",`url(#${clipId})`);
+
+  // ── DISCRETE LAYER: countable dots ──
+  const dots=svg.append("g").selectAll("circle")
+    .data(people).join("circle")
+    .attr("cx",d=>xS(d.x)).attr("cy",d=>yS(d.y))
+    .attr("stroke","#fff").attr("stroke-width",1.5);
+
+  // ── LABELS ──
+  svg.append("text").attr("x",W-22).attr("y",38)
+    .attr("text-anchor","end")
+    .attr("font-size",28).attr("font-weight",800).attr("fill","#BDBDBD")
+    .text("Ω");
+
+  const lblDiscrete=svg.append("text").attr("x",22).attr("y",H-18)
+    .attr("font-size",14).attr("font-weight",700)
+    .attr("fill",C.txt).attr("font-family",mono);
+  const lblContinuous=svg.append("text").attr("x",W-22).attr("y",H-18)
+    .attr("text-anchor","end").attr("font-size",14).attr("font-weight",700)
+    .attr("fill",C.flood).attr("font-family",mono);
+
+  // ═══════════════════ UPDATE ═══════════════════
+  function update(){
+    const p=SL.val();
+    const cutoff=Math.round(p*N);
+    const selectedSet=new Set(people.slice(0,cutoff).map(d=>d.id));
+
+    // Discrete: highlight selected dots
+    dots
+      .attr("fill",d=>selectedSet.has(d.id)?C.sel:C.unsel)
+      .attr("r",d=>selectedSet.has(d.id)?5.5:4)
+      .attr("opacity",d=>selectedSet.has(d.id)?0.9:0.45);
+
+    // Continuous: expand shade — area proportional to p
+    const r=maxR*Math.sqrt(p);
+    floodCircle.attr("r",r);
+
+    // Labels
+    lblDiscrete.text(`Rời rạc: ${cutoff}/${N} điểm`);
+    lblContinuous.text(`Liên tục: ${(p*100).toFixed(1)}%`);
+  }
+
+  SL.input.addEventListener("input",()=>{SL.sync();update();});
+  update();
+
+  outer.appendChild(svg.node());
+  return outer;
 }
-
-// 3. REACTIVE SELECTION
-currentData_radial_flood = {
-  const cutoff = Math.round(prob_radial_flood * 100);
-  
-  const cx = radial_config_flood.center.x;
-  const cy = radial_config_flood.center.y;
-  
-  const withDist = people_radial_flood.map(p => {
-    const dx = p.x - cx;
-    const dy = p.y - cy;
-    return { ...p, dist: dx*dx + dy*dy }; 
-  });
-  
-  const sorted = withDist.slice().sort((a, b) => a.dist - b.dist);
-  const selectedSet = new Set(sorted.slice(0, cutoff).map(d => d.id));
-
-  return people_radial_flood.map(p => ({
-    ...p,
-    status: selectedSet.has(p.id) ? "Selected" : "Not selected"
-  }));
-}
-
-// 4. PLOT
-Plot.plot({
-  width: 800,
-  height: 320,
-  x: { axis: null },
-  y: { axis: null },
-  
-  marks: [
-    Plot.frame({stroke: "#ccc"}),
-
-    // --- DENSITY (The Flood) ---
-    Plot.density(currentData_radial_flood, {
-      filter: d => d.status === "Selected",
-      x: "x",
-      y: "y",
-      fill: "#4e79a7",
-      fillOpacity: 0.3,
-      
-      // KEY CHANGES HERE:
-      bandwidth: 50,    // High bandwidth = Very smooth, merging clusters
-      thresholds: [0.005] // Low threshold = Draws even faint outer edges
-    }),
-
-    // --- DOTS ---
-    Plot.dot(currentData_radial_flood, {
-      x: "x",
-      y: "y",
-      fill: d => d.status === "Selected" ? "#4e79a7" : "#e0e0e0",
-      r: 4,
-      fillOpacity: 0.9
-    }),
-    
-    // --- LABELS ---
-    Plot.text([prob_radial_flood], {
-      frameAnchor: "bottom-left",
-      dx: 10, dy: -10,
-      text: d => `Số người: ${Math.round(d * 100)}/100`, 
-      fill: "black", stroke: "white", strokeWidth: 3,
-      fontSize: 16, fontWeight: "bold"
-    }),
-
-    Plot.text(["Ω"], {
-      frameAnchor: "top-right", dx: -15, dy: 15, 
-      fontSize: 30, fontWeight: "bold", fill: "#999"
-    })
-  ]
-})
 ```
 
 ### Quan hệ giữa hai biến cố
@@ -948,3 +969,475 @@ Luôn thu thập dữ liệu ở thang đo cao nhất có thể (tỉ số hoặ
 
 Ví dụ: Thu thập tuổi thay vì chia thành nhóm tuổi (0-5, 5-10, >10), hay danh định (trẻ em, người lớn).
 
+## Ứng dụng
+
+```{ojs}
+viewof bauCua = {
+  const SYM = [
+    {id:'deer',  emoji:'🦌', bg:'#EFEBE9', bdr:'#A1887F'},
+    {id:'gourd', emoji:'🍐', bg:'#FFF3E0', bdr:'#FB8C00'},
+    {id:'cock',  emoji:'🐓', bg:'#FFEBEE', bdr:'#E53935'},
+    {id:'fish',  emoji:'🐟', bg:'#E3F2FD', bdr:'#1E88E5'},
+    {id:'crab',  emoji:'🦀', bg:'#E0F7FA', bdr:'#00ACC1'},
+    {id:'prawn', emoji:'🦐', bg:'#FFFDE7', bdr:'#FDD835'},
+  ];
+  const C={red:'#C41E3A',gold:'#D4A017',goldL:'#F5D061',
+    win:'#2E7D32',lose:'#C62828',felt:'#1a5c2a',feltL:'#2d7a3e',
+    txt:'#212121',sub:'#9E9E9E',border:'#E0E0E0'};
+  const mono="'SF Mono',SFMono-Regular,Menlo,monospace";
+  const K=10; // unit = 10K
+
+  function fmt(v){return v+'K';}
+
+  // ═══════════════════ CRYPTO RNG ═══════════════════
+  function rndInt(n){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;}
+  function rndDie(){return rndInt(6);}
+
+  // ═══════════════════ STATE ═══════════════════
+  let balance=1000,netProfit=0,bets={},rolling=false,autoPlaying=false,autoTimer=null;
+  let stats={games:0,wagered:0,returned:0};
+  let chartData=[];
+  const SPEED_MS=[700,250,50];
+
+  // ═══════════════════ OUTER ═══════════════════
+  const outer=document.createElement("div");
+  outer.style.cssText=`display:flex;flex-direction:column;gap:14px;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:860px;margin:0 auto;`;
+  if(!document.querySelector('link[href*="Inter"]')){
+    const lk=document.createElement('link');lk.rel='stylesheet';
+    lk.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(lk);
+  }
+  outer.appendChild(injectStyle());
+
+  // ═══════════════════ WALLET ═══════════════════
+  const walletRow=document.createElement("div");
+  walletRow.style.cssText="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;";
+  function mkChip(icon,color){
+    const d=document.createElement("div");
+    d.style.cssText=`padding:6px 16px;border-radius:30px;font-weight:800;font-size:14px;
+      background:#fff;border:2.5px solid ${color};color:${color};
+      box-shadow:0 2px 8px rgba(0,0,0,0.06);font-family:${mono};display:flex;gap:5px;align-items:center;`;
+    const lbl=document.createElement("span");lbl.textContent=icon;lbl.style.fontSize='13px';
+    const val=document.createElement("span");val.style.cssText=`color:${C.txt};font-size:16px;`;val.textContent='0';
+    d.append(lbl,val);return{el:d,val};
+  }
+  const chipBal=mkChip('💰',C.gold);
+  const chipBet=mkChip('🎯',C.red);
+  const chipNet=mkChip('📊 Ròng:','#43A047');
+  walletRow.append(chipBal.el,chipBet.el,chipNet.el);
+  outer.appendChild(walletRow);
+
+  // ═══════════════════ SLIDERS ═══════════════════
+  const SL={};
+  SL.unit=createSlider("Cược mỗi lần",1,10,1,5,C.red,"red");
+  // Override display format
+  const baseSync=SL.unit.sync;
+  SL.unit.sync=()=>{baseSync();SL.unit.valSpan.textContent=(SL.unit.val()*10)+'K';};
+  SL.unit.sync();
+  SL.speed=createSlider("Tốc độ tự động",1,3,1,2,"#6A1B9A","purple");
+  const slRow=document.createElement("div");slRow.style.cssText="display:flex;gap:14px;width:100%;";
+  slRow.append(SL.unit.el,SL.speed.el);
+  outer.appendChild(slRow);
+
+  // ═══════════════════ BOARD ═══════════════════
+  const boardWrap=document.createElement("div");
+  boardWrap.style.cssText=`background:linear-gradient(145deg,${C.feltL},${C.felt});
+    border-radius:18px;border:4px solid ${C.gold};padding:12px;
+    box-shadow:0 0 0 2px #8B6914,0 6px 24px rgba(0,0,0,0.15);`;
+  const boardGrid=document.createElement("div");
+  boardGrid.style.cssText="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;";
+  boardWrap.appendChild(boardGrid);
+  outer.appendChild(boardWrap);
+
+  const cells={};
+  SYM.forEach(s=>{
+    const cell=document.createElement("div");
+    cell.style.cssText=`background:${s.bg};border-radius:14px;border:3px solid ${s.bdr};
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:8px 6px 6px;position:relative;user-select:none;
+      box-shadow:0 2px 8px rgba(0,0,0,0.1);transition:box-shadow 0.3s,border-color 0.2s;
+      min-height:100px;cursor:pointer;`;
+    cell.addEventListener('mouseenter',()=>{if(!rolling)cell.style.transform='translateY(-2px)';});
+    cell.addEventListener('mouseleave',()=>{cell.style.transform='';});
+
+    const em=document.createElement("div");
+    em.style.cssText="font-size:42px;line-height:1;margin-bottom:6px;";
+    em.textContent=s.emoji;
+
+    const betRow=document.createElement("div");
+    betRow.style.cssText="display:flex;align-items:center;gap:3px;";
+    function mkSBtn(label,bg,action){
+      const b=document.createElement("button");
+      b.style.cssText=`width:30px;height:28px;border-radius:8px;border:none;
+        background:${bg};color:#fff;font-size:17px;font-weight:800;cursor:pointer;
+        display:flex;align-items:center;justify-content:center;transition:all 0.1s;
+        box-shadow:0 1px 4px rgba(0,0,0,0.12);line-height:1;`;
+      b.textContent=label;
+      b.addEventListener('click',e=>{e.stopPropagation();action();});
+      b.addEventListener('mouseenter',()=>b.style.transform='scale(1.12)');
+      b.addEventListener('mouseleave',()=>b.style.transform='');
+      return b;
+    }
+    const btnMinus=mkSBtn('−','#90A4AE',()=>removeBet(s.id));
+    const btnPlus=mkSBtn('+',C.red,()=>placeBet(s.id));
+    const betDisp=document.createElement("div");
+    betDisp.style.cssText=`min-width:44px;text-align:center;font-family:${mono};
+      font-size:15px;font-weight:800;color:${C.sub};padding:3px 6px;
+      background:rgba(255,255,255,0.7);border-radius:8px;border:1.5px solid #E0E0E0;`;
+    betDisp.textContent='—';
+    betRow.append(btnMinus,betDisp,btnPlus);
+
+    const payLabel=document.createElement("div");
+    payLabel.style.cssText=`position:absolute;top:5px;right:5px;font-size:12px;font-weight:800;
+      padding:2px 8px;border-radius:10px;display:none;font-family:${mono};
+      box-shadow:0 2px 6px rgba(0,0,0,0.15);`;
+    const matchLabel=document.createElement("div");
+    matchLabel.style.cssText=`position:absolute;top:5px;left:5px;font-size:12px;font-weight:800;display:none;
+      padding:1px 6px;border-radius:6px;background:${C.win};color:#fff;font-family:${mono};`;
+
+    cell.append(em,betRow,payLabel,matchLabel);
+    cell.addEventListener('click',()=>placeBet(s.id));
+    boardGrid.appendChild(cell);
+    cells[s.id]={cell,betDisp,payLabel,matchLabel};
+  });
+
+  // ═══════════════════ DICE ═══════════════════
+  const diceRow=document.createElement("div");
+  diceRow.style.cssText="display:flex;justify-content:center;gap:16px;min-height:80px;align-items:center;padding:4px 0;";
+  const diceEls=[0,1,2].map(()=>{
+    const d=document.createElement("div");
+    d.style.cssText=`width:72px;height:72px;background:linear-gradient(145deg,#fff,#f0ece0);
+      border-radius:14px;border:3px solid #c9a84c;display:flex;align-items:center;justify-content:center;
+      font-size:38px;box-shadow:0 4px 12px rgba(0,0,0,0.15);transition:transform 0.08s;`;
+    d.textContent='🎲';diceRow.appendChild(d);return d;
+  });
+  outer.appendChild(diceRow);
+
+  // ═══════════════════ RESULT ═══════════════════
+  const resultEl=document.createElement("div");
+  resultEl.style.cssText=`text-align:center;font-weight:800;font-size:16px;min-height:26px;font-family:${mono};`;
+  outer.appendChild(resultEl);
+
+  // ═══════════════════ CONTROLS ═══════════════════
+  const ctrlRow=document.createElement("div");
+  ctrlRow.style.cssText="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center;";
+  function mkBtn(text,color,big){
+    const b=document.createElement("button");
+    b.style.cssText=`padding:${big?'12px 36px':'8px 18px'};border-radius:12px;border:none;
+      background:linear-gradient(135deg,${color},${color}dd);color:#fff;
+      font-size:${big?16:13}px;font-weight:800;cursor:pointer;font-family:inherit;
+      transition:all 0.15s;box-shadow:0 3px 12px ${color}44;letter-spacing:0.3px;`;
+    b.textContent=text;
+    b.addEventListener('mouseenter',()=>b.style.transform='translateY(-2px)');
+    b.addEventListener('mouseleave',()=>b.style.transform='');
+    return b;
+  }
+
+  const btnRoll=mkBtn("🎲 LẮC!",C.red,true);
+  const btnAuto=mkBtn("⏩ Tự động","#6A1B9A",false);
+  const stratSel=document.createElement("select");
+  stratSel.style.cssText=`padding:8px 12px;border-radius:10px;border:2px solid #E0E0E0;
+    font-family:inherit;font-size:12px;font-weight:600;background:#fff;color:${C.txt};`;
+  [['random1','Cược 1 ngẫu nhiên'],['random2','Cược 2 ngẫu nhiên'],['all6','Cược tất cả 6'],
+   ['single','Luôn cược 🦌']].forEach(([v,t])=>{
+    const o=document.createElement("option");o.value=v;o.textContent=t;stratSel.appendChild(o);
+  });
+  const btnReset=mkBtn("↺ Đặt lại","#546E7A",false);
+  ctrlRow.append(btnRoll,btnAuto,stratSel,btnReset);
+  outer.appendChild(ctrlRow);
+
+  // ═══════════════════ STATS ═══════════════════
+  const statsCard=document.createElement("div");
+  statsCard.style.cssText=`background:#fff;border-radius:16px;border:1px solid ${C.border};
+    padding:16px;box-shadow:0 2px 12px rgba(0,0,0,0.04);`;
+  const statsTitle=document.createElement("div");
+  statsTitle.style.cssText=`font-size:15px;font-weight:800;color:${C.txt};margin-bottom:10px;text-align:center;`;
+  statsTitle.textContent='Thống kê';
+  statsCard.appendChild(statsTitle);
+
+  const statsGrid=document.createElement("div");
+  statsGrid.style.cssText="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;";
+  const stRefs={};
+  function mkStat(label,key){
+    const d=document.createElement("div");
+    d.style.cssText=`background:#FAFAFA;border-radius:10px;padding:8px;text-align:center;border:1px solid #F0F0F0;`;
+    const lb=document.createElement("div");
+    lb.style.cssText="font-size:10px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;";
+    lb.textContent=label;
+    const vl=document.createElement("div");
+    vl.style.cssText=`font-size:17px;font-weight:800;color:${C.txt};margin-top:2px;font-family:${mono};`;
+    vl.textContent='—';
+    d.append(lb,vl);stRefs[key]=vl;return d;
+  }
+  statsGrid.append(
+    mkStat('Ván','games'),mkStat('Tiền cược','wager'),mkStat('Tiền về','ret'),
+    mkStat('Lãi/Lỗ ròng','net'),mkStat('Hoàn vốn / ₫','actRet')
+  );
+  // Custom tooltip for Hoàn vốn
+  const hvBox=stRefs.actRet.parentNode;
+  hvBox.style.position="relative";
+  hvBox.style.cursor="help";
+  const tip=document.createElement("div");
+  tip.style.cssText=`position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
+    background:#333;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;
+    white-space:nowrap;pointer-events:none;opacity:0;transition:opacity 0.2s;
+    margin-bottom:8px;box-shadow:0 2px 8px rgba(0,0,0,0.2);z-index:10;font-weight:600;`;
+  tip.textContent="Tổng tiền về / Tổng tiền cược";
+  
+  // Arrow
+  const arr=document.createElement("div");
+  arr.style.cssText=`position:absolute;top:100%;left:50%;margin-left:-5px;
+    border-width:5px;border-style:solid;border-color:#333 transparent transparent transparent;`;
+  tip.appendChild(arr);
+  hvBox.appendChild(tip);
+  
+  hvBox.addEventListener("mouseenter",()=>tip.style.opacity="1");
+  hvBox.addEventListener("mouseleave",()=>tip.style.opacity="0");
+  
+  statsCard.appendChild(statsGrid);
+
+  // ── d3 SVG chart ──
+  const chartW=820,chartH=150;
+  const chartSvg=d3.create("svg").attr("viewBox",[0,0,chartW,chartH])
+    .style("width","100%").style("max-width",chartW+"px")
+    .style("border-radius","10px").style("background","#FAFAFA")
+    .style("border","1px solid #F0F0F0");
+  statsCard.appendChild(chartSvg.node());
+  const chartLbl=document.createElement("div");
+  chartLbl.style.cssText=`font-size:10px;color:${C.sub};text-align:center;margin-top:4px;font-weight:600;`;
+  chartLbl.textContent="";
+  statsCard.appendChild(chartLbl);
+  outer.appendChild(statsCard);
+
+  // ═══════════════════ LOGIC ═══════════════════
+  function totalBet(){return Object.values(bets).reduce((a,b)=>a+b,0);}
+  function placeBet(id){
+    if(rolling)return;SL.unit.sync();
+    const unit=SL.unit.val()*K;
+    if(balance<unit)return;
+    bets[id]=(bets[id]||0)+unit;balance-=unit;
+    clearPayouts();render();
+  }
+  function removeBet(id){
+    if(rolling)return;SL.unit.sync();
+    const unit=SL.unit.val()*K;
+    const cur=bets[id]||0;if(cur<=0)return;
+    const rem=Math.min(unit,cur);
+    bets[id]=cur-rem;if(bets[id]<=0)delete bets[id];
+    balance+=rem;clearPayouts();render();
+  }
+  function clearPayouts(){
+    SYM.forEach(s=>{
+      const c=cells[s.id];c.payLabel.style.display='none';c.matchLabel.style.display='none';
+      c.cell.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';
+    });
+    resultEl.textContent='';
+  }
+  function render(){
+    chipBal.val.textContent=fmt(balance);
+    const tb=totalBet();
+    chipBet.val.textContent=fmt(tb);chipBet.el.style.borderColor=tb>0?C.red:'#E0E0E0';chipBet.val.style.color=tb>0?C.red:C.sub;
+    chipNet.val.textContent=(netProfit>=0?'+':'')+fmt(netProfit);
+    chipNet.el.style.borderColor=netProfit>=0?'#43A047':C.lose;chipNet.val.style.color=netProfit>=0?'#43A047':C.lose;
+
+    SYM.forEach(s=>{
+      const c=cells[s.id],bet=bets[s.id]||0;
+      c.betDisp.textContent=bet>0?fmt(bet):'—';
+      c.betDisp.style.color=bet>0?C.red:C.sub;
+      c.betDisp.style.borderColor=bet>0?C.red:'#E0E0E0';
+      c.cell.style.borderColor=bet>0?C.red:s.bdr;
+      c.cell.style.borderWidth=bet>0?'4px':'3px';
+    });
+    btnRoll.disabled=tb===0||rolling;
+    btnRoll.style.opacity=btnRoll.disabled?'0.4':'1';
+    btnRoll.style.cursor=btnRoll.disabled?'not-allowed':'pointer';
+
+    stRefs.games.textContent=stats.games||'—';
+    stRefs.wager.textContent=stats.wagered?fmt(stats.wagered):'—';
+    stRefs.ret.textContent=stats.returned?fmt(stats.returned):'—';
+    const net=stats.returned-stats.wagered;
+    stRefs.net.textContent=stats.games?(net>=0?'+':'')+fmt(net):'—';
+    stRefs.net.style.color=net>=0?C.win:C.lose;
+    if(stats.wagered>0){
+      stRefs.actRet.textContent=(stats.returned/stats.wagered).toFixed(4);
+      stRefs.actRet.style.color=stats.returned/stats.wagered>=1?C.win:C.lose;
+    }
+  }
+
+  // ═══════════════════ ROLL ═══════════════════
+  function rollDice(skipAnim){
+    return new Promise(resolve=>{
+      rolling=true;clearPayouts();render();
+      const results=[rndDie(),rndDie(),rndDie()];
+      if(skipAnim){
+        diceEls.forEach((d,i)=>{d.textContent=SYM[results[i]].emoji;d.style.transform='';});
+        rolling=false;resolve(results.map(i=>SYM[i].id));return;
+      }
+      let ticks=0;const maxT=12;
+      const iv=setInterval(()=>{
+        diceEls.forEach(d=>{
+          d.textContent=SYM[rndDie()].emoji;
+          d.style.transform=ticks%2?'rotate(-7deg) scale(1.06)':'rotate(7deg) scale(0.94)';
+        });
+        ticks++;
+        if(ticks>=maxT){
+          clearInterval(iv);
+          diceEls.forEach((d,i)=>{d.textContent=SYM[results[i]].emoji;d.style.transform='';});
+          rolling=false;resolve(results.map(i=>SYM[i].id));
+        }
+      },55);
+    });
+  }
+
+  async function play(skipAnim){
+    if(rolling||totalBet()===0)return;
+    const results=await rollDice(skipAnim);
+    const counts={};results.forEach(id=>{counts[id]=(counts[id]||0)+1;});
+    let rW=0,rR=0;
+    for(const id in bets){
+      const bet=bets[id];rW+=bet;
+      const m=counts[id]||0;const c=cells[id];
+      if(m>0){
+        const pay=bet+bet*m;rR+=pay;balance+=pay;
+        c.payLabel.textContent=`+${fmt(bet*m)}`;c.payLabel.style.display='block';
+        c.payLabel.style.background=C.win;c.payLabel.style.color='#fff';
+        c.matchLabel.style.display='block';c.matchLabel.textContent=`×${m}`;
+        c.cell.style.boxShadow=m===1?'0 0 16px rgba(76,175,80,0.45)':
+          m===2?'0 0 22px rgba(255,193,7,0.55)':'0 0 28px rgba(244,67,54,0.65)';
+      } else {
+        c.payLabel.textContent=`-${fmt(bet)}`;c.payLabel.style.display='block';
+        c.payLabel.style.background=C.lose;c.payLabel.style.color='#fff';
+      }
+    }
+    const profit=rR-rW;netProfit+=profit;
+    stats.games++;stats.wagered+=rW;stats.returned+=rR;
+    if(!skipAnim){
+      resultEl.textContent=profit>0?`🎉 Thắng +${fmt(profit)}!`:profit===0?'↔ Hòa vốn':`💸 Thua ${fmt(Math.abs(profit))}`;
+      resultEl.style.color=profit>0?C.win:profit===0?C.sub:C.lose;
+    }
+    chartData.push({g:stats.games,r:stats.wagered>0?stats.returned/stats.wagered:1});
+    // Cap memory: thin older data when array exceeds 10k entries
+    if(chartData.length>10000){
+      const half=chartData.filter((_,i)=>i%2===0||i===chartData.length-1);
+      chartData.length=0;chartData.push(...half);
+    }
+    bets={};render();
+    const spd=SL.speed.val();
+    if(!autoPlaying||spd<3||chartData.length%5===0)drawChart();
+  }
+
+  // ═══════════════════ AUTO ═══════════════════
+  function toggleAuto(){
+    if(autoPlaying){
+      autoPlaying=false;clearTimeout(autoTimer);
+      btnAuto.textContent='⏩ Tự động';btnAuto.style.background='linear-gradient(135deg,#6A1B9A,#6A1B9Add)';
+      drawChart();render();return;
+    }
+    autoPlaying=true;
+    btnAuto.textContent='⏸ Dừng';btnAuto.style.background=`linear-gradient(135deg,${C.lose},${C.lose}dd)`;
+
+    function tick(){
+      if(!autoPlaying)return;
+      if(rolling){autoTimer=setTimeout(tick,50);return;}
+      SL.unit.sync();SL.speed.sync();
+      const unit=SL.unit.val()*K;
+      const st=stratSel.value;
+      const nBets=st==='all6'?6:st==='random2'?2:1;
+      if(balance<nBets*unit){toggleAuto();return;}
+
+      bets={};
+      if(st==='random1'){const s=SYM[rndDie()];bets[s.id]=unit;balance-=unit;}
+      else if(st==='random2'){
+        const ix=new Set();while(ix.size<2)ix.add(rndDie());
+        for(const i of ix){bets[SYM[i].id]=unit;balance-=unit;}
+      } else if(st==='all6'){SYM.forEach(s=>{bets[s.id]=unit;balance-=unit;});}
+      else {bets['deer']=unit;balance-=unit;}
+      render();
+      const spd=SL.speed.val();
+      play(spd>=3).then(()=>{if(autoPlaying)autoTimer=setTimeout(tick,SPEED_MS[spd-1]);});
+    }
+    tick();
+  }
+
+  // ═══════════════════ CHART ═══════════════════
+  const cmg={l:46,r:12,t:14,b:22};
+  const ciw=chartW-cmg.l-cmg.r,cih=chartH-cmg.t-cmg.b;
+  const chartG=chartSvg.append("g").attr("transform",`translate(${cmg.l},${cmg.t})`);
+  const cGridG=chartG.append("g"),cLineG=chartG.append("g"),cAxisG=chartG.append("g");
+
+  function drawChart(){
+    cGridG.selectAll("*").remove();cLineG.selectAll("*").remove();cAxisG.selectAll("*").remove();
+    if(chartData.length<2)return;
+    const vals=chartData.map(d=>d.r);
+    let yMin=Math.min(d3.min(vals),0.82),yMax=Math.max(d3.max(vals),1.08);
+    const pad=(yMax-yMin)*0.1;yMin-=pad;yMax+=pad;
+    const xS=d3.scaleLinear().domain([0,chartData.length-1]).range([0,ciw]);
+    const yS=d3.scaleLinear().domain([yMin,yMax]).range([cih,0]);
+
+    // Sparse y ticks: every 0.20
+    for(let v=Math.ceil(yMin*10)/10;v<=yMax;v+=0.20){
+      cGridG.append("line").attr("x2",ciw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke","#E8E8E8");
+      cAxisG.append("text").attr("x",-6).attr("y",yS(v)+3)
+        .attr("text-anchor","end").attr("font-size",12).attr("fill","#777").attr("font-family",mono).text(v.toFixed(2));
+    }
+    if(yMin<1&&yMax>1){
+      cGridG.append("line").attr("x2",ciw).attr("y1",yS(1)).attr("y2",yS(1))
+        .attr("stroke","#BDBDBD").attr("stroke-dasharray","4,4");
+      cGridG.append("text").attr("x",4).attr("y",yS(1)-5).attr("font-size",11).attr("fill","#999").text("Hòa vốn");
+    }
+    let pts=chartData;
+    if(pts.length>600){const step=Math.ceil(pts.length/600);pts=pts.filter((_,i)=>i%step===0||i===chartData.length-1);}
+    const xSp=d3.scaleLinear().domain([0,pts.length-1]).range([0,ciw]);
+    cLineG.append("path").attr("d",d3.area().x((_,i)=>xSp(i)).y0(cih).y1(d=>yS(d.r))(pts))
+      .attr("fill",C.gold).attr("opacity",0.1);
+    cLineG.append("path").attr("d",d3.line().x((_,i)=>xSp(i)).y(d=>yS(d.r))(pts))
+      .attr("fill","none").attr("stroke",C.gold).attr("stroke-width",2);
+    const last=chartData[chartData.length-1];
+    cLineG.append("circle").attr("cx",xS(chartData.length-1)).attr("cy",yS(last.r))
+      .attr("r",3.5).attr("fill",C.gold).attr("stroke","#fff").attr("stroke-width",1.5);
+    const xStep=Math.max(1,Math.floor(chartData.length/7));
+    for(let i=0;i<chartData.length;i+=xStep)
+      cAxisG.append("text").attr("x",xS(i)).attr("y",cih+16)
+        .attr("text-anchor","middle").attr("font-size",11).attr("fill","#999").attr("font-family",mono).text(chartData[i].g);
+  }
+
+  // ═══════════════════ EVENTS ═══════════════════
+  btnRoll.addEventListener('click',()=>play(false));
+
+  btnAuto.addEventListener('click',toggleAuto);
+  SL.unit.input.addEventListener("input",()=>SL.unit.sync());
+  SL.speed.input.addEventListener("input",()=>SL.speed.sync());
+  btnReset.addEventListener('click',()=>{
+    if(autoPlaying)toggleAuto();
+    balance=1000;netProfit=0;bets={};stats={games:0,wagered:0,returned:0};chartData=[];rolling=false;
+    diceEls.forEach(d=>{d.textContent='🎲';d.style.transform='';});
+    clearPayouts();render();drawChart();
+  });
+
+  render();
+  invalidation.then(()=>{autoPlaying=false;clearTimeout(autoTimer);});
+  outer.value={};return outer;
+}
+```
+
+Luật chơi:
+
+- Bàn cược có 6 ô: Bầu, Cua, Tôm, Cá, Gà, Nai.
+- Người chơi đặt tiền vào một hoặc nhiều ô dự đoán, nhà cái lắc 3 viên xí ngầu
+- Trả thưởng:
+  - Ô đã chọn không xuất hiện: mất tiền cược
+  - Xuất hiện 1 lần: hoàn vốn + thưởng x1
+  - Xuất hiện 2 lần: hoàn vốn + thưởng x2
+  - Xuất hiện 3 lần: hoàn vốn + thưởng x3
+
+::: {.callout-note}
+## Câu hỏi
+
+1. Đây có phải 1 trò chơi công bằng không? Tại sao?
+
+2. Nếu bắt đầu với 1 triệu đồng, mỗi ván cược 50K, thì sau bao nhiêu ván bạn sẽ mất toàn bộ 1 triệu hoặc thu được thêm 1 triệu đem về?
+
+3. Nếu nhà cái muốn thu hút người chơi hơn bằng cách tăng thưởng: Khi ra 3 con vật giống nhau, thay vì trả 1:3, nhà cái trả 1:10. Hỏi nhà cái có bị lỗ không?
+:::

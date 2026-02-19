@@ -1,0 +1,8 @@
+---
+title: "Sự không chắc chắn"
+format: html
+---
+
+Uncertainty
+
+Sự không chắc chắn đến từ dữ liệu không đầy đủ (incomplete data). 
