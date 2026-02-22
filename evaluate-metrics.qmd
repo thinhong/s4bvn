@@ -1,0 +1,716 @@
+---
+title: "Đánh giá mô hình"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    number-sections: true
+bibliography: references.bib
+execute: 
+  warning: false
+  message: false
+---
+
+```{r}
+#| echo: false
+library(tidyverse)
+library(pROC)
+library(yardstick)
+```
+
+# Các chỉ số cho kết cục định tính (Classification)
+
+Trước khi tính các chỉ số đánh giá mô hình cho kết cục định tính, chúng ta cần nắm rõ các thành phần chính để tính ra các chỉ số đó, một khái niệm phải ghi nhớ là **Confusion Matrix** [@fawcett2006introduction]:
+
+* True Positive (TP): Dự báo có dịch, thực tế có dịch.
+* True Negative (TN): Dự báo không dịch, thực tế không dịch.
+* False Positive (FP): Dự báo có dịch, thực tế không dịch (hay còn gọi là dương tính giả).
+* False Negative (FN): Dự báo không dịch, thực tế có dịch (hay còn gọi là âm tính giả).
+
+## Các chỉ số đánh giá dựa trên Confusion Matrix
+
+### Accuracy
+
+Độ chính xác là tỷ lệ phần trăm các trường hợp được mô hình dự đoán đúng trên tổng số các trường hợp được đánh giá. Cho biết mô hình **"đoán đúng"** được bao nhiêu phần trăm [@fawcett2006introduction].
+
+::: callout-caution
+Tuy nhiên, cần thận trọng sử dụng khi bộ dữ liệu mất cân bằng (ví dụ số tuần không có dịch chiếm 90%, chỉ cần mô hình luôn đoán "không có dịch" thì **Accuracy** vẫn đạt 90% nhưng mô hình hoàn toàn vô dụng, nghĩa là nói đại cũng đúng nên mô hình không cần thiết).
+:::
+
+$$Accuracy=\frac{TP+TN}{TP+TN+FP+FN}$$
+
+**Ví dụ:** Mô hình cảnh báo sớm dịch TCM tại cộng đồng dự báo cho 100 phường/xã. Nếu mô hình dự báo đúng 80 phường (bao gồm cả đoán đúng phường có dịch và đoán đúng phường không có dịch) thì Accuracy của mô hình là 80%.
+
+### Recall (Senstivity)
+
+Độ nhạy đo lường khả năng mô hình "bắt" được các trường hợp dương tính thật [@fawcett2006introduction]. Trong dịch tễ, đây thường là chỉ số quan trọng nhất cho việc cảnh báo sớm, vì việc bỏ sót một ca bệnh có thể dẫn đến bùng phát dịch đối với các bệnh có hệ số lây nhiễm cao như Sởi.
+
+$$Recall=\frac{TP}{TP+TN}$$
+
+**Ví dụ:** Trong hệ thống trí tuệ nhân tạo sàng lọc ca nhiễm COVID-19 qua ảnh X-quang, nếu thực tế có 100 bệnh nhân mắc bệnh, nhưng mô hình chỉ nhận diện được 85 người thì độ nhạy là 85%.
+
+### Specificity
+
+Độ đặc hiệu đo lường khả năng mô hình nhận diện đúng các trường hợp "không dịch" [@fawcett2006introduction]. Một mô hình có độ đặc hiệu cao sẽ giúp hạn chế tối đa các trường hợp cảnh báo giả. Trong y tế, điều này giúp tránh lãng phí nguồn lực chống dịch.
+
+$$Recall=\frac{TN}{TN+FP}$$
+
+**Ví dụ:** Sử dụng test nhanh để sàng lọc một loại virus mới. Nếu có 100 người thực sự khỏe mạnh, nhưng test lại cho rằng 5 người dương tính thì độ đặc hiệu là 95%.
+
+### Precision (Positive Predictive Value-PPV)
+
+Giá trị tiên đoán dương trả lời câu hỏi ***Khi mô hình phát tín hiệu cảnh báo có dịch, chúng ta có thể tin tưởng được bao nhiêu phần trăm?***. Nó bị kéo giảm nặng nề nếu mô hình tung ra quá nhiều cảnh báo giả [@fawcett2006introduction].
+
+$$Precision=\frac{TP}{TP+FP}$$
+
+**Ví dụ**: Nếu mô hình dự báo 10 chuyến bay nhập cảnh có nguy cơ cao, nhưng thực tế rà soát chỉ có 6 chuyến bay mang mầm bệnh thì Precision đạt 60%.
+
+### Negative Predictive Value - NPV
+
+Giá tri jtieen đoán âm trả lời câu hỏi ***Khi mô hình báo không dịch, chúng ta có thể tin tưởng được bao nhiêu phần trăm?*** Trong sàng lọc cộng đồng, nếu NPV thấp người được dự báo âm tính vẫn có nguy cơ mang mầm bệnh đi lây lan [fawcett2006introduction].
+
+$$NPV=\frac{TN}{TN+FN}$$
+
+### F1-Score
+
+Là chỉ số được tính từ Precision và Recall, được sử dụng để tìm điểm cân bằng giữa việc không bỏ sót ca bệnh và không báo động giả quá nhiều, đặc biệt khi dữ liệu mất cân bằng [@fawcett2006introduction].
+
+$$Recall=2\times\frac{Precision\times{Recall}}{Precision + Recall}$$
+
+**Ví dụ:**: Dự báo biến chứng nặng ở bệnh nhân tay chân miệng. Cần F1-Score cao để đảm bảo vừa bắt được ca nặng, vừa không chuyển nhầm ca nhẹ gây quá tải.
+
+```{=html}
+<div style="display: flex; flex-wrap: wrap; gap: 20px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f8f9fa;">
+  <div style="flex: 1; min-width: 250px;">
+    <h5 style="margin-top:0;">Confusion Matrix</h5>
+    <label><strong>TP</strong> TP: <span id="v_tp" style="color:#d62728; font-weight:bold;">40</span></label>
+    <input type="range" id="i_tp" min="0" max="100" value="40" style="width:100%" oninput="updateMetrics()">
+    
+    <label><strong>TN</strong> TN: <span id="v_tn" style="color:#2ca02c; font-weight:bold;">40</span></label>
+    <input type="range" id="i_tn" min="0" max="100" value="40" style="width:100%" oninput="updateMetrics()">
+    
+    <label><strong>FP</strong> FP: <span id="v_fp" style="color:#ff7f0e; font-weight:bold;">10</span></label>
+    <input type="range" id="i_fp" min="0" max="100" value="10" style="width:100%" oninput="updateMetrics()">
+    
+    <label><strong>FN</strong> FN: <span id="v_fn" style="color:#1f77b4; font-weight:bold;">10</span></label>
+    <input type="range" id="i_fn" min="0" max="100" value="10" style="width:100%" oninput="updateMetrics()">
+  </div>
+
+  <div style="flex: 2; min-width: 300px; display: flex; align-items: flex-end; justify-content: space-around; height: 220px; border-left: 2px dashed #ccc; padding-left: 10px;">
+    
+    <div style="display: flex; flex-direction: column; align-items: center; width: 15%;">
+      <span id="t_acc" style="font-size: 0.85em; margin-bottom: 5px; font-weight: bold;">80%</span>
+      <div style="width: 100%; height: 150px; background-color: #e9ecef; border-radius: 4px; position: relative; display: flex; align-items: flex-end;">
+        <div id="b_acc" style="width: 100%; height: 80%; background-color: #6c757d; border-radius: 4px; transition: height 0.3s;"></div>
+      </div>
+      <span style="font-size: 0.8em; margin-top: 5px;">Accuracy</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; width: 15%;">
+      <span id="t_rec" style="font-size: 0.85em; margin-bottom: 5px; font-weight: bold;">80%</span>
+      <div style="width: 100%; height: 150px; background-color: #e9ecef; border-radius: 4px; position: relative; display: flex; align-items: flex-end;">
+        <div id="b_rec" style="width: 100%; height: 80%; background-color: #d62728; border-radius: 4px; transition: height 0.3s;"></div>
+      </div>
+      <span style="font-size: 0.8em; margin-top: 5px;">Recall</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; width: 15%;">
+      <span id="t_spe" style="font-size: 0.85em; margin-bottom: 5px; font-weight: bold;">80%</span>
+      <div style="width: 100%; height: 150px; background-color: #e9ecef; border-radius: 4px; position: relative; display: flex; align-items: flex-end;">
+        <div id="b_spe" style="width: 100%; height: 80%; background-color: #2ca02c; border-radius: 4px; transition: height 0.3s;"></div>
+      </div>
+      <span style="font-size: 0.8em; margin-top: 5px;">Specific</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; width: 15%;">
+      <span id="t_pre" style="font-size: 0.85em; margin-bottom: 5px; font-weight: bold;">80%</span>
+      <div style="width: 100%; height: 150px; background-color: #e9ecef; border-radius: 4px; position: relative; display: flex; align-items: flex-end;">
+        <div id="b_pre" style="width: 100%; height: 80%; background-color: #ff7f0e; border-radius: 4px; transition: height 0.3s;"></div>
+      </div>
+      <span style="font-size: 0.8em; margin-top: 5px;">Precision</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; width: 15%;">
+      <span id="t_npv" style="font-size: 0.85em; margin-bottom: 5px; font-weight: bold;">80%</span>
+      <div style="width: 100%; height: 150px; background-color: #e9ecef; border-radius: 4px; position: relative; display: flex; align-items: flex-end;">
+        <div id="b_npv" style="width: 100%; height: 80%; background-color: #1f77b4; border-radius: 4px; transition: height 0.3s;"></div>
+      </div>
+      <span style="font-size: 0.8em; margin-top: 5px;">NPV</span>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; width: 15%;">
+      <span id="t_f1" style="font-size: 0.85em; margin-bottom: 5px; font-weight: bold;">80%</span>
+      <div style="width: 100%; height: 150px; background-color: #e9ecef; border-radius: 4px; position: relative; display: flex; align-items: flex-end;">
+        <div id="b_f1" style="width: 100%; height: 80%; background-color: #9467bd; border-radius: 4px; transition: height 0.3s;"></div>
+      </div>
+      <span style="font-size: 0.8em; margin-top: 5px;">F1-Score</span>
+    </div>
+
+  </div>
+
+  <script>
+    function updateMetrics() {
+      let tp = parseInt(document.getElementById('i_tp').value);
+      let tn = parseInt(document.getElementById('i_tn').value);
+      let fp = parseInt(document.getElementById('i_fp').value);
+      let fn = parseInt(document.getElementById('i_fn').value);
+      
+      document.getElementById('v_tp').innerText = tp;
+      document.getElementById('v_tn').innerText = tn;
+      document.getElementById('v_fp').innerText = fp;
+      document.getElementById('v_fn').innerText = fn;
+
+      let total = tp + tn + fp + fn;
+      let acc = total === 0 ? 0 : (tp + tn) / total;
+      let rec = (tp + fn) === 0 ? 0 : tp / (tp + fn);
+      let spe = (tn + fp) === 0 ? 0 : tn / (tn + fp);
+      let pre = (tp + fp) === 0 ? 0 : tp / (tp + fp);
+      let npv = (tn + fn) === 0 ? 0 : tn / (tn + fn);
+      let f1 = (pre + rec) === 0 ? 0 : 2 * (pre * rec) / (pre + rec);
+
+      const updateBar = (id, val) => {
+        let pct = (val * 100).toFixed(1);
+        document.getElementById('t_' + id).innerText = pct + '%';
+        document.getElementById('b_' + id).style.height = pct + '%';
+      };
+
+      updateBar('acc', acc);
+      updateBar('rec', rec);
+      updateBar('spe', spe);
+      updateBar('pre', pre);
+      updateBar('npv', npv);
+      updateBar('f1', f1);
+    }
+    updateMetrics(); // Initialize
+  </script>
+</div>
+```
+
+## Các chỉ số đánh giá dựa trên xác suất
+
+### ROC Curve
+
+ROC là đường cong biểu diễn tỷ lệ True Positive Rate (Recall) và False Positive Rate (1 - Specificity) ở mọi ngưỡng cắt (threshold) [@hosmer2013applied]. AUC là diện tích dưới đường cong ROC. Trên thực tế, giá trị AUC = 0.5 là đoán mò nên không có ý nghĩa, AUC = 1.0 là hoàn hảo nhưng thực tế thì không bao giờ có.
+
+$$AUC = \int_{0}^{1} TPR(FPR) \, d(FPR)$$
+
+Theo các tác giả Hosmer và Lemshow [@hosmer2013applied], thì AUC được phân thành các ngưỡng:
+
+* AUC = 0.5: Không có sự khác biệt (hên xui).
+
+* 0.5 < AUC < 0.7: Kém, không khác biệt nhiều so với hên xui.
+
+* 0.7 <= AUC < 0.8: Chấp nhận được.
+
+* 0.8 <= AUC < 0.9: Tốt.
+
+* AUC >= 0.9: Rất tốt.
+
+### Brier Score
+
+Đo lường sai số bình phương giữa xác suất dự báo và kết cục thực tế (1: Có dịch, 0: Không dịch). Brier Score dao động từ 0 đến 1, điểm càng thấp mô hình dự báo xác suất càng sát với thực tế [@steyerberg2019clinical].
+
+$$BS=\frac{1}{N}\sum_{i=1}^{N}(p_i-o_i)^2$$
+
+(Trong đó $p_i$ là xác suất, $o_i \in \{0, 1\}$ là kết cục thực tế).
+
+**Ví dụ:** Dự báo "Xác suất bùng dịch tả là 80%". Thực tế có bùng dịch ($o=1$). Sai số của lần dự báo này là $(0.80 - 1)^2 = 0.04$.
+
+```{=html}
+<div style="display: flex; flex-wrap: wrap; gap: 20px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #e3f2fd;">
+  <div style="flex: 1; min-width: 280px;">
+    <h5 style="margin-top:0; color:#0277bd;">Điều chỉnh xác suất dự báo bùng phát dịch</h5>
+    
+    <label>Khu vực 1 (Thực tế: <strong>Có dịch</strong>) - <span id="v_p1" style="font-weight:bold; color:#c62828;">80</span>%</label>
+    <input type="range" id="i_p1" min="0" max="100" value="80" style="width:100%" oninput="updateProb()">
+    
+    <label>Khu vực 2 (Thực tế: <strong>Có dịch</strong>) - <span id="v_p2" style="font-weight:bold; color:#c62828;">60</span>%</label>
+    <input type="range" id="i_p2" min="0" max="100" value="60" style="width:100%" oninput="updateProb()">
+    
+    <hr style="border: 0.5px solid #bbdefb;">
+    
+    <label>Khu vực 3 (Thực tế: <strong>Không dịch</strong>) - <span id="v_n1" style="font-weight:bold; color:#2e7d32;">40</span>%</label>
+    <input type="range" id="i_n1" min="0" max="100" value="40" style="width:100%" oninput="updateProb()">
+    
+    <label>Khu vực 4 (Thực tế: <strong>Không dịch</strong>) - <span id="v_n2" style="font-weight:bold; color:#2e7d32;">20</span>%</label>
+    <input type="range" id="i_n2" min="0" max="100" value="20" style="width:100%" oninput="updateProb()">
+  </div>
+
+  <div style="width: 120px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-left: 2px dashed #90caf9; padding-left: 15px;">
+    <span style="font-weight:bold; margin-bottom: 5px;">Brier Score</span>
+    <div style="width: 100%; height: 160px; background-color: #bbdefb; border-radius: 4px; position: relative; display: flex; align-items: flex-end;">
+      <div id="bar_brier" style="width: 100%; height: 10%; background-color: #d32f2f; border-radius: 4px; transition: height 0.3s;"></div>
+    </div>
+    <span id="res_brier" style="font-size: 1.1em; margin-top: 5px; color:#d32f2f; font-weight:bold;">0.100</span>
+    <span style="font-size: 0.75em; color:gray;">(Càng thấp càng tốt)</span>
+  </div>
+
+  <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 2px dashed #90caf9; padding-left: 15px;">
+    <span style="font-weight:bold; margin-bottom: 5px;">Đường cong ROC</span>
+    <svg width="160" height="160" style="border: 1px solid #ccc; background: white; border-bottom: 2px solid black; border-left: 2px solid black;">
+      <line x1="0" y1="160" x2="160" y2="0" stroke="#eee" stroke-dasharray="4"/>
+      <path id="roc_area" d="M 0 160 L 0 80 L 80 80 L 160 0 L 160 160 Z" fill="rgba(21, 101, 192, 0.2)"/>
+      <path id="roc_line" d="M 0 160 L 0 80 L 80 80 L 160 0" stroke="#1565c0" stroke-width="3" fill="none"/>
+    </svg>
+    <span style="font-size: 1.1em; margin-top: 10px; color:#1565c0; font-weight:bold;">AUC = <span id="res_auc">0.875</span></span>
+  </div>
+
+  <script>
+    function updateProb() {
+      let p1 = parseInt(document.getElementById('i_p1').value) / 100;
+      let p2 = parseInt(document.getElementById('i_p2').value) / 100;
+      let n1 = parseInt(document.getElementById('i_n1').value) / 100;
+      let n2 = parseInt(document.getElementById('i_n2').value) / 100;
+
+      document.getElementById('v_p1').innerText = (p1*100).toFixed(0);
+      document.getElementById('v_p2').innerText = (p2*100).toFixed(0);
+      document.getElementById('v_n1').innerText = (n1*100).toFixed(0);
+      document.getElementById('v_n2').innerText = (n2*100).toFixed(0);
+
+      let brier = (Math.pow(p1 - 1, 2) + Math.pow(p2 - 1, 2) + Math.pow(n1 - 0, 2) + Math.pow(n2 - 0, 2)) / 4;
+      document.getElementById('res_brier').innerText = brier.toFixed(3);
+      // Brier cao nhất là 1, nên chiều cao biểu đồ % = brier * 100
+      document.getElementById('bar_brier').style.height = (brier * 100) + '%';
+
+      // --- Tính và Vẽ ROC/AUC ---
+      let pts = [
+        {p: p1, y: 1}, {p: p2, y: 1},
+        {p: n1, y: 0}, {p: n2, y: 0}
+      ];
+      let thresholds = [...new Set(pts.map(d => d.p))].sort((a, b) => b - a);
+      
+      let path = "M 0 160 ";
+      let area = "M 0 160 ";
+      let auc_val = 0;
+      let last_fpr = 0;
+      let last_tpr = 0;
+
+      for(let t of thresholds) {
+        let tp = pts.filter(d => d.p >= t && d.y === 1).length;
+        let fp = pts.filter(d => d.p >= t && d.y === 0).length;
+        let tpr = tp / 2; // Tổng số khu vực CÓ DỊCH thực tế là 2
+        let fpr = fp / 2; // Tổng số khu vực KHÔNG DỊCH thực tế là 2
+        
+        // Vẽ đồ thị svg
+        let svgX = fpr * 160;
+        let svgY = 160 - (tpr * 160);
+        path += `L ${svgX} ${svgY} `;
+        area += `L ${svgX} ${svgY} `;
+      }
+      
+      // Đóng đường đồ thị nếu chưa tới điểm (1,1)
+      path += "L 160 0";
+      area += "L 160 0 L 160 160 Z";
+
+      document.getElementById('roc_line').setAttribute('d', path);
+      document.getElementById('roc_area').setAttribute('d', area);
+
+      // Tính chính xác giá trị AUC (so sánh chéo các cặp)
+      for(let p_pos of [p1, p2]) {
+        for(let p_neg of [n1, n2]) {
+          if(p_pos > p_neg) auc_val += 1;
+          else if(p_pos === p_neg) auc_val += 0.5;
+        }
+      }
+      auc_val = auc_val / 4; 
+      document.getElementById('res_auc').innerText = auc_val.toFixed(3);
+    }
+    updateProb(); 
+  </script>
+</div>
+```
+
+## Thực hành
+
+```{r}
+#| code-fold: true
+
+df <- tibble(
+  obs = factor(c(1, 0, 0, 1, 0, 0, 1, 0, 0, 0)),
+  pred = factor(c(1, 0, 0, 0, 0, 1, 1, 0, 0, 0))
+)
+
+acc <- yardstick::accuracy(df, truth = obs, estimate = pred)
+recall <- yardstick::sens(df, truth = obs, estimate = pred)
+spec <- yardstick::spec(df, truth = obs, estimate = pred)
+precision <- yardstick::ppv(df, truth = obs, estimate = pred)
+npv <- yardstick::npv(df, truth = obs, estimate = pred)
+f1_score <- yardstick::f_meas(df, truth = obs, estimate = pred)
+
+data.frame(acc$.estimate, recall$.estimate, spec$.estimate, precision$.estimate, npv$.estimate, f1_score$.estimate) %>% 
+  rename("Accuracy" = acc..estimate,
+         "Recall" = recall..estimate,
+         "Specificity" = spec..estimate,
+         "Precision" = precision..estimate,
+         "NPV" = npv..estimate,
+         "F1-Score" = f1_score..estimate) %>% 
+  knitr::kable()
+```
+
+```{r}
+#| code-fold: true
+obs_p <- c(1, 0, 1, 1, 0, 0, 0, 1, 1, 0)
+pred_p <- c(0.9, 0.1, 0.8, 0.4, 0.3, 0.5, 0.4, 0.6, 0.7, 0.7)
+brier_score <- mean((pred_p - obs_p)^2)
+print(paste0("Brier score = ",brier_score))
+
+roc_obj <- roc(obs_p, pred_p, quiet = TRUE)
+auc_val <- round(auc(roc_obj), 3)
+ci_vals <- ci.auc(roc_obj)
+ci_lower <- round(ci_vals[1], 3)
+ci_upper <- round(ci_vals[3], 3)
+print(paste0("AUC = ", auc_val, " (95% CIs: ", ci_lower, " - ", ci_upper, ")"))
+```
+
+```{=html}
+<div style="overflow-x: auto; margin-top: 20px;">
+  <table style="width: 100%; border-collapse: collapse; font-family: sans-serif; box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden;">
+    <thead>
+      <tr style="background-color: #0277bd; color: white; text-align: left;">
+        <th style="padding: 15px; width: 30%;">Chỉ số</th>
+        <th style="padding: 15px; width: 70%;">Ý nghĩa</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="background-color: #f8f9fa; border-bottom: 1px solid #eeeeee;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #black;">Accuracy</td>
+        <td style="padding: 12px 15px;">Tỷ lệ dự báo đúng tổng thể (đoán đúng vùng có dịch và đoán đúng vùng an toàn).</td>
+      </tr>
+      <tr style="background-color: #ffffff; border-bottom: 1px solid #eeeeee;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #black;">Recall (Sensitivity)</td>
+        <td style="padding: 12px 15px;">Khả năng bắt trúng các đợt bùng phát, hạn chế tối đa việc bỏ lọt ổ dịch.</td>
+      </tr>
+      <tr style="background-color: #f8f9fa; border-bottom: 1px solid #eeeeee;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #black;">Specificity</td>
+        <td style="padding: 12px 15px;">Khả năng nhận diện đúng các khu vực an toàn, hạn chế các báo động giả.</td>
+      </tr>
+      <tr style="background-color: #ffffff; border-bottom: 1px solid #eeeeee;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #black;">Precision (PPV)</td>
+        <td style="padding: 12px 15px;">Sự tự tin khi hệ thống phát tín hiệu cảnh báo (báo có dịch bao nhiêu lần thì trúng bấy nhiêu).</td>
+      </tr>
+      <tr style="background-color: #f8f9fa; border-bottom: 1px solid #eeeeee;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #black;">NPV</td>
+        <td style="padding: 12px 15px;">Sự tự tin khi hệ thống dự báo "không có dịch".</td>
+      </tr>
+      <tr style="background-color: #ffffff; border-bottom: 1px solid #eeeeee;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #black;">F1-Score</td>
+        <td style="padding: 12px 15px;">Trung bình điều hòa, điểm cân bằng giữa việc phát hiện ổ dịch (Recall) và tránh báo động nhầm (Precision).</td>
+      </tr>
+      <tr style="background-color: #f8f9fa; border-bottom: 1px solid #eeeeee;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #black;">Brier Score</td>
+        <td style="padding: 12px 15px;">Đo lường mức độ sai lệch của con số xác suất dự báo bùng dịch.</td>
+      </tr>
+      <tr style="background-color: #ffffff;">
+        <td style="padding: 12px 15px; font-weight: bold; color: #black;">AUC</td>
+        <td style="padding: 12px 15px;">Năng lực phân tách và xếp hạng mức độ rủi ro giữa vùng sắp có dịch và vùng an toàn.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+# Các chỉ số đánh giá cho kết cục định lượng (Regression)
+
+## Đo lường sai số tuyệt đối và bình phương
+
+### Mean Absolute Error - MAE
+
+Sai số tuyệt đối trung bình là giá trị trung bình tuyệt đối của sự chênh lệch giữa dự báo và thực tế. Đây là chỉ số trực quan nhất vì nó có cùng đơn vị với biến mục tiêu. Nó cho biết, trung bình mỗi lần dự đoán, mô hình của bạn bị lệch so với thực tế bao nhiêu đơn vị. MAE khá "lành tính" và không bị khuếch đại bởi các giá trị ngoại lai (outliers) [@hyndman2018forecasting].
+
+$$MAE=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y}_i|$$
+
+**Ví dụ:** Mô hình dự báo số ca Sởi cho 22 quận/huyện. Nếu MAE = 15 ca, nghĩa là trung bình cứ ở mỗi quận, con số dự báo của bạn đang lệch 15 ca so với số liệu ghi nhận thực tế trên hệ thống giám sát.
+
+### Root Mean Squared Error - RMSE
+
+Căn bậc hai sai số toàn phương trung bình là giá trị căn bậc hai của MSE để đưa chỉ số sai số về lại cùng đơn vị đo lường ban đầu. Nó mang đầy đủ đặc tính của MSE nhưng dễ diễn giải hơn [@hyndman2018forecasting].
+
+$$RMSE=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}$$
+
+**Ví dụ:** Giả sử dự báo sai 2 ca ở 10 quận, RMSE thường nhỏ, nhưng nếu dự báo sai 20 ca ở 1 quận, RMSE sẽ rất lớn.
+
+## Đo lường sai số phần trăm
+
+### Mean Percentage Error - MPE
+
+Sai số phần trăm trung bình cho biết sai số tính bằng phần trăm nhưng giữ nguyên dấu (không lấy trị tuyệt đối). Chỉ số này chẩn đoán xem hệ thống có bị sai lệch (bias) hay không, theo dõi xu hướng dự báo quá cao (over-forecasting, MPE âm) hay dự báo quá thấp (under-forecasting, MPE dương) [@hyndman2018forecasting].
+
+$$MPE=\frac{100\%}{n}\sum_{i=1}^{n}\frac{y_i-\hat{y}_i}{y_i}$$
+
+**Ví dụ:** Nếu MPE = +20% thì mô hình đang gặp tình trạng "dự báo thiếu" (Under-forecast), thực tế có 100 ca mà nó hay đoán 80 ca. Nhưng nếu MPE = -20% thì thực tế 100 ca mà nó toàn rú lên 120 ca (Over-forecast). MPE gần 0% không có nghĩa là mô hình dự báo đúng, mà chỉ là tổng số lần dự báo thiếu và đoán quá mức đang bằng nhau.
+
+### Mean Absolute Percentage Error - MAPE
+
+Sai số phần trăm tuyệt đối trung bình đo lường sai số bằng phần trăm tuyệt đối, giống với MPE nhưng thêm trị tuyệt đối [@hyndman2018forecasting; @chai2014root].
+
+$$MAPE=\frac{100\%}{n}\sum_{i=1}^{n}\left|\frac{y_i-\hat{y}_i}{y_i}\right|$$
+
+**Ví dụ:** Vì có trị tuyệt tối nên nếu MAPE = 10% nghĩa là dù ở quận 100 ca hay 50 ca, thì cứ cộng trừ khoảng 10% sai số để dự trù nguồn lực.
+
+## Mức độ phù hợp của mô hình
+
+R-squared ($R^2$) là hệ số xác định cho biết tỷ lệ phương sai của biến mục tiêu được giải thích bởi mô hình [@chicco2021coefficient]. Hệ số $R^2$ có thể được sử dụng cho cả kết cục định lượng và định tính.
+
+::: callout-tip
+Hệ số $R^2$ có thể nằm trong khoảng giá trị (−∞, 1].
+:::
+
+::: callout-caution
+Nếu $R^2$ < 0 thì có thể:
+
+* Chọn sai mô hình: Ví dụ đợt bùng phát COVID-19 tăng trưởng theo hàm mũ (exponential) nhưng mô hình lại áp dụng một đường thẳng tuyến tính (linear) để fit dữ liệu.
+
+* Mô hình bị overfitting: vấn đề cần lưu ý khi sử dụng mô hình ML, nếu việc train quá mức dẫn đến dự báo trên tệp dữ liệu mới hoàn toàn sai nên $R^2$ có thể tiến tới âm vô cực.
+:::
+
+$$R^2=1-\frac{RSS}{TSS}=\frac{\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}{\sum_{i=1}^{n}(y_i-\bar{y})^2}$$
+
+Trong đó:$TSS$ (Total Sum of Squares) là sai số bằng giá trị trung bình của dữ liệu thực tế (một đường ngang horizontal line). $RSS$ (Residual Sum of Squares) là sai số của cái mô hình dự báo xây dựng.
+
+**Ví dụ:** Nghiên cứu tác động của mật độ dân số, nhiệt độ và lượng mưa đến số ca mắc sởi. Nếu tính ra $R^2 = 0.75$, ta có thể khẳng định 3 yếu tố này giải thích được 75% lý do số ca mắc tăng/giảm, 25% còn lại do các yếu tố ngẫu nhiên khác.
+
+```{=html}
+<div style="display: flex; flex-wrap: wrap; gap: 20px; border: 1px solid #ddd; padding: 20px; border-radius: 8px; background-color: #f8f9fa;">
+  
+  <div style="flex: 1; min-width: 250px;">
+    <h5 style="margin-top:0; color:#0277bd;">Điều chỉnh Kịch bản Dự báo</h5>
+    
+    <label><strong>1. Thiên lệch (Bias):</strong> Mô hình đang đoán lố hay hụt?</label>
+    <input type="range" id="macro_bias" min="-30" max="30" value="0" style="width:100%" oninput="updateReg()">
+    <div style="display:flex; justify-content:space-between; font-size:0.75em; color:gray; margin-bottom: 15px;">
+      <span>Lố (Over)</span><span>Chuẩn</span><span>Hụt (Under)</span>
+    </div>
+    
+    <label><strong>2. Độ nhiễu (Noise):</strong> Mô hình dự báo phân tán lộn xộn?</label>
+    <input type="range" id="macro_noise" min="0" max="40" value="5" style="width:100%" oninput="updateReg()">
+    <div style="display:flex; justify-content:space-between; font-size:0.75em; color:gray; margin-bottom: 15px;">
+      <span>Bám sát thực tế</span><span>Sai số cao</span>
+    </div>
+    
+    <label><strong>3. Outlier đột biến:</strong> Đoán trật lất ở 1 ổ dịch lớn!</label>
+    <input type="range" id="macro_outlier" min="0" max="100" value="0" style="width:100%" oninput="updateReg()">
+    <div style="display:flex; justify-content:space-between; font-size:0.75em; color:gray;">
+      <span>Bình thường</span><span>Sai thảm họa 1 quận</span>
+    </div>
+  </div>
+
+  <div style="width: 180px; display: flex; flex-direction: column; justify-content: center; border-left: 2px dashed #ccc; padding-left: 15px;">
+    <h5 style="margin-top:0;">Chỉ số mô hình</h5>
+    
+    <div style="margin-bottom: 8px;">
+      <span style="display:inline-block; width: 60px; font-weight:bold;">MAE:</span> 
+      <span id="res_mae" style="color:#2ca02c; font-weight:bold; font-size:1.1em;">0.0</span> <span style="font-size:0.8em">ca</span>
+    </div>
+    
+    <div style="margin-bottom: 8px;">
+      <span style="display:inline-block; width: 60px; font-weight:bold;">RMSE:</span> 
+      <span id="res_rmse" style="color:#d62728; font-weight:bold; font-size:1.1em;">0.0</span> <span style="font-size:0.8em">ca</span>
+    </div>
+    <hr style="border: 0.5px solid #ddd; width: 100%;">
+    <div style="margin-bottom: 8px;">
+      <span style="display:inline-block; width: 60px; font-weight:bold;">MAPE:</span> 
+      <span id="res_mape" style="color:#ff7f0e; font-weight:bold; font-size:1.1em;">0.0</span> %
+    </div>
+
+    <div style="margin-bottom: 8px;">
+      <span style="display:inline-block; width: 60px; font-weight:bold;">MPE:</span> 
+      <span id="res_mpe" style="color:#9467bd; font-weight:bold; font-size:1.1em;">0.0</span> %
+      <div style="font-size:0.7em; color:gray; line-height: 1.2;" id="txt_mpe">(Cân bằng)</div>
+    </div>
+    <hr style="border: 0.5px solid #ddd; width: 100%;">
+    <div>
+      <span style="display:inline-block; width: 60px; font-weight:bold;">R²:</span> 
+      <span id="res_r2" style="color:#1565c0; font-weight:bold; font-size:1.1em;">100.0</span> %
+    </div>
+  </div>
+
+  <div style="flex: 1.5; min-width: 260px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; border-left: 2px dashed #ccc; padding-left: 15px;">
+    
+    <div style="position: relative; width: 260px; height: 250px; margin-top: 10px;">
+      <div style="position: absolute; top: 100px; left: -25px; transform: rotate(-90deg); font-weight: bold; font-size: 0.85em; color: #333;">Dự báo (Predicted)</div>
+      
+      <div style="position: absolute; bottom: 0px; left: 80px; font-weight: bold; font-size: 0.85em; color: #333;">Thực tế (Actual)</div>
+      
+      <svg width="220" height="220" style="position: absolute; top: 0px; left: 30px; border-bottom: 2px solid black; border-left: 2px solid black; background: white;">
+        <line x1="0" y1="220" x2="220" y2="0" stroke="#2ca02c" stroke-dasharray="4" stroke-width="2"/>
+        
+        <line id="fit_line" x1="0" y1="0" x2="0" y2="0" stroke="#ff7f0e" stroke-width="2.5"/>
+        
+        <g id="plot_points"></g>
+      </svg>
+    </div>
+
+    <div style="display: flex; justify-content: center; gap: 15px; margin-top: 5px; font-size: 0.8em; font-weight: bold;">
+      <div><span style="display:inline-block; width:15px; border-top:2px dashed #2ca02c; vertical-align:middle; margin-right:5px;"></span>y = x (Hoàn hảo)</div>
+      <div><span style="display:inline-block; width:15px; border-top:2px solid #ff7f0e; vertical-align:middle; margin-right:5px;"></span>Đường Mô hình</div>
+    </div>
+
+  </div>
+
+  <script>
+    // Dữ liệu thực tế cố định: 22 quận/huyện
+    const y_act = [];
+    for(let i = 1; i <= 22; i++) {
+      y_act.push(i * 5 + 5); 
+    }
+    const random_factors = [0.2, -0.5, 0.8, -0.1, 0.9, -0.7, 0.3, -0.9, 0.4, -0.2, 0.6, -0.8, 0.1, -0.4, 0.7, -0.6, 0.5, -0.3, 0.85, -0.15, 0.45, -0.55];
+
+    function updateReg() {
+      let bias = parseInt(document.getElementById('macro_bias').value); 
+      let noise = parseInt(document.getElementById('macro_noise').value);
+      let outlier = parseInt(document.getElementById('macro_outlier').value);
+
+      const n = y_act.length;
+      let y_pred = [];
+      
+      // Biến cho Linear Regression tính đường fit
+      let sum_x = 0, sum_y = 0, sum_xy = 0, sum_x2 = 0;
+
+      for(let i = 0; i < n; i++) {
+        let p = y_act[i] - bias + (random_factors[i] * noise);
+        if (i === 21) { p = p - outlier; }
+        if (p < 0) p = 0;
+        y_pred.push(p);
+
+        // Cộng dồn để tính đường fit (y = a + bx)
+        sum_x += y_act[i];
+        sum_y += p;
+        sum_xy += (y_act[i] * p);
+        sum_x2 += (y_act[i] * y_act[i]);
+      }
+
+      // --- Tính Hồi quy tuyến tính (Linear Regression Fit) ---
+      let b_slope = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x);
+      let a_intercept = (sum_y - b_slope * sum_x) / n;
+
+      // --- Tính các chỉ số sai số ---
+      let sum_abs_err = 0, sum_sq_err = 0, sum_abs_pct_err = 0, sum_pct_err = 0;
+      let mean_act = sum_x / n;
+      let tss = 0; 
+
+      for(let i = 0; i < n; i++) {
+        let err = y_act[i] - y_pred[i]; 
+        sum_abs_err += Math.abs(err);
+        sum_sq_err += Math.pow(err, 2);
+        sum_abs_pct_err += Math.abs(err / y_act[i]);
+        sum_pct_err += (err / y_act[i]);
+        tss += Math.pow(y_act[i] - mean_act, 2);
+      }
+
+      let mae = sum_abs_err / n;
+      let rmse = Math.sqrt(sum_sq_err / n);
+      let mape = (sum_abs_pct_err / n) * 100;
+      let mpe = (sum_pct_err / n) * 100;
+      let r2 = 1 - (sum_sq_err / tss);
+
+      // Cập nhật text hiển thị
+      document.getElementById('res_mae').innerText = mae.toFixed(1);
+      document.getElementById('res_rmse').innerText = rmse.toFixed(1);
+      document.getElementById('res_mape').innerText = mape.toFixed(1);
+      
+      let mpe_text = mpe > 2 ? "(Đoán HỤT: Dự báo < Thực tế)" : (mpe < -2 ? "(Đoán LỐ: Dự báo > Thực tế)" : "(Mô hình khá cân bằng)");
+      document.getElementById('res_mpe').innerText = mpe.toFixed(1);
+      document.getElementById('txt_mpe').innerText = mpe_text;
+      
+      let r2_pct = r2 * 100;
+      if (r2_pct < 0) {
+        document.getElementById('res_r2').innerHTML = `<span style="color:#d62728">${r2_pct.toFixed(1)}% (Mô hình vỡ)</span>`;
+      } else {
+        document.getElementById('res_r2').innerHTML = r2_pct.toFixed(1) + " %";
+      }
+
+      // --- Vẽ SVG Scatter Plot & Line ---
+      let scale = 220 / 140; // Max dữ liệu khoảng 140
+      let plot_html = "";
+      
+      // Vẽ 22 điểm
+      for(let i=0; i < n; i++) {
+        let cx = y_act[i] * scale;
+        let cy = 220 - (y_pred[i] * scale);
+        plot_html += `<circle cx="${cx}" cy="${cy}" r="4" fill="#1f77b4" stroke="white" stroke-width="1" opacity="0.8"/>`;
+      }
+      document.getElementById('plot_points').innerHTML = plot_html;
+
+      // Cập nhật tọa độ cho đường mô hình (Fit line)
+      // Chạy từ x=0 đến x=140
+      let x_start = 0;
+      let y_start = a_intercept + b_slope * x_start;
+      let x_end = 140;
+      let y_end = a_intercept + b_slope * x_end;
+
+      document.getElementById('fit_line').setAttribute('x1', x_start * scale);
+      document.getElementById('fit_line').setAttribute('y1', 220 - (y_start * scale));
+      document.getElementById('fit_line').setAttribute('x2', x_end * scale);
+      document.getElementById('fit_line').setAttribute('y2', 220 - (y_end * scale));
+    }
+    
+    updateReg(); // Khởi tạo lần đầu
+  </script>
+</div>
+```
+
+## Thực hành
+
+```{r}
+#| code-fold: true
+df <- data.frame(
+  obs = c(15, 20, 25, 30, 40),
+  pred  = c(12, 22, 23, 31, 35)
+)
+
+mae  <- yardstick::mae(df, obs, pred)
+rmse <- yardstick::rmse(df, obs, pred)
+mpe <- yardstick::mpe(df, obs, pred)
+mape <- yardstick::mape(df, obs, pred)
+r2 <- yardstick::rsq(df, obs, pred)
+
+results <- data.frame(
+  Index = c("MAE", "RMSE", "MPE", "MAPE", "R-squared"),
+  Value = c(mae$.estimate, rmse$.estimate, mpe$.estimate, mape$.estimate, r2$.estimate)
+)
+
+results$Value <- round(results$Value, 2)
+
+knitr::kable(results)
+```
+
+```{=html}
+<div style="overflow-x: auto; margin-top: 20px;">
+<table style="width: 100%; border-collapse: collapse; font-family: sans-serif; box-shadow: 0 4px 8px rgba(0,0,0,0.05); border-radius: 8px; overflow: hidden;">
+<thead>
+<tr style="background-color: #e65100; color: white; text-align: left;">
+<th style="padding: 15px; width: 15%;">Chỉ số</th>
+<th style="padding: 15px; width: 35%;">Ý nghĩa</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background-color: #fff3e0; border-bottom: 1px solid #eeeeee;">
+<td style="padding: 12px 15px; font-weight: bold; color: #black;">MAE</td>
+<td style="padding: 12px 15px;">Sai số trung bình mang cùng đơn vị đo lường thực tế, ít bị lệch bởi ca dị biệt.</td>
+</tr>
+<tr style="background-color: #ffffff; border-bottom: 1px solid #eeeeee;">
+<td style="padding: 12px 15px; font-weight: bold; color: #black;">MSE</td>
+<td style="padding: 12px 15px;">Phạt rất nặng các lần dự báo sai lệch quá lớn. Đơn vị bị bình phương.</td>
+</tr>
+<tr style="background-color: #fff3e0; border-bottom: 1px solid #eeeeee;">
+<td style="padding: 12px 15px; font-weight: bold; color: #black;">RMSE</td>
+<td style="padding: 12px 15px;">Giữ nguyên đặc tính phạt lỗi lớn của MSE nhưng đưa về lại đơn vị thực tế.</td>
+</tr>
+<tr style="background-color: #ffffff; border-bottom: 1px solid #eeeeee;">
+<td style="padding: 12px 15px; font-weight: bold; color: #black;">MPE</td>
+<td style="padding: 12px 15px;">Đo lường sự thiên lệch (Bias) bằng %. Biết được mô hình hay đoán vống hay đoán hụt.</td>
+</tr>
+<tr style="background-color: #fff3e0; border-bottom: 1px solid #eeeeee;">
+<td style="padding: 12px 15px; font-weight: bold; color: #black;">MAPE</td>
+<td style="padding: 12px 15px;">Sai số quy đổi ra tỷ lệ phần trăm (%), không quan tâm đến quy mô dữ liệu lớn nhỏ.</td>
+</tr>
+<tr style="background-color: #ffffff;">
+<td style="padding: 12px 15px; font-weight: bold; color: #black;">R-squared</td>
+<td style="padding: 12px 15px;">Tỷ lệ biến thiên của dịch bệnh được giải thích bởi các yếu tố đầu vào.</td>
+</tr>
+</tbody>
+</table>
+</div>
+```
+
