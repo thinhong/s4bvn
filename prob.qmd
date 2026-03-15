@@ -1880,15 +1880,15 @@ viewof probSampling = {
   popHeader.append(popTitle, popLegend);
 
   const popSvg = d3.create("svg").attr("viewBox",[0,0,gridW,gridH])
-    .style("width","100%").style("border-radius","10px").style("background","#FAFBFD");
+    .style("width","100%").style("height","auto").style("border-radius","10px").style("background","#FAFBFD");
 
   // Sequence zone divider and label
   popSvg.append("line")
     .attr("x1", 10).attr("y1", popZoneH + 10).attr("x2", gridW-10).attr("y2", popZoneH + 10)
     .attr("stroke", C.light).attr("stroke-width", 1).attr("stroke-dasharray","6,4");
   popSvg.append("text")
-    .attr("x", 14).attr("y", popZoneH + 24)
-    .attr("fill", C.sub).attr("font-size","10px").attr("font-weight","700")
+    .attr("x", 14).attr("y", popZoneH + 26)
+    .attr("fill", C.sub).attr("font-size","15px").attr("font-weight","700")
     .attr("font-family","Inter,sans-serif").text("Đã chọn →");
 
   popCard.append(popHeader, popSvg.node());
@@ -1935,31 +1935,31 @@ viewof probSampling = {
   barTitle.textContent = "Số lượng mẫu";
   const barChartW = 800, barChartH = 90;
   const barSvg = d3.create("svg").attr("viewBox",[0,0,barChartW,barChartH])
-    .style("width","100%").style("overflow","visible");
+    .style("width","100%").style("height","auto").style("overflow","visible");
   barCard.append(barTitle, barSvg.node());
   outer.appendChild(barCard);
 
   // Persistent bar elements
-  const labelW=90, barH_=28, barGap=14, chartBarW=barChartW-labelW-60;
+  const labelW=110, barH_=34, barGap=18, chartBarW=barChartW-labelW-60;
   const bY1=10, bY2=bY1+barH_+barGap;
-  barSvg.append("text").attr("x",labelW-8).attr("y",bY1+barH_/2+1)
+  barSvg.append("text").attr("x",labelW-10).attr("y",bY1+barH_/2+1)
     .attr("text-anchor","end").attr("dominant-baseline","middle")
-    .attr("fill",C.pos).attr("font-size","13px").attr("font-weight","700")
+    .attr("fill",C.pos).attr("font-size","18px").attr("font-weight","700")
     .attr("font-family","Inter,sans-serif").text("Mắc bệnh");
   const barD = barSvg.append("rect").attr("x",labelW).attr("y",bY1)
-    .attr("width",0).attr("height",barH_).attr("rx",6).attr("fill",C.pos).attr("opacity",0.85);
-  const barDText = barSvg.append("text").attr("x",labelW+8).attr("y",bY1+barH_/2+1)
+    .attr("width",0).attr("height",barH_).attr("rx",8).attr("fill",C.pos).attr("opacity",0.85);
+  const barDText = barSvg.append("text").attr("x",labelW+10).attr("y",bY1+barH_/2+1)
     .attr("dominant-baseline","middle").attr("fill",C.txt)
-    .attr("font-size","14px").attr("font-weight","800").attr("font-family",mono).text("0");
-  barSvg.append("text").attr("x",labelW-8).attr("y",bY2+barH_/2+1)
+    .attr("font-size","18px").attr("font-weight","800").attr("font-family",mono).text("0");
+  barSvg.append("text").attr("x",labelW-10).attr("y",bY2+barH_/2+1)
     .attr("text-anchor","end").attr("dominant-baseline","middle")
-    .attr("fill",C.neg).attr("font-size","13px").attr("font-weight","700")
+    .attr("fill",C.neg).attr("font-size","18px").attr("font-weight","700")
     .attr("font-family","Inter,sans-serif").text("Khỏe mạnh");
   const barHRect = barSvg.append("rect").attr("x",labelW).attr("y",bY2)
-    .attr("width",0).attr("height",barH_).attr("rx",6).attr("fill",C.neg).attr("opacity",0.85);
-  const barHText = barSvg.append("text").attr("x",labelW+8).attr("y",bY2+barH_/2+1)
+    .attr("width",0).attr("height",barH_).attr("rx",8).attr("fill",C.neg).attr("opacity",0.85);
+  const barHText = barSvg.append("text").attr("x",labelW+10).attr("y",bY2+barH_/2+1)
     .attr("dominant-baseline","middle").attr("fill",C.txt)
-    .attr("font-size","14px").attr("font-weight","800").attr("font-family",mono).text("0");
+    .attr("font-size","18px").attr("font-weight","800").attr("font-family",mono).text("0");
 
   // ═══════════════════ MULTIPLICATION CARD ═══════════════════
   const multCard = document.createElement("div");
