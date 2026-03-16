@@ -10,6 +10,18 @@ import { createButton, createSlider, injectStyle } from "./_slider.js"
 d3 = require("d3@7")
 ```
 
+::: {.callout-tip}
+
+## Mục tiêu
+
+- Hiểu các khái niệm và có thể chuyển một phép thử ngẫu nhiên từ ngôn ngữ nói sang biểu diễn bằng tập hợp toán học
+- Hiểu khái niệm và cách tính xác suất có điều kiện
+- Nắm rõ mối quan hệ giữa các biến cố: xung khắc, phụ thuộc, độc lập
+- Biết cách áp dụng các phép tính xác suất trong các vấn đề thực tế
+- Hiểu chính xác khái niệm biến ngẫu nhiên
+
+:::
+
 ## Nguồn gốc
 
 Lý thuyết xác suất ra đời để giải quyết một vấn đề trong cờ bạc. Vấn đề cụ thể khai sinh ra lĩnh vực này được gọi là "Bài toán Chia điểm" (Problem of Points).
@@ -89,9 +101,9 @@ Là một thử nghiệm mà chúng ta không biết trước kết quả cho đ
 
 Ví dụ: tung đồng xu (không biết sẽ ra mặt sấp hay mặt ngửa), làm xét nghiệm cho một người (không biết là âm tính hay dương tính)
 
-### Không gian mẫu (sample space $\Omega$)
+### Không gian mẫu (sample space)
 
-Là **tập hợp** chứa **tất cả** các kết quả có thể xảy ra của một phép thử ngẫu nhiên, mỗi kết quả liệt kê đúng một lần duy nhất.
+Là **tập hợp** chứa **tất cả** các kết quả có thể xảy ra của một phép thử ngẫu nhiên, mỗi kết quả liệt kê đúng một lần duy nhất. Không gian mẫu thường được kí hiệu là $\Omega$.
 
 Ví dụ: không gian mẫu của tung đồng xu là $\Omega = \{ \text{sấp}, \text{ngửa} \}$
 
@@ -1279,11 +1291,11 @@ viewof venn = (() => {
 
 Xác suất để các biến cố cùng xảy ra đồng thời hoặc nối tiếp nhau ($A$ và $B$).
 
-$$P(A \cap B) = P(A) \times P(B|A)$$
+$$\mathbb{P}(A \cap B) = \mathbb{P}(A) \times \mathbb{P}(B|A)$$
 
 (Xác suất $A$ xảy ra, nhân với xác suất $B$ xảy ra với điều kiện $A$ đã xảy ra).
 
-Khi hai biến cố là **độc lập** thì $P(B|A) = P(B)$:
+Khi hai biến cố là **độc lập** thì $\mathbb{P}(B|A) = \mathbb{P}(B)$:
 
 $$\mathbb{P}(A \cap B) = \mathbb{P}(A) \times \mathbb{P}(B)$$
 
@@ -2364,7 +2376,7 @@ Cái tên "Biến ngẫu nhiên" là một thuật ngữ lịch sử rất dễ 
 Biến ngẫu nhiên một hàm số (function) có nhiệm vụ gán một **số thực** cho mỗi điểm mẫu trong không gian mẫu của một phép thử ngẫu nhiên.
 
 $$X: \Omega \rightarrow \mathbb{R}$$
-## Đo lường biến ngẫu nhiên
+**Đo lường biến ngẫu nhiên**
 
 Biến ngẫu nhiên được chia thành 4 loại dựa theo loại phép tính được thực hiện mà không làm sai lệch ý nghĩa của dữ liệu [@stevens1946;@daniel2018].
 
