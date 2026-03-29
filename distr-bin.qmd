@@ -1,6 +1,7 @@
 ---
 title: "Phân phối nhị thức"
 format: html
+draft: true
 ---
 
 ```{ojs}

@@ -1,6 +1,7 @@
 ---
 title: "Phân phối log-normal"
 format: html
+draft: true
 ---
 
 ### Biến tỉ số

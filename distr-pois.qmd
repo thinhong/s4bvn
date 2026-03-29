@@ -1,6 +1,7 @@
 ---
 title: "Phân phối Poisson"
 format: html
+draft: true
 ---
 
 ```{ojs}

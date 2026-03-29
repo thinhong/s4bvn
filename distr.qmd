@@ -12,28 +12,1639 @@ d3 = require("d3@7")
 
 ## Định nghĩa
 
-Phân phối xác suất (probability distribution) là một hàm số (function) thể hiện xác suất của mọi biến cố (tập hợp con) của không gian mẫu $\Omega$.
+Phân phối xác suất (probability distribution) là một hàm số (function) thể hiện xác suất của mọi biến cố (tập hợp con) nằm trong không gian mẫu $\Omega$.
 
-Phân phối xác suất bắt buộc phải thỏa 3 điều kiện sau:
+Phân phối xác suất thỏa 3 điều kiện sau:
 
 -   $\mathbb{P}(\Omega) = 1$
 
 -   $0 \leq \mathbb{P}(A) \leq 1$ với mọi biến cố $A$
 
--   Nếu các biến số $A_1$, $A_2$, ..., $A_n$ xung khắc, thì:
+-   Nếu các biến cố $A_1$, $A_2$, ..., $A_n$ xung khắc, thì:
 
 $$\mathbb{P}(A_1 \cup A_2 \cup \cdots \cup A_n) = \mathbb{P}(A_1) + \mathbb{P}(A_2) + \cdots + \mathbb{P}(A_n)$$
 
-Mỗi biến ngẫu nhiên có 1 phân phối xác suất. Do có 2 loại biến rời rạc và liên tục, nên phân phối xác suất cũng được phân loại thành phân phối rời rạc và liên tục tương ứng.
+Trong thực tế ứng dụng, để tổng quát hóa, phân phối xác suất thường được hiểu là hàm số để tính xác suất của biến ngẫu nhiên. Mỗi biến ngẫu nhiên có một phân phối xác suất. Do có 2 loại biến rời rạc và liên tục, nên phân phối xác suất cũng được phân loại thành phân phối rời rạc và liên tục tương ứng.
 
 ## Các hàm phân phối xác suất
 
+```{ojs}
+viewof binomViz = {
+  // ═══════════════════ PALETTE ═══════════════════
+  const C = {
+    txt:'#16213E', sub:'#8294AA', light:'#E4E9F0',
+    card:'#FFFFFF', grid:'#F0F2F5',
+    pmf:'#1565C0', pmfDark:'#0D47A1',
+    cdf:'#00796B', cdfDark:'#004D40',
+    quant:'#AD1457', quantLight:'#F8BBD0',
+    highlight:'#FF6F00', highlightLight:'#FFF3E0',
+    accent:'#283593',
+  };
+  const mono = "'SF Mono',SFMono-Regular,Menlo,monospace";
+
+  function kCol(k,n){ return d3.interpolateBlues(0.22+0.58*k/Math.max(n,1)); }
+  function kColSoft(k,n){ return d3.interpolateBlues(0.06+0.22*k/Math.max(n,1)); }
+
+  // ═══════════════════ MATH ═══════════════════
+  // Pre-compute log-factorials for fast binomial
+  const maxN = 20;
+  const logFact = new Float64Array(maxN + 1);
+  logFact[0] = 0;
+  for (let i = 1; i <= maxN; i++) logFact[i] = logFact[i-1] + Math.log(i);
+
+  function pmf(k,n,p){
+    if(k<0||k>n) return 0;
+    if(p===0) return k===0?1:0;
+    if(p===1) return k===n?1:0;
+    return Math.exp(logFact[n]-logFact[k]-logFact[n-k]+k*Math.log(p)+(n-k)*Math.log(1-p));
+  }
+  function cdfVal(k,n,p){let s=0;for(let i=0;i<=k;i++)s+=pmf(i,n,p);return Math.min(1,s);}
+  function qbinom(alpha,n,p){for(let k=0;k<=n;k++){if(cdfVal(k,n,p)>=alpha)return k;}return n;}
+
+  // ═══════════════════ STATE ═══════════════════
+  let hoveredK = -1;
+  let mode = 'pmf';
+
+  // ═══════════════════ OUTER ═══════════════════
+  const outer = document.createElement("div");
+  outer.style.cssText = `display:flex;flex-direction:column;gap:14px;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  if(!document.querySelector('link[href*="Inter"]')){
+    const lk=document.createElement('link');lk.rel='stylesheet';
+    lk.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(lk);
+  }
+  outer.appendChild(injectStyle());
+
+  // ═══════════════════ SLIDERS ═══════════════════
+  const SL = {};
+  SL.n = createSlider("n (number of trials)",1,20,1,8,C.pmf,"blue");
+  SL.p = createSlider("p (success probability)",0.01,0.99,0.01,0.40,'#E53935',"red");
+  SL.alpha = createSlider("\u03B1 (quantile level)",0.01,0.99,0.01,0.50,C.quant,"pink");
+  const slRow1 = document.createElement("div");
+  slRow1.style.cssText = "display:flex;gap:14px;width:100%;";
+  slRow1.append(SL.n.el, SL.p.el);
+  outer.appendChild(slRow1);
+  const slRowAlpha = document.createElement("div");
+  slRowAlpha.style.cssText = "display:flex;gap:14px;width:100%;";
+  slRowAlpha.append(SL.alpha.el);
+  outer.appendChild(slRowAlpha);
+
+  // ═══════════════════ MODE TOGGLES ═══════════════════
+  const toggleRow = document.createElement("div");
+  toggleRow.style.cssText = "display:flex;gap:6px;justify-content:center;";
+  const modeConfig = {
+    pmf:     {label:'PMF  P(X = k)',    color:C.pmf},
+    cdf:     {label:'CDF  P(X \u2264 k)',    color:C.cdf},
+    quantile:{label:'Quantile  Q(\u03B1)', color:C.quant},
+  };
+  const modeBtns = {};
+  Object.entries(modeConfig).forEach(([key,cfg])=>{
+    const b = document.createElement("button");
+    b.style.cssText = `padding:8px 22px;border-radius:10px;border:2px solid ${C.light};
+      font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+      transition:all 0.15s;background:${C.card};color:${C.txt};`;
+    b.textContent = cfg.label;
+    b.addEventListener('click',()=>{mode=key;hoveredK=-1;renderAll();});
+    toggleRow.appendChild(b);
+    modeBtns[key] = b;
+  });
+  outer.appendChild(toggleRow);
+
+  function styleToggles(){
+    Object.entries(modeBtns).forEach(([key,b])=>{
+      const active = key===mode;
+      const col = modeConfig[key].color;
+      b.style.background = active?col:C.card;
+      b.style.color = active?'#fff':C.txt;
+      b.style.borderColor = active?col:C.light;
+    });
+    slRowAlpha.style.display = mode==='quantile'?'flex':'none';
+  }
+
+  // ═══════════════════ INFO LINE ═══════════════════
+  const formulaEl = document.createElement("div");
+  formulaEl.style.cssText = `font-size:12px;color:${C.sub};text-align:center;line-height:1.6;font-weight:500;`;
+  outer.appendChild(formulaEl);
+
+  // ═══════════════════ PANELS ═══════════════════
+  const panelRow = document.createElement("div");
+  panelRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;";
+  outer.appendChild(panelRow);
+
+  function mkPanel(titleText){
+    const card = document.createElement("div");
+    card.style.cssText = `background:${C.card};border-radius:16px;border:1px solid ${C.light};
+      padding:14px;box-shadow:0 2px 16px rgba(0,0,0,0.04);`;
+    const title = document.createElement("div");
+    title.style.cssText = `font-size:13px;font-weight:800;color:${C.txt};margin-bottom:8px;text-align:center;`;
+    title.innerHTML = titleText;
+    card.appendChild(title);
+    return {card, title};
+  }
+
+  const leftPanel = mkPanel('\u03A9 Sample Space');
+  const rightPanel = mkPanel('P(X = k)');
+  const LW=440, LH=400, RW=440, RH=400;
+  const leftSvg = d3.create("svg").attr("viewBox",[0,0,LW,LH])
+    .style("width","100%").style("border-radius","12px")
+    .style("background","#FAFBFD").style("border",`1px solid ${C.light}`);
+  const rightSvg = d3.create("svg").attr("viewBox",[0,0,RW,RH])
+    .style("width","100%").style("border-radius","12px")
+    .style("background","#FAFBFD").style("border",`1px solid ${C.light}`);
+  leftPanel.card.appendChild(leftSvg.node());
+  rightPanel.card.appendChild(rightSvg.node());
+  panelRow.append(leftPanel.card, rightPanel.card);
+
+  // Hover info
+  const hoverInfo = document.createElement("div");
+  hoverInfo.style.cssText = `font-size:13px;font-weight:600;color:${C.txt};text-align:center;
+    min-height:24px;font-family:${mono};padding:6px 12px;
+    background:${C.card};border-radius:10px;border:1px solid ${C.light};`;
+  outer.appendChild(hoverInfo);
+
+  // ═══════════════════ SQUARIFIED TREEMAP ═══════════════════
+  function squarify(probs, x, y, w, h){
+    const rects = [];
+    const total = probs.reduce((a,b)=>a+b, 0);
+    if(total === 0) return rects;
+    const items = probs.map((p,i)=>({i, area:(p/total)*w*h})).filter(d=>d.area>0.5);
+    function lay(items, x, y, w, h){
+      if(!items.length) return;
+      if(items.length===1){rects.push({i:items[0].i, x, y, w, h}); return;}
+      const ta = items.reduce((s,it)=>s+it.area, 0);
+      const wide = w >= h;
+      let bestA=Infinity, bestS=1, cum=0;
+      for(let s=1;s<items.length;s++){
+        cum += items[s-1].area;
+        let worst = 0;
+        for(let j=0;j<s;j++){
+          const frac = items[j].area/cum;
+          const rw = wide?(cum/ta)*w:w*frac;
+          const rh = wide?h*frac:(cum/ta)*h;
+          worst = Math.max(worst, Math.max(rw/rh, rh/rw));
+        }
+        if(worst<bestA){bestA=worst; bestS=s;}
+      }
+      const strip=items.slice(0,bestS), rest=items.slice(bestS);
+      const sArea = strip.reduce((s,it)=>s+it.area, 0);
+      const ratio = sArea/ta;
+      if(wide){
+        const sw=w*ratio; let cy=y;
+        strip.forEach(it=>{const sh=h*(it.area/sArea);rects.push({i:it.i,x,y:cy,w:sw,h:sh});cy+=sh;});
+        lay(rest, x+sw, y, w-sw, h);
+      } else {
+        const sh=h*ratio; let cx=x;
+        strip.forEach(it=>{const sw=w*(it.area/sArea);rects.push({i:it.i,x:cx,y,w:sw,h:sh});cx+=sw;});
+        lay(rest, x, y+sh, w, h-sh);
+      }
+    }
+    lay(items, x, y, w, h);
+    return rects;
+  }
+
+  // ═══════════════════ RENDER ═══════════════════
+  // Use a rAF guard so we never queue multiple renders per frame
+  let rafId = 0;
+  function scheduleRender(){
+    if(rafId) return;
+    rafId = requestAnimationFrame(()=>{ rafId=0; renderAll(); });
+  }
+
+  function renderAll(){
+    SL.n.sync(); SL.p.sync(); SL.alpha.sync();
+    const n=SL.n.val(), p=SL.p.val(), alpha=SL.alpha.val();
+    const isCDF = mode==='cdf', isQ = mode==='quantile';
+    styleToggles();
+
+    const probs = Array.from({length:n+1},(_,k)=>pmf(k,n,p));
+    const cdfs  = Array.from({length:n+1},(_,k)=>cdfVal(k,n,p));
+    const qK = qbinom(alpha, n, p);
+    const modeColor = isQ?C.quant:isCDF?C.cdf:C.pmf;
+
+    const effectiveHover = isQ ? qK : hoveredK;
+    const showCumRange = isCDF || isQ;
+
+    // Titles
+    leftPanel.title.innerHTML = `Không gian mẫu \u03A9`;
+    rightPanel.title.innerHTML = isQ
+      ? `Q(\u03B1) = min{k : F(k) \u2265 \u03B1}`
+      : isCDF ? `CDF`
+      : `PMF`;
+
+    // Formula
+    if(isQ){
+      formulaEl.innerHTML = `<b style="color:${C.quant};">Quantile:</b> Q(${alpha.toFixed(2)}) = smallest k where F(k) \u2265 ${alpha.toFixed(2)} &rarr; <b style="color:${C.quant};">k = ${qK}</b> &nbsp; (F(${qK}) = ${cdfs[qK].toFixed(4)})`;
+    } else if(isCDF){
+      formulaEl.innerHTML = `<b style="color:${C.cdf};">CDF:</b> F(k) = \u2211<sub>i=0</sub><sup>k</sup> C(${n},i) \u00B7 ${p.toFixed(2)}<sup>i</sup> \u00B7 ${(1-p).toFixed(2)}<sup>${n}-i</sup>`;
+    } else {
+      formulaEl.innerHTML = `<b style="color:${C.pmf};">PMF:</b> P(X=k) = C(${n},k) \u00B7 ${p.toFixed(2)}<sup>k</sup> \u00B7 ${(1-p).toFixed(2)}<sup>${n}-k</sup>`;
+    }
+
+    leftSvg.selectAll("*").remove();
+    rightSvg.selectAll("*").remove();
+
+    // ═══════════════════ LEFT: MOSAIC (no dots) ═══════════════════
+    const pad = 12;
+    const rects = squarify(probs, pad, pad, LW-2*pad, LH-2*pad);
+
+    // Frame
+    leftSvg.append("rect").attr("x",pad-1).attr("y",pad-1)
+      .attr("width",LW-2*pad+2).attr("height",LH-2*pad+2)
+      .attr("rx",12).attr("fill","none").attr("stroke",C.light).attr("stroke-width",1);
+
+    // Build all tile elements in a document fragment approach via d3
+    const tileG = leftSvg.append("g");
+
+    rects.forEach(r=>{
+      const k=r.i, gap=2;
+      const isHK = effectiveHover===k;
+      const inRange = showCumRange && effectiveHover>=0 && k<=effectiveHover;
+      const active = isHK || inRange;
+      const anyHover = effectiveHover >= 0;
+      const dimmed = anyHover && !active;
+      const col = kCol(k,n), colS = kColSoft(k,n);
+
+      // Tile background
+      tileG.append("rect")
+        .attr("x",r.x+gap/2).attr("y",r.y+gap/2)
+        .attr("width",Math.max(0,r.w-gap)).attr("height",Math.max(0,r.h-gap))
+        .attr("rx",6)
+        .attr("fill", dimmed ? '#F0F0F0' : active ? d3.interpolateBlues(0.12+0.35*k/Math.max(n,1)) : colS)
+        .attr("stroke", isHK ? C.highlight : (inRange ? modeColor : 'rgba(255,255,255,0.5)'))
+        .attr("stroke-width", isHK ? 3 : (inRange ? 2 : 0.5));
+
+      // Inner subtle gradient overlay for depth (no dots)
+      if(!dimmed && r.w > 10 && r.h > 10){
+        tileG.append("rect")
+          .attr("x",r.x+gap/2).attr("y",r.y+gap/2)
+          .attr("width",Math.max(0,r.w-gap)).attr("height",Math.max(0,(r.h-gap)*0.4))
+          .attr("rx",6)
+          .attr("fill","rgba(255,255,255,0.15)");
+      }
+
+      // Label
+      if(r.w > 26 && r.h > 22){
+        const cx=r.x+r.w/2, cy=r.y+r.h/2;
+        const fs = Math.min(20, Math.min(r.w, r.h)*0.3);
+        const showPct = r.h > 46;
+
+        if(active && r.h > 32){
+          const pw=Math.min(r.w-6, fs*3.5), ph=showPct ? fs+20 : fs+8;
+          tileG.append("rect").attr("x",cx-pw/2).attr("y",cy-ph/2)
+            .attr("width",pw).attr("height",ph)
+            .attr("rx",7).attr("fill","rgba(255,255,255,0.92)");
+        }
+        tileG.append("text").attr("x",cx).attr("y",cy-(showPct?4:0))
+          .attr("text-anchor","middle").attr("dominant-baseline","middle")
+          .attr("font-size",active?fs+2:fs).attr("font-weight",900)
+          .attr("fill",dimmed?'#ccc':col).attr("font-family",mono)
+          .text(`k=${k}`);
+        if(showPct){
+          tileG.append("text").attr("x",cx).attr("y",cy+fs*0.5+5)
+            .attr("text-anchor","middle").attr("font-size",active?11:10).attr("font-weight",700)
+            .attr("fill",dimmed?'#ddd':col).attr("opacity",dimmed?0.3:1)
+            .attr("font-family",mono).text((probs[k]*100).toFixed(1)+'%');
+        }
+      }
+
+      // Hit area
+      if(!isQ){
+        tileG.append("rect").attr("x",r.x).attr("y",r.y).attr("width",r.w).attr("height",r.h)
+          .attr("fill","transparent").attr("cursor","pointer")
+          .on("mouseenter",()=>{hoveredK=k;renderAll();})
+          .on("mouseleave",()=>{hoveredK=-1;renderAll();});
+      }
+    });
+
+    // Omega watermark
+    leftSvg.append("text").attr("x",LW-16).attr("y",20)
+      .attr("font-size",15).attr("font-weight",900).attr("fill",C.sub).attr("opacity",0.2)
+      .attr("text-anchor","end").text("\u03A9");
+
+    // Cumulative area label
+    if(showCumRange && effectiveHover>=0){
+      const cumP = cdfs[effectiveHover];
+      leftSvg.append("text").attr("x",pad+6).attr("y",LH-pad-4)
+        .attr("font-size",12).attr("font-weight",800).attr("fill",modeColor)
+        .attr("font-family",mono).text(`\u2211 = ${(cumP*100).toFixed(1)}%`);
+    }
+
+    // ═══════════════════ RIGHT PANEL ═══════════════════
+    const mg = {l:54, r:16, t:20, b:42};
+    const iw = RW-mg.l-mg.r, ih = RH-mg.t-mg.b;
+    const gR = rightSvg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+    const xS = d3.scaleBand().domain(d3.range(n+1)).range([0,iw]).padding(0.12);
+
+    if(mode==='pmf'){
+      // ── PMF BARS ──
+      const yMax = d3.max(probs)*1.2;
+      const yS = d3.scaleLinear().domain([0,yMax]).range([ih,0]);
+
+      yS.ticks(5).forEach(v=>{
+        gR.append("line").attr("x2",iw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke",C.grid);
+        gR.append("text").attr("x",-8).attr("y",yS(v)+4).attr("text-anchor","end")
+          .attr("font-size",10).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+
+      probs.forEach((pk,k)=>{
+        const isH = hoveredK===k, dim = hoveredK>=0 && !isH;
+        const col = kCol(k,n), bx = xS(k), by = yS(pk), bh = ih-by;
+        if(isH) gR.append("rect").attr("x",bx+2).attr("y",by+3).attr("width",xS.bandwidth()).attr("height",bh)
+          .attr("rx",5).attr("fill","rgba(0,0,0,0.05)");
+        gR.append("rect").attr("x",bx).attr("y",by).attr("width",xS.bandwidth()).attr("height",bh)
+          .attr("rx",5).attr("fill",col)
+          .attr("opacity",dim?0.12:(isH?1:0.72))
+          .attr("stroke",isH?C.highlight:"none").attr("stroke-width",isH?3:0);
+        if(isH || hoveredK<0)
+          gR.append("text").attr("x",bx+xS.bandwidth()/2).attr("y",by-8)
+            .attr("text-anchor","middle").attr("font-size",isH?12:9).attr("font-weight",800)
+            .attr("fill",isH?C.highlight:col).attr("font-family",mono).attr("opacity",dim?0.12:0.85)
+            .text(pk.toFixed(3));
+      });
+
+      // Y label
+      rightSvg.append("text").attr("x",14).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,14,${mg.t+ih/2})`).text("P(X = k)");
+
+    } else {
+      // ── CDF / QUANTILE ──
+      const yS = d3.scaleLinear().domain([0,1.05]).range([ih,0]);
+      const ticks = [0,0.25,0.5,0.75,1.0];
+      ticks.forEach(v=>{
+        gR.append("line").attr("x2",iw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke",C.grid);
+        gR.append("text").attr("x",-8).attr("y",yS(v)+4).attr("text-anchor","end")
+          .attr("font-size",10).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+
+      // ── FIX: CDF shaded bars — each bar k reaches to its OWN cdf value ──
+      if(effectiveHover >= 0){
+        for(let k=0; k<=effectiveHover; k++){
+          const barTop = yS(cdfs[k]);
+          gR.append("rect")
+            .attr("x", xS(k))
+            .attr("y", barTop)
+            .attr("width", xS.bandwidth())
+            .attr("height", ih - barTop)
+            .attr("fill", modeColor).attr("opacity", 0.08);
+        }
+      }
+
+      // Step function
+      for(let k=0; k<=n; k++){
+        const cx = xS(k)+xS.bandwidth()/2, cy = yS(cdfs[k]);
+        const isHK = effectiveHover===k;
+        const inR = showCumRange && effectiveHover>=0 && k<=effectiveHover;
+        const dim = effectiveHover>=0 && !inR && !isHK;
+
+        // Horizontal segment to next
+        if(k<n){
+          const nx = xS(k+1)+xS.bandwidth()/2;
+          gR.append("line").attr("x1",cx).attr("y1",cy).attr("x2",nx).attr("y2",cy)
+            .attr("stroke",modeColor).attr("stroke-width",2).attr("opacity",dim?0.1:0.5);
+        }
+        // Vertical riser
+        if(k>0){
+          gR.append("line").attr("x1",cx).attr("y1",yS(cdfs[k-1])).attr("x2",cx).attr("y2",cy)
+            .attr("stroke",modeColor).attr("stroke-width",1.5).attr("stroke-dasharray","3,2")
+            .attr("opacity",dim?0.1:0.4);
+        }
+        // Dot
+        gR.append("circle").attr("cx",cx).attr("cy",cy).attr("r",isHK?7:4.5)
+          .attr("fill",isHK?C.highlight:modeColor).attr("stroke","#fff").attr("stroke-width",isHK?2.5:1.5)
+          .attr("opacity",dim?0.1:1);
+        // Value
+        if(isHK || (effectiveHover<0 && k%Math.max(1,Math.ceil((n+1)/8))===0))
+          gR.append("text").attr("x",cx).attr("y",cy-12)
+            .attr("text-anchor","middle").attr("font-size",isHK?12:9).attr("font-weight",800)
+            .attr("fill",isHK?C.highlight:modeColor).attr("font-family",mono)
+            .attr("opacity",dim?0.1:0.8).text(cdfs[k].toFixed(3));
+      }
+
+      // ── QUANTILE LOOKUP LINES ──
+      if(isQ){
+        const aY = yS(alpha);
+        const qX = xS(qK)+xS.bandwidth()/2;
+        const qY = yS(cdfs[qK]);
+
+        gR.append("line").attr("x1",0).attr("y1",aY).attr("x2",qX).attr("y2",aY)
+          .attr("stroke",C.quant).attr("stroke-width",2).attr("stroke-dasharray","6,4");
+        gR.append("line").attr("x1",qX).attr("y1",aY).attr("x2",qX).attr("y2",ih)
+          .attr("stroke",C.quant).attr("stroke-width",2).attr("stroke-dasharray","6,4");
+
+        gR.append("rect").attr("x",-48).attr("y",aY-10).attr("width",40).attr("height",20)
+          .attr("rx",5).attr("fill",C.quant);
+        gR.append("text").attr("x",-28).attr("y",aY+4)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text(`${alpha.toFixed(2)}`);
+
+        gR.append("circle").attr("cx",qX).attr("cy",aY).attr("r",5)
+          .attr("fill",C.quant).attr("stroke","#fff").attr("stroke-width",2);
+
+        gR.append("rect").attr("x",qX-20).attr("y",ih+2).attr("width",40).attr("height",20)
+          .attr("rx",5).attr("fill",C.quant);
+        gR.append("text").attr("x",qX).attr("y",ih+15)
+          .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",900)
+          .attr("fill","#fff").attr("font-family",mono).text(`k=${qK}`);
+
+        if(qY < aY-4){
+          gR.append("line").attr("x1",qX+12).attr("y1",aY-2).attr("x2",qX+12).attr("y2",qY+2)
+            .attr("stroke",C.quant).attr("stroke-width",1.5).attr("opacity",0.6);
+        }
+      }
+
+      // Y label
+      rightSvg.append("text").attr("x",14).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,14,${mg.t+ih/2})`)
+        .text("F(k) = P(X \u2264 k)");
+    }
+
+    // ── X axis labels (shared) ──
+    gR.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+    for(let k=0; k<=n; k++){
+      const isHK = effectiveHover===k;
+      if(isQ && k===qK) continue;
+      gR.append("text").attr("x",xS(k)+xS.bandwidth()/2).attr("y",ih+18)
+        .attr("text-anchor","middle").attr("font-size",isHK?13:11)
+        .attr("font-weight",isHK?800:500).attr("fill",isHK?C.highlight:C.sub)
+        .attr("font-family",mono).text(k);
+    }
+    rightSvg.append("text").attr("x",mg.l+iw/2).attr("y",RH-4)
+      .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",700).attr("fill",C.sub).text("k");
+
+    // ── Hit areas on right panel ──
+    if(!isQ){
+      for(let k=0; k<=n; k++){
+        rightSvg.append("rect")
+          .attr("x",mg.l+xS(k)-xS.step()*0.1).attr("y",mg.t)
+          .attr("width",xS.step()).attr("height",ih)
+          .attr("fill","transparent").attr("cursor","pointer")
+          .on("mouseenter",()=>{hoveredK=k;renderAll();})
+          .on("mouseleave",()=>{hoveredK=-1;renderAll();});
+      }
+    }
+
+    // ═══════════════════ HOVER INFO ═══════════════════
+    if(isQ){
+      const fq = cdfs[qK];
+      hoverInfo.innerHTML = `\u03B1 = <span style="color:${C.quant};font-weight:900;">${alpha.toFixed(2)}</span>`
+        +` &rarr; Q(\u03B1) = <span style="color:${C.quant};font-weight:900;">${qK}</span>`
+        +` &nbsp;|&nbsp; F(${qK}) = ${fq.toFixed(4)} \u2265 ${alpha.toFixed(2)}`
+        +(qK>0?` &nbsp;|&nbsp; F(${qK-1}) = ${cdfs[qK-1].toFixed(4)} < ${alpha.toFixed(2)}`:'')
+        +` &nbsp;|&nbsp; Shaded area = <span style="color:${C.quant};">${(fq*100).toFixed(1)}%</span> of \u03A9`;
+    } else if(effectiveHover>=0){
+      const k=effectiveHover, pk=probs[k], ck=cdfs[k];
+      if(isCDF){
+        hoverInfo.innerHTML = `k = <b>${k}</b> &rarr; P(X=${k}) = <span style="color:${kCol(k,n)};">${pk.toFixed(4)}</span>`
+          +` &nbsp;|&nbsp; F(${k}) = P(X\u2264${k}) = <span style="color:${C.cdf};font-weight:900;">${ck.toFixed(4)}</span>`
+          +` = <span style="color:${C.cdf};">${(ck*100).toFixed(1)}%</span> of \u03A9`;
+      } else {
+        hoverInfo.innerHTML = `k = <b>${k}</b> &rarr; P(X=${k}) = C(${n},${k})\u00B7${p.toFixed(2)}<sup>${k}</sup>\u00B7${(1-p).toFixed(2)}<sup>${n-k}</sup>`
+          +` = <span style="color:${kCol(k,n)};font-weight:900;">${pk.toFixed(4)}</span>`
+          +` = <span style="color:${kCol(k,n)};">${(pk*100).toFixed(1)}%</span> of \u03A9`;
+      }
+    } else {
+      hoverInfo.innerHTML = `<span style="color:${C.sub};">Hover either panel to explore the distribution</span>`;
+    }
+  }
+
+  // ═══════════════════ EVENTS ═══════════════════
+  SL.n.input.addEventListener("input",()=>{hoveredK=-1;scheduleRender();});
+  SL.p.input.addEventListener("input",()=>{hoveredK=-1;scheduleRender();});
+  SL.alpha.input.addEventListener("input", scheduleRender);
+
+  renderAll();
+  outer.value = {};
+  return outer;
+}
+```
+
 ### Hàm khối/mật độ xác suất
 
-### 
+Là một hàm số để tính xác suất cho từng giá trị của biến ngẫu nhiên. Hàm này có hai thành phần:
 
-### Joint distribution
+$$f(\underbrace{X = x}_{\text{Giá trị biến ngẫu nhiên}} \mid \underbrace{\theta}_{\text{Tham số}})$$
 
+1.  Giá trị của biến ngẫu nhiên: nằm trên trục hoành của đồ thị
+
+2.  Tham số: là một hoặc nhiều yếu tố quy định xác suất của các giá trị của biến ngẫu nhiên
+
+Với biến rời rạc thì gọi là hàm khối xác suất (probability mass function, pmf). Với biến liên tục thì gọi là hàm mật độ xác suất (probability density function, pdf).
+
+Ví dụ: Hàm khối xác suất của phân phối nhị thức được viết như sau
+
+$$f(\underbrace{X = k}_{\text{Giá trị biến ngẫu nhiên}} \mid \underbrace{n, p}_{\text{Tham số}}) = \binom{n}{k} p^k (1-p)^{n-k}$$
+
+Phân phối nhị thức dùng để đếm số lần thành công trong một số lượng cố định các phép thử Bernoulli độc lập.
+
+Nếu phép thử là tung một đồng xu 10 lần, chúng ta quan tâm có bao nhiêu lần ra mặt ngửa. Hai thành phần của hàm pmf này là:
+
+1.  Giá trị của biến ngẫu nhiên ($k$): là số lần ra mặt ngửa mà ta muốn tính xác suất. $k$ có thể có các giá trị từ 0 đến 10.
+
+2.  Tham số: có 2 yếu tố quy định xác suất của các giá trị $k$
+
+-   Tổng số lần tung đồng xu ($n = 10$): vì tổng xác suất luôn bằng 1, càng tung đồng xu nhiều lần thì xác suất để xảy ra mỗi trường hợp nhất định sẽ nhỏ đi
+-   Xác suất ra mặt ngửa của mỗi lần tung đồng xu $p = 0.5$: vì khả năng mỗi lần ra mặt ngửa càng lớn thì tổng số mặt ngửa $k$ ra càng nhiều và ngược lại
+
+Chúng ta gắn các tham số $n$ và $p$ mà mình muốn vào hàm pmf. Sau đó lần lượt gắn $k = 0, 1, 2...$ vào để tính ra xác suất của từng giá trị của biến ngẫu nhiên.
+
+```{ojs}
+viewof binomial_dist = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. MATH
+  // ══════════════════════════════════════════════════════
+  const lcCache = new Map();
+  function lc(n,k){
+    if(k<0||k>n)return -Infinity;
+    if(k>n-k)k=n-k;
+    const key=(n<<12)|k;
+    if(lcCache.has(key))return lcCache.get(key);
+    let r=0;for(let i=0;i<k;i++)r+=Math.log(n-i)-Math.log(i+1);
+    lcCache.set(key,r);return r;
+  }
+  function pmf(x,n,p){
+    if(x<0||x>n)return 0;
+    if(p<=0)return x===0?1:0;
+    if(p>=1)return x===n?1:0;
+    return Math.exp(lc(n,x)+x*Math.log(p)+(n-x)*Math.log(1-p));
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER + STYLE
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:900px;margin:0 auto;
+  `;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    .bd-slider{position:relative;height:8px;border-radius:4px;background:#e2e8f0;}
+    .bd-slider-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;transition:width 0.04s;}
+    .bd-slider input[type=range]{
+      position:absolute;top:0;left:0;width:100%;height:100%;
+      -webkit-appearance:none;appearance:none;background:transparent;
+      cursor:pointer;margin:0;padding:0;
+    }
+    .bd-slider input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;appearance:none;
+      width:20px;height:20px;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.28);
+      cursor:pointer;margin-top:-6px;background:#475569;
+    }
+    .bd-slider input[type=range]::-moz-range-thumb{
+      width:14px;height:14px;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.28);
+      cursor:pointer;background:#475569;
+    }
+    .bd-slider input[type=range]::-webkit-slider-runnable-track{height:8px;background:transparent;}
+    .bd-slider input[type=range]::-moz-range-track{height:8px;background:transparent;}
+    .bd-slider-dark input[type=range]::-webkit-slider-thumb{background:#1e293b;}
+    .bd-slider-dark input[type=range]::-moz-range-thumb{background:#1e293b;}
+    .bd-slider-blue input[type=range]::-webkit-slider-thumb{background:#3b82f6;}
+    .bd-slider-blue input[type=range]::-moz-range-thumb{background:#3b82f6;}
+  `;
+  wrapper.appendChild(style);
+
+  // ══════════════════════════════════════════════════════
+  // 3. SLIDERS
+  // ══════════════════════════════════════════════════════
+  function createSlider(label, min, max, step, val, color, cls) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:140px;";
+
+    const head = document.createElement("div");
+    head.style.cssText = "display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;";
+
+    const lbl = document.createElement("span");
+    lbl.style.cssText = "font-size:12px;font-weight:600;color:#64748b;letter-spacing:0.3px;text-transform:uppercase;";
+    lbl.textContent = label;
+
+    const valSpan = document.createElement("span");
+    valSpan.style.cssText = `font-size:18px;font-weight:800;color:${color};font-variant-numeric:tabular-nums;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;`;
+    valSpan.textContent = step < 1 ? Number(val).toFixed(2) : val;
+
+    head.appendChild(lbl); head.appendChild(valSpan);
+
+    const track = document.createElement("div");
+    track.className = "bd-slider bd-slider-" + cls;
+
+    const fill = document.createElement("div");
+    fill.className = "bd-slider-fill";
+    fill.style.background = color;
+    fill.style.width = ((val - min) / (max - min)) * 100 + "%";
+    track.appendChild(fill);
+
+    const input = document.createElement("input");
+    input.type = "range"; input.min = min; input.max = max;
+    input.step = step; input.value = val;
+    track.appendChild(input);
+
+    row.appendChild(head); row.appendChild(track);
+
+    return { el: row, input, valSpan, fill,
+      val() { return +input.value; },
+      sync() {
+        const v = +input.value;
+        valSpan.textContent = step < 1 ? v.toFixed(2) : String(v);
+        fill.style.width = ((v - min) / (max - min)) * 100 + "%";
+      }
+    };
+  }
+
+  const SL = {};
+  // Changed default 'n' from 20 to 10
+  SL.n = createSlider("Số phép thử (n)", 1, 100, 1, 10, "#1e293b", "dark");
+  SL.p = createSlider("Xác suất thành công mỗi lần thử (p)", 0.01, 0.99, 0.01, 0.50, "#3b82f6", "blue");
+
+  const ctrlRow = document.createElement("div");
+  ctrlRow.style.cssText = "display:flex;gap:28px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
+  ctrlRow.appendChild(SL.n.el); ctrlRow.appendChild(SL.p.el);
+  wrapper.appendChild(ctrlRow);
+
+  // ══════════════════════════════════════════════════════
+  // 4. SVG CHART (pre-allocated pools)
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const W = 760, H = 380;
+  // Increased margins to accommodate larger text sizes
+  const mg = {t:20, r:20, b:56, l:64};
+  const cw = W-mg.l-mg.r, ch = H-mg.t-mg.b;
+
+  const svg = document.createElementNS(NS,"svg");
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  svg.style.cssText = `width:100%;max-width:${W}px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;`;
+
+  function el(tag,a){const e=document.createElementNS(NS,tag);if(a)for(const[k,v]of Object.entries(a))e.setAttribute(k,v);return e;}
+
+  // Grid
+  const gridLines=[];
+  for(let i=0;i<=4;i++){const l=el("line",{stroke:"#e2e8f0","stroke-width":"0.7"});svg.appendChild(l);gridLines.push(l);}
+
+  // Y labels - Increased font-size to 14
+  const yLabels=[];
+  for(let i=0;i<=4;i++){const t=el("text",{"text-anchor":"end",fill:"#94a3b8","font-size":"14","font-family":"'SF Mono',monospace"});svg.appendChild(t);yLabels.push(t);}
+
+  // Bar pool
+  const POOL=101;
+  const bars=[];
+  for(let i=0;i<POOL;i++){
+    const r=el("rect",{rx:"2",fill:"#3b82f6",stroke:"#2563eb","stroke-width":"0.5"});
+    r.style.display="none";svg.appendChild(r);bars.push(r);
+  }
+
+  // Hover bar
+  const hoverBar=el("rect",{rx:"2",fill:"rgba(59,130,246,0.35)",stroke:"#1d4ed8","stroke-width":"1"});
+  hoverBar.style.display="none";svg.appendChild(hoverBar);
+
+  // X axis
+  const xAxisLine=el("line",{stroke:"#94a3b8"});svg.appendChild(xAxisLine);
+  const xTicks=[];
+  for(let i=0;i<30;i++){
+    const ln=el("line",{stroke:"#94a3b8",y2:"5"});ln.style.display="none";svg.appendChild(ln);
+    // Increased font-size to 14 and dy to 20
+    const t=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"14","font-family":"'SF Mono',monospace",dy:"20"});t.style.display="none";svg.appendChild(t);
+    xTicks.push({ln,t});
+  }
+  // Increased font-size to 16
+  const xLabel=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"16",y:String(H-6)});
+  xLabel.textContent="Số lần thành công (k)";svg.appendChild(xLabel);
+
+  // Y axis
+  svg.appendChild(el("line",{x1:String(mg.l),x2:String(mg.l),y1:String(mg.t),y2:String(mg.t+ch),stroke:"#94a3b8"}));
+  // Increased font-size to 16
+  const yLabel=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"16",x:"18",y:String(mg.t+ch/2),transform:`rotate(-90,18,${mg.t+ch/2})`});
+  yLabel.textContent="P(X = k)";svg.appendChild(yLabel);
+
+  // Tooltip
+  const tipG=el("g");tipG.style.display="none";
+  const tipRect=el("rect",{rx:"6",fill:"#1e293b",opacity:"0.92"});
+  // Increased font-sizes to 14
+  const tipText1=el("text",{fill:"#fff","font-size":"14","font-weight":"700","font-family":"'SF Mono',monospace"});
+  const tipText2=el("text",{fill:"#94a3b8","font-size":"14","font-family":"'SF Mono',monospace"});
+  tipG.appendChild(tipRect);tipG.appendChild(tipText1);tipG.appendChild(tipText2);
+  svg.appendChild(tipG);
+
+  wrapper.appendChild(svg);
+
+  // ══════════════════════════════════════════════════════
+  // 5. RENDER
+  // ══════════════════════════════════════════════════════
+  let curData=[], curMaxY=0, hoverIdx=-1;
+  let sx, sy, barW, baseline;
+
+  function render(){
+    const nV=SL.n.val(), pV=SL.p.val();
+    const mean=nV*pV, sd=Math.sqrt(nV*pV*(1-pV));
+
+    let loX=Math.max(0,Math.floor(mean-4*sd-1));
+    let hiX=Math.min(nV,Math.ceil(mean+4*sd+1));
+    if(nV<=30){loX=0;hiX=nV;}
+
+    curData=[];curMaxY=0;
+    for(let x=loX;x<=hiX;x++){
+      const p=pmf(x,nV,pV);
+      curData.push({x,prob:p});
+      if(p>curMaxY)curMaxY=p;
+    }
+    curMaxY*=1.15;
+    if(curMaxY<1e-9)curMaxY=0.01;
+
+    const cnt=hiX-loX+1;
+    sx=x=>mg.l+((x-loX)/(hiX-loX))*cw;
+    sy=y=>mg.t+ch-(y/curMaxY)*ch;
+    barW=Math.max(2,Math.min(28,cw/cnt*0.75));
+    baseline=sy(0);
+
+    // Grid + Y labels
+    for(let i=0;i<=4;i++){
+      const v=(curMaxY/4)*i,yy=sy(v);
+      gridLines[i].setAttribute("x1",mg.l);gridLines[i].setAttribute("x2",W-mg.r);
+      gridLines[i].setAttribute("y1",yy);gridLines[i].setAttribute("y2",yy);
+      yLabels[i].setAttribute("x",mg.l-8);yLabels[i].setAttribute("y",yy+4);
+      yLabels[i].textContent=v.toFixed(v<0.01?4:3);
+    }
+
+    // Bars
+    for(let i=0;i<POOL;i++){
+      if(i<curData.length){
+        const d=curData[i];
+        const bx=sx(d.x)-barW/2,by=sy(d.prob);
+        bars[i].setAttribute("x",bx);bars[i].setAttribute("y",by);
+        bars[i].setAttribute("width",barW);bars[i].setAttribute("height",Math.max(0,baseline-by));
+        bars[i].style.display="";
+      }else{bars[i].style.display="none";}
+    }
+
+    // X axis
+    xAxisLine.setAttribute("x1",mg.l);xAxisLine.setAttribute("x2",W-mg.r);
+    xAxisLine.setAttribute("y1",baseline);xAxisLine.setAttribute("y2",baseline);
+    xLabel.setAttribute("x",mg.l+cw/2);
+
+    const span=hiX-loX;
+    const ts=span>80?10:span>40?5:span>20?2:1;
+    let ti=0;
+    for(let x=Math.ceil(loX/ts)*ts;x<=hiX&&ti<30;x+=ts){
+      const xx=sx(x);
+      xTicks[ti].ln.setAttribute("x1",xx);xTicks[ti].ln.setAttribute("x2",xx);
+      xTicks[ti].ln.setAttribute("y1",baseline);xTicks[ti].ln.setAttribute("y2",baseline+5);
+      xTicks[ti].ln.style.display="";
+      xTicks[ti].t.setAttribute("x",xx);xTicks[ti].t.setAttribute("y",baseline+5);
+      xTicks[ti].t.textContent=x;xTicks[ti].t.style.display="";
+      ti++;
+    }
+    for(;ti<30;ti++){xTicks[ti].ln.style.display="none";xTicks[ti].t.style.display="none";}
+
+    updateHover();
+    wrapper.value={n:nV,p:pV};
+    wrapper.dispatchEvent(new Event("input",{bubbles:true}));
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 6. HOVER
+  // ══════════════════════════════════════════════════════
+  function updateHover(){
+    if(hoverIdx<0||hoverIdx>=curData.length){
+      hoverBar.style.display="none";tipG.style.display="none";return;
+    }
+    const d=curData[hoverIdx];
+    const bx=sx(d.x)-barW/2,by=sy(d.prob);
+    hoverBar.setAttribute("x",bx-1);hoverBar.setAttribute("y",by-1);
+    hoverBar.setAttribute("width",barW+2);hoverBar.setAttribute("height",Math.max(0,baseline-by)+2);
+    hoverBar.style.display="";
+
+    const t1="k = "+d.x;
+    const t2="P = "+d.prob.toFixed(5);
+    const tw=Math.max(t1.length,t2.length)*8.5+16; // Adjusted for wider text
+    const th=50; // Increased height
+    let tx=sx(d.x)+barW/2+8,ty=by-10;
+    if(tx+tw>W-mg.r)tx=sx(d.x)-barW/2-tw-8;
+    if(ty<mg.t)ty=mg.t+4;
+
+    tipRect.setAttribute("x",tx);tipRect.setAttribute("y",ty);
+    tipRect.setAttribute("width",tw);tipRect.setAttribute("height",th);
+    tipText1.setAttribute("x",tx+8);tipText1.setAttribute("y",ty+20);tipText1.textContent=t1;
+    tipText2.setAttribute("x",tx+8);tipText2.setAttribute("y",ty+40);tipText2.textContent=t2;
+    tipG.style.display="";
+  }
+
+  function onMove(e){
+    const rect=svg.getBoundingClientRect();
+    const mouseX=(e.clientX-rect.left)*(W/rect.width);
+    if(mouseX<mg.l||mouseX>W-mg.r||!curData.length){hoverIdx=-1;updateHover();return;}
+    let best=-1,bestD=Infinity;
+    for(let i=0;i<curData.length;i++){
+      const dist=Math.abs(sx(curData[i].x)-mouseX);
+      if(dist<bestD){bestD=dist;best=i;}
+    }
+    if(bestD>barW*1.2)best=-1;
+    if(best!==hoverIdx){hoverIdx=best;updateHover();}
+  }
+  function onLeave(){hoverIdx=-1;updateHover();}
+
+  svg.addEventListener("mousemove",onMove);
+  svg.addEventListener("mouseleave",onLeave);
+
+  // ══════════════════════════════════════════════════════
+  // 7. EVENTS
+  // ══════════════════════════════════════════════════════
+  let rafId=0;
+  function schedule(){cancelAnimationFrame(rafId);rafId=requestAnimationFrame(render);}
+  function onN(){SL.n.sync();schedule();}
+  function onP(){SL.p.sync();schedule();}
+  SL.n.input.addEventListener("input",onN);
+  SL.p.input.addEventListener("input",onP);
+
+  render();
+
+  // ══════════════════════════════════════════════════════
+  // 8. CLEANUP
+  // ══════════════════════════════════════════════════════
+  invalidation.then(()=>{
+    cancelAnimationFrame(rafId);
+    SL.n.input.removeEventListener("input",onN);
+    SL.p.input.removeEventListener("input",onP);
+    svg.removeEventListener("mousemove",onMove);
+    svg.removeEventListener("mouseleave",onLeave);
+    lcCache.clear();curData=[];
+  });
+
+  wrapper.value={};
+  return wrapper;
+})()
+```
+
+### Hàm phân phối tích lũy
+
+Là một hàm số để tính tổng xác suất cộng dồn từ giá trị nhỏ nhất có thể có cho đến một giá trị giới hạn của biến ngẫu nhiên. Hàm phân phối tích lũy (cumulative distribution function, cdf, kí hiệu là $F(x)$) cũng có hai thành phần giống với hàm pmf/pdf:
+
+$$F(\underbrace{X \le x}_{\text{Giá trị biến ngẫu nhiên}} \mid \underbrace{\theta}_{\text{Tham số}})$$
+
+Hàm cdf đơn giản là phép cộng dồn tất cả các xác suất của pmf/pdf, từ đầu đến giá trị giới hạn $x$.
+
+
+
+### Hàm phân vị
+
+Hàm phân vị (quantile function, kí hiệu là $Q(p)$) là hàm ngược của hàm phân phối tích lũy (cdf).
+
+Sử dụng cùng một đường cong được định hình bởi tham số $\theta$:
+
+Ta dùng cdf để tìm xác suất cộng dồn $p$ khi đã biết mốc giá trị $x$:
+
+$$\underbrace{p}_{\text{Xác suất cần tìm}} = F(\underbrace{x}_{\text{Đầu vào giá trị}} \mid \underbrace{\theta}_{\text{Tham số}})$$
+
+Ngược lại, ta dùng hàm phân vị để tìm mốc giá trị $x$ nhằm đạt được một xác suất mục tiêu $p$ cho trước:
+
+$$\underbrace{x}_{\text{Mốc giá trị cần tìm}} = Q(\underbrace{p}_{\text{Đầu vào xác suất}} \mid \underbrace{\theta}_{\text{Tham số}})$$
+
+Giá trị $1.96$ trong công thức tính khoảng tin cậy 95% $\text{Ước lượng} \pm 1.96 \times \text{Sai số chuẩn (SE)}$ là mốc giá trị tính được từ hàm phân vị trên phân phối chuẩn tắc (standard normal distribution, là phân phối chuẩn với trung bình $\mu = 0$ và độ lệch chuẩn $\sigma = 1$).
+
+```{ojs}
+viewof normalQViz = {
+  const C = {
+    txt:'#16213E', sub:'#8294AA', light:'#E4E9F0',
+    card:'#fff', grid:'#F0F2F5',
+    pdf:'#0d9488',
+    cdf:'#6366f1',
+    quantLine:'#2563eb', quantFill:'#dbeafe',
+    symFill:'#fef3c7', symLine:'#d97706',
+  };
+  const mono = "'SF Mono',SFMono-Regular,Menlo,monospace";
+
+  // ═══════════════════ MATH ═══════════════════
+  const SQRT2PI = Math.sqrt(2*Math.PI);
+  const SQRT2 = Math.sqrt(2);
+
+  function normPdf(x,mu,s){ const z=(x-mu)/s; return Math.exp(-0.5*z*z)/(s*SQRT2PI); }
+  function erf_a(x){
+    const sg=x<0?-1:1, ax=Math.abs(x);
+    const t=1/(1+0.3275911*ax);
+    return sg*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-ax*ax));
+  }
+  function normCdf(x,mu,s){ return 0.5*(1+erf_a((x-mu)/(s*SQRT2))); }
+  function normQ(p){
+    if(p<=0)return-Infinity;if(p>=1)return Infinity;
+    const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239];
+    const b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572];
+    const c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783];
+    const d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+    if(p<0.02425){const q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/(((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1));}
+    if(p<=0.97575){const q=p-0.5,r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+    const q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/(((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1));
+  }
+  function normQuantile(p,mu,s){ return mu+s*normQ(p); }
+
+  function curvePts(fn,lo,hi,n){
+    const p=[],dx=(hi-lo)/(n-1);
+    for(let i=0;i<n;i++){const x=lo+i*dx;p.push({x,y:fn(x)});}
+    return p;
+  }
+
+  // ═══════════════════ DOM ═══════════════════
+  const outer = document.createElement("div");
+  outer.style.cssText = `display:flex;flex-direction:column;gap:14px;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  if(!document.querySelector('link[href*="Inter"]')){
+    const lk=document.createElement('link');lk.rel='stylesheet';
+    lk.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(lk);
+  }
+  outer.appendChild(injectStyle());
+
+  // Hide spin buttons
+  const spinStyle = document.createElement("style");
+  spinStyle.textContent = `input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+    input[type=number]{-moz-appearance:textfield;}`;
+  outer.appendChild(spinStyle);
+
+  // ═══════════════════ EDITABLE SLIDER ═══════════════════
+  function createEditableSlider(label, min, max, sliderStep, val, decimals, color, cls){
+    const sl = createSlider(label, min, max, sliderStep, val, color, cls);
+    const fmt = v => v.toFixed(decimals);
+    const numInput = document.createElement("input");
+    numInput.type = "number";
+    numInput.min = min; numInput.max = max; numInput.step = "any";
+    numInput.value = fmt(val);
+    numInput.style.cssText = `width:72px;font-size:16px;font-weight:800;color:${color};
+      font-variant-numeric:tabular-nums;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+      border:2px solid ${C.light};border-radius:8px;padding:3px 6px;text-align:right;
+      background:${C.card};outline:none;transition:border-color 0.15s;`;
+    numInput.addEventListener("focus",()=>{ numInput.style.borderColor=color; numInput.select(); });
+    numInput.addEventListener("blur",()=>{
+      numInput.style.borderColor=C.light;
+      let v=parseFloat(numInput.value); if(isNaN(v))v=val;
+      v=Math.max(min,Math.min(max,v));
+      numInput.value=fmt(v); sl.input.value=v; sl.sync();
+      sl.input.dispatchEvent(new Event("input"));
+    });
+    numInput.addEventListener("keydown",(e)=>{if(e.key==="Enter")numInput.blur();});
+    const origSync=sl.sync.bind(sl);
+    sl.sync=function(){ origSync(); if(document.activeElement!==numInput) numInput.value=fmt(+sl.input.value); };
+    sl.valSpan.replaceWith(numInput);
+    sl.numInput=numInput;
+    return sl;
+  }
+
+  // ═══════════════════ SLIDERS ═══════════════════
+  const SL = {};
+  SL.mu = createEditableSlider("\u03BC (mean)", -5, 5, 0.01, 0, 2, '#e11d48', "red");
+  SL.sigma = createEditableSlider("\u03C3 (std dev)", 0.1, 5, 0.01, 1, 2, C.pdf, "teal");
+  SL.q = createSlider("Quantile level", 0.005, 0.995, 0.005, 0.975, C.quantLine, "blue");
+
+  const slRow1 = document.createElement("div");
+  slRow1.style.cssText = "display:flex;gap:14px;width:100%;";
+  slRow1.append(SL.mu.el, SL.sigma.el);
+  outer.appendChild(slRow1);
+  outer.appendChild(SL.q.el);
+
+  // ═══════════════════ PANELS ═══════════════════
+  const panelRow = document.createElement("div");
+  panelRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;";
+  outer.appendChild(panelRow);
+
+  function mkPanel(titleHtml, color){
+    const card = document.createElement("div");
+    card.style.cssText = `background:${C.card};border-radius:16px;border:1px solid ${C.light};
+      padding:14px;box-shadow:0 2px 16px rgba(0,0,0,.04);`;
+    const title = document.createElement("div");
+    title.style.cssText = `font-size:14px;font-weight:800;color:${color};margin-bottom:8px;text-align:center;`;
+    title.innerHTML = titleHtml;
+    card.appendChild(title);
+    const VW=460,VH=380;
+    const svg = d3.create("svg").attr("viewBox",[0,0,VW,VH])
+      .style("width","100%").style("display","block").style("border-radius","12px")
+      .style("background","#FAFBFD").style("border",`1px solid ${C.light}`);
+    card.appendChild(svg.node());
+    panelRow.appendChild(card);
+    return {svg,title,VW,VH};
+  }
+
+  const pdfPanel = mkPanel('PDF &mdash; \u03C6(x; \u03BC, \u03C3)', C.pdf);
+  const cdfPanel = mkPanel('CDF &mdash; \u03A6(x; \u03BC, \u03C3) &amp; Quantile', C.cdf);
+
+  // ═══════════════════ RENDER ═══════════════════
+  function renderAll(){
+    SL.mu.sync(); SL.sigma.sync(); SL.q.sync();
+    const mu=SL.mu.val(), sigma=SL.sigma.val(), q=SL.q.val();
+    const xQ = normQuantile(q, mu, sigma);
+    const xQL = normQuantile(1-q, mu, sigma); // lower symmetric quantile
+    const zQ = normQ(q); // standard normal quantile (z-value)
+
+    // Symmetric probability = area between xQL and xQ
+    const symProb = q - (1-q); // = 2q - 1
+
+    const xLo = mu - 4.2*sigma, xHi = mu + 4.2*sigma;
+    const nPts = 300;
+
+    // ═══════════════════ PDF PANEL ═══════════════════
+    {
+      const{svg,VW,VH}=pdfPanel;
+      svg.selectAll("*").remove();
+      const mg={l:52,r:14,t:16,b:44};
+      const iw=VW-mg.l-mg.r, ih=VH-mg.t-mg.b;
+      const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+      const pts=curvePts(x=>normPdf(x,mu,sigma),xLo,xHi,nPts);
+      const yMax=normPdf(mu,mu,sigma)*1.12;
+      const xS=d3.scaleLinear().domain([xLo,xHi]).range([0,iw]);
+      const yS=d3.scaleLinear().domain([0,yMax]).range([ih,0]);
+
+      // Grid
+      yS.ticks(5).forEach(v=>{
+        g.append("line").attr("x2",iw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke",C.grid);
+        g.append("text").attr("x",-6).attr("y",yS(v)+4).attr("text-anchor","end")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+      xS.ticks(8).forEach(v=>{
+        g.append("text").attr("x",xS(v)).attr("y",ih+18)
+          .attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(1));
+      });
+
+      // ── Central symmetric shaded region (between xQL and xQ) ──
+      const symPts=pts.filter(d=>d.x>=xQL&&d.x<=xQ);
+      if(symPts.length>1){
+        const closed=[{x:xQL,y:normPdf(xQL,mu,sigma)},...symPts,{x:xQ,y:normPdf(xQ,mu,sigma)}];
+        g.append("path")
+          .attr("d",d3.area().x(d=>xS(d.x)).y0(ih).y1(d=>yS(d.y)).curve(d3.curveLinear)(closed))
+          .attr("fill",C.symFill).attr("opacity",0.8);
+      }
+
+      // ── Upper tail shaded region (up to quantile q from left) — shown as blue ──
+      // Actually show the full area up to xQ as a light blue under the symmetric gold
+      const leftPts=pts.filter(d=>d.x<=xQ);
+      if(leftPts.length>1){
+        const closed=[...leftPts,{x:xQ,y:normPdf(xQ,mu,sigma)}];
+        g.append("path")
+          .attr("d",d3.area().x(d=>xS(d.x)).y0(ih).y1(d=>yS(d.y)).curve(d3.curveLinear)(closed))
+          .attr("fill",C.quantFill).attr("opacity",0.35);
+      }
+
+      // Re-draw the symmetric region on top so it's visually distinct
+      if(symPts.length>1){
+        const closed=[{x:xQL,y:normPdf(xQL,mu,sigma)},...symPts,{x:xQ,y:normPdf(xQ,mu,sigma)}];
+        g.append("path")
+          .attr("d",d3.area().x(d=>xS(d.x)).y0(ih).y1(d=>yS(d.y)).curve(d3.curveLinear)(closed))
+          .attr("fill",C.symFill).attr("opacity",0.55);
+      }
+
+      // PDF curve
+      g.append("path")
+        .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yS(d.y)).curve(d3.curveLinear)(pts))
+        .attr("fill","none").attr("stroke",C.pdf).attr("stroke-width",2.5);
+
+      // ── Quantile vertical lines (both symmetric) ──
+      // Upper quantile
+      {
+        const qPx=xS(xQ), qPdfY=normPdf(xQ,mu,sigma);
+        g.append("line").attr("x1",qPx).attr("x2",qPx).attr("y1",yS(qPdfY)).attr("y2",ih)
+          .attr("stroke",C.quantLine).attr("stroke-width",2).attr("stroke-dasharray","5,3");
+        const pillX=Math.max(0,Math.min(iw-60,qPx-30));
+        g.append("rect").attr("x",pillX).attr("y",ih+2).attr("width",60).attr("height",20)
+          .attr("rx",5).attr("fill",C.quantLine);
+        g.append("text").attr("x",pillX+30).attr("y",ih+15)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text(xQ.toFixed(2));
+      }
+      // Lower quantile (symmetric)
+      {
+        const qPx=xS(xQL), qPdfY=normPdf(xQL,mu,sigma);
+        g.append("line").attr("x1",qPx).attr("x2",qPx).attr("y1",yS(qPdfY)).attr("y2",ih)
+          .attr("stroke",C.symLine).attr("stroke-width",2).attr("stroke-dasharray","5,3");
+        const pillX=Math.max(0,Math.min(iw-60,qPx-30));
+        g.append("rect").attr("x",pillX).attr("y",ih+2).attr("width",60).attr("height",20)
+          .attr("rx",5).attr("fill",C.symLine);
+        g.append("text").attr("x",pillX+30).attr("y",ih+15)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text(xQL.toFixed(2));
+      }
+
+      // Central % label
+      g.append("text").attr("x",xS(mu)).attr("y",yS(yMax*0.45))
+        .attr("text-anchor","middle").attr("font-size",14).attr("font-weight",800)
+        .attr("fill",C.symLine).attr("opacity",0.8).attr("font-family",mono)
+        .text(`${(symProb*100).toFixed(1)}%`);
+
+      // Tail labels
+      const tailProb = 1-q;
+      g.append("text").attr("x",xS(xQ)+(iw-xS(xQ))/2).attr("y",yS(yMax*0.25))
+        .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",700)
+        .attr("fill",C.quantLine).attr("opacity",0.6).attr("font-family",mono)
+        .text(`${(tailProb*100).toFixed(1)}%`);
+      g.append("text").attr("x",xS(xQL)/2).attr("y",yS(yMax*0.25))
+        .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",700)
+        .attr("fill",C.symLine).attr("opacity",0.6).attr("font-family",mono)
+        .text(`${(tailProb*100).toFixed(1)}%`);
+
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+      svg.append("text").attr("x",mg.l+iw/2).attr("y",VH-2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text("x");
+      svg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("\u03C6(x)");
+    }
+
+    // ═══════════════════ CDF PANEL ═══════════════════
+    {
+      const{svg,VW,VH}=cdfPanel;
+      svg.selectAll("*").remove();
+      const mg={l:52,r:14,t:16,b:44};
+      const iw=VW-mg.l-mg.r, ih=VH-mg.t-mg.b;
+      const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+      const pts=curvePts(x=>normCdf(x,mu,sigma),xLo,xHi,nPts);
+      const xS=d3.scaleLinear().domain([xLo,xHi]).range([0,iw]);
+      const yS=d3.scaleLinear().domain([0,1.05]).range([ih,0]);
+
+      [0,0.25,0.5,0.75,1].forEach(v=>{
+        g.append("line").attr("x2",iw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke",C.grid);
+        g.append("text").attr("x",-6).attr("y",yS(v)+4).attr("text-anchor","end")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+      xS.ticks(8).forEach(v=>{
+        g.append("text").attr("x",xS(v)).attr("y",ih+18)
+          .attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(1));
+      });
+
+      // Shaded CDF region
+      {
+        const qPx=xS(xQ), qPy=yS(q);
+        g.append("rect").attr("x",0).attr("y",qPy).attr("width",qPx).attr("height",ih-qPy)
+          .attr("fill",C.quantFill).attr("opacity",0.4);
+      }
+
+      // CDF curve
+      g.append("path")
+        .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yS(d.y)).curve(d3.curveLinear)(pts))
+        .attr("fill","none").attr("stroke",C.cdf).attr("stroke-width",2.5);
+
+      // ── Upper quantile lookup ──
+      {
+        const qPx=xS(xQ), qPy=yS(q);
+        g.append("line").attr("x1",0).attr("y1",qPy).attr("x2",qPx).attr("y2",qPy)
+          .attr("stroke",C.quantLine).attr("stroke-width",2).attr("stroke-dasharray","6,4");
+        g.append("line").attr("x1",qPx).attr("y1",qPy).attr("x2",qPx).attr("y2",ih)
+          .attr("stroke",C.quantLine).attr("stroke-width",2).attr("stroke-dasharray","6,4");
+        // q pill
+        g.append("rect").attr("x",-48).attr("y",qPy-11).attr("width",42).attr("height",22)
+          .attr("rx",5).attr("fill",C.quantLine);
+        g.append("text").attr("x",-27).attr("y",qPy+5)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text(q.toFixed(3));
+        // dot
+        g.append("circle").attr("cx",qPx).attr("cy",qPy).attr("r",5.5)
+          .attr("fill",C.quantLine).attr("stroke","#fff").attr("stroke-width",2);
+        // x pill
+        const pillX=Math.max(0,Math.min(iw-60,qPx-30));
+        g.append("rect").attr("x",pillX).attr("y",ih+2).attr("width",60).attr("height",20)
+          .attr("rx",5).attr("fill",C.quantLine);
+        g.append("text").attr("x",pillX+30).attr("y",ih+15)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text(xQ.toFixed(2));
+      }
+
+      // ── Lower quantile lookup (symmetric) ──
+      {
+        const qPx=xS(xQL), qPy=yS(1-q);
+        g.append("line").attr("x1",0).attr("y1",qPy).attr("x2",qPx).attr("y2",qPy)
+          .attr("stroke",C.symLine).attr("stroke-width",1.5).attr("stroke-dasharray","6,4").attr("opacity",0.7);
+        g.append("line").attr("x1",qPx).attr("y1",qPy).attr("x2",qPx).attr("y2",ih)
+          .attr("stroke",C.symLine).attr("stroke-width",1.5).attr("stroke-dasharray","6,4").attr("opacity",0.7);
+        // dot
+        g.append("circle").attr("cx",qPx).attr("cy",qPy).attr("r",4.5)
+          .attr("fill",C.symLine).attr("stroke","#fff").attr("stroke-width",1.5);
+        // small label
+        g.append("rect").attr("x",-48).attr("y",qPy-11).attr("width",42).attr("height",22)
+          .attr("rx",5).attr("fill",C.symLine);
+        g.append("text").attr("x",-27).attr("y",qPy+5)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text((1-q).toFixed(3));
+      }
+
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+      svg.append("text").attr("x",mg.l+iw/2).attr("y",VH-2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text("x");
+      svg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("\u03A6(x)");
+    }
+  }
+
+  // ═══════════════════ EVENTS ═══════════════════
+  SL.mu.input.addEventListener("input",renderAll);
+  SL.sigma.input.addEventListener("input",renderAll);
+  SL.q.input.addEventListener("input",renderAll);
+
+  renderAll();
+  outer.value={}; return outer;
+}
+```
+
+
+### Hệ thống hàm phân phối xác suất trong R
+
+Ngôn ngữ R viết các hàm này theo quy luật:
+
+`[Tiền tố]` + `[Tên phân phối]`
+
+| Tiền tố (Chức năng) | Tên phân phối (Viết tắt) | Ví dụ ghép hàm trong R |
+|:-----------------------|:-----------------------|:-----------------------|
+| **`d`**: pmf/pdf | **`binom`**: Nhị thức | `dbinom()`, `pbinom()`, `qbinom()` |
+| **`p`**: cdf | **`norm`**: Chuẩn | `dnorm()`, `pnorm()`, `qnorm()` |
+| **`q`**: quantile | **`gamma`**: Gamma | `dgamma()`, `pgamma()`, `qgamma()` |
+
+**Bài tập**:
+
+Giả sử cân nặng của trẻ sơ sinh đủ tháng tại một quần thể tuân theo phân phối chuẩn với trung bình ($\mu$) là 3200 gram và độ lệch chuẩn ($\sigma$) là 400 gram.
+
+- Dùng hàm nào trong R để lấy giá trị 1.96 từ phân phối chuẩn tắc khi tính khoảng tin cậy 95%?
+
+- Dùng R để tính giá trị khoảng tin cậy 95% cân nặng trẻ sơ sinh của quần thể này
+
+- Tính tỷ lệ trẻ sinh ra bị xếp vào nhóm nhẹ cân (từ 2500 gram trở xuống)
+
+### Ứng dụng
+
+**Quyết định số ngày cách ly COVID-19**
+
+Tại sao trong thời gian đại dịch, chúng ta cách ly các ca tiếp xúc hoặc nhập cảnh trong 14 ngày? Phương pháp để tính ra con số này là sử dụng hàm phân vị dựa trên phân phối thời gian ủ bệnh. Thời gian cách ly là khoảng thời gian đủ dài để 99% người nhiễm virus bộc lộ triệu chứng.
+
+Thời gian ủ bệnh (incubation period) của SARS-CoV-2 là một biến ngẫu nhiên thường được ước lượng bằng phân phối Gamma. Dựa theo [bài báo](https://www.eurosurveillance.org/content/10.2807/1560-7917.ES.2020.25.5.2000062) của tác giả Backer cùng cộng sự, thời gian ủ bệnh khi được ước lượng bằng phân phối Gamma có trung bình $\mu = 6.5$ và độ lệch chuẩn $\sigma = 2.6$ [@backer2020].
+
+**Bài tập**:
+
+Hãy dùng các biểu đồ pdf và cdf bên dưới để tái hiện lại kết quả của các tác giả đã viết trong bài báo:
+
+-   Nhập các giá trị tham số shape và rate phù hợp với phân phối thời gian ủ bệnh được báo cáo trong bài
+
+-   Kéo thanh phân vị đến các mốc 95%, 97.5%, 99% và so sánh với kết quả trong bài báo
+
+-   Dùng hàm `qgamma` trong R để kiểm tra kết quả
+
+::: callout-note
+## Gợi ý
+
+Phân phối Gamma có hai tham số là shape và rate có thể được tính từ giá trị trung bình và độ lệch chuẩn theo công thức:
+
+-   Shape: $\alpha = \frac{\mu^2}{\sigma^2}$
+-   Rate: $\beta = \frac{\mu}{\sigma^2}$
+:::
+
+```{ojs}
+viewof gammaViz = {
+  const C = {
+    txt:'#16213E', sub:'#8294AA', light:'#E4E9F0',
+    card:'#fff', grid:'#F0F2F5',
+    pdf:'#0d9488', pdfFill:'#ccfbf1',
+    cdf:'#6366f1', cdfFill:'#e0e7ff',
+    quant:'#1e40af', quantFill:'#dbeafe', quantLine:'#2563eb',
+  };
+  const mono = "'SF Mono',SFMono-Regular,Menlo,monospace";
+
+  // ═══════════════════ MATH ═══════════════════
+  function lnGamma(z){
+    if(z<0.5) return Math.log(Math.PI/Math.sin(Math.PI*z))-lnGamma(1-z);
+    z-=1;
+    const c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,
+      771.32342877765313,-176.61502916214059,12.507343278686905,
+      -0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+    let x=c[0]; for(let i=1;i<9;i++) x+=c[i]/(z+i);
+    const t=z+7.5;
+    return 0.5*Math.log(2*Math.PI)+(z+0.5)*Math.log(t)-t+Math.log(x);
+  }
+  function gammaPdf(x,a,b){
+    if(x<=0) return a<1?Infinity:a===1?b:0;
+    if(x<1e-300) return 0;
+    return Math.exp(a*Math.log(b)-lnGamma(a)+(a-1)*Math.log(x)-b*x);
+  }
+  function gammainc(a,x){
+    if(x<=0) return 0;
+    if(x>a+40||x>200) return 1-gammainc_ucf(a,x);
+    let sum=1/a,term=1/a;
+    for(let n=1;n<300;n++){term*=x/(a+n);sum+=term;if(Math.abs(term)<Math.abs(sum)*1e-14)break;}
+    return Math.exp(-x+a*Math.log(x)-lnGamma(a))*sum;
+  }
+  function gammainc_ucf(a,x){
+    const lnp=-x+a*Math.log(x)-lnGamma(a);
+    let cf_d=x+1-a; if(Math.abs(cf_d)<1e-30) cf_d=1e-30;
+    cf_d=1/cf_d; let cf_f=cf_d, cf_c=1e-30;
+    for(let i=1;i<200;i++){
+      const an=i*(a-i), bn=x+2*i+1-a;
+      cf_d=bn+an*cf_d; if(Math.abs(cf_d)<1e-30) cf_d=1e-30; cf_d=1/cf_d;
+      cf_c=bn+an/cf_c; if(Math.abs(cf_c)<1e-30) cf_c=1e-30;
+      const delta=cf_c*cf_d; cf_f*=delta;
+      if(Math.abs(delta-1)<1e-14) break;
+    }
+    return Math.exp(lnp)*cf_f;
+  }
+  function gammaCdf(x,a,b){ return x<=0?0:gammainc(a,b*x); }
+  function normQ01(p){
+    if(p<=0)return-Infinity;if(p>=1)return Infinity;
+    const a=[-39.69683028665376,220.9460984245205,-275.9285104469687,138.3577518672690,-30.66479806614716,2.506628277459239];
+    const b=[-54.47609879822406,161.5858368580409,-155.6989798598866,66.80131188771972,-13.28068155288572];
+    const c=[-0.007784894002430293,-0.3223964580411365,-2.400758277161838,-2.549732539343734,4.374664141464968,2.938163982698783];
+    const d=[0.007784695709041462,0.3224671290700398,2.445134137142996,3.754408661907416];
+    if(p<0.02425){const q=Math.sqrt(-2*Math.log(p));return(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/(((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1));}
+    if(p<=0.97575){const q=p-0.5,r=q*q;return(((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);}
+    const q=Math.sqrt(-2*Math.log(1-p));return-(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/(((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1));
+  }
+  function gammaQuantile(q,a,b){
+    if(q<=0)return 0;if(q>=1)return Infinity;
+    let x=a/b;
+    if(a>=1){const z=normQ01(q),s=Math.sqrt(a)/b;x=Math.max(1e-10,a/b+z*s);}
+    else x=Math.max(1e-10,Math.pow(q,1/a)/b);
+    for(let i=0;i<60;i++){
+      const cf=gammaCdf(x,a,b),pf=gammaPdf(x,a,b);
+      if(pf<1e-300){x*=cf<q?2:0.5;continue;}
+      const dx=(cf-q)/pf;x=Math.max(1e-15,x-dx);
+      if(Math.abs(dx)<x*1e-12)break;
+    }
+    return x;
+  }
+  function curvePts(fn,lo,hi,n){
+    const p=[],dx=(hi-lo)/(n-1);
+    for(let i=0;i<n;i++){const x=lo+i*dx,y=fn(x);if(isFinite(y))p.push({x,y});}
+    return p;
+  }
+
+  // ═══════════════════ DOM ═══════════════════
+  const outer = document.createElement("div");
+  outer.style.cssText = `display:flex;flex-direction:column;gap:14px;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  if(!document.querySelector('link[href*="Inter"]')){
+    const lk=document.createElement('link');lk.rel='stylesheet';
+    lk.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(lk);
+  }
+  outer.appendChild(injectStyle());
+
+  // Hide number input spin buttons globally
+  const spinStyle = document.createElement("style");
+  spinStyle.textContent = `input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+    input[type=number]{-moz-appearance:textfield;}`;
+  outer.appendChild(spinStyle);
+
+  // ═══════════════════ EDITABLE SLIDER ═══════════════════
+  // Slider for coarse dragging + number input for precise typing.
+  // The number input accepts ANY valid float within [min,max] — no step snapping on typed values.
+  // The slider still has a step for drag granularity.
+  function createEditableSlider(label, min, max, sliderStep, val, decimals, color, cls){
+    const sl = createSlider(label, min, max, sliderStep, val, color, cls);
+    const fmt = v => v.toFixed(decimals);
+
+    const numInput = document.createElement("input");
+    numInput.type = "number";
+    numInput.min = min; numInput.max = max;
+    numInput.step = "any"; // allow arbitrary precision typing
+    numInput.value = fmt(val);
+    numInput.style.cssText = `width:72px;font-size:16px;font-weight:800;color:${color};
+      font-variant-numeric:tabular-nums;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+      border:2px solid ${C.light};border-radius:8px;padding:3px 6px;text-align:right;
+      background:${C.card};outline:none;transition:border-color 0.15s;`;
+
+    numInput.addEventListener("focus",()=>{ numInput.style.borderColor=color; numInput.select(); });
+    numInput.addEventListener("blur",()=>{
+      numInput.style.borderColor=C.light;
+      let v = parseFloat(numInput.value);
+      if(isNaN(v)) v = val;
+      v = Math.max(min, Math.min(max, v));
+      numInput.value = fmt(v);
+      sl.input.value = v;
+      sl.sync();
+      sl.input.dispatchEvent(new Event("input"));
+    });
+    numInput.addEventListener("keydown",(e)=>{ if(e.key==="Enter") numInput.blur(); });
+
+    // Override sync to keep numInput in sync when slider drags
+    const origSync = sl.sync.bind(sl);
+    sl.sync = function(){
+      origSync();
+      // Only update numInput if it's not focused (avoid overwriting while user types)
+      if(document.activeElement !== numInput){
+        numInput.value = fmt(+sl.input.value);
+      }
+    };
+
+    sl.valSpan.replaceWith(numInput);
+    sl.numInput = numInput;
+    return sl;
+  }
+
+  // ═══════════════════ SLIDERS ═══════════════════
+  const SL = {};
+  SL.a = createEditableSlider("\u03B1 (shape)", 0.10, 20, 0.01, 3, 2, C.pdf, "teal");
+  SL.b = createEditableSlider("\u03B2 (rate)",  0.01, 10, 0.001, 1, 3, C.cdf, "purple");
+  SL.q = createSlider("Quantile level", 0.005, 0.995, 0.005, 0.975, C.quantLine, "blue");
+
+  const slRow1 = document.createElement("div");
+  slRow1.style.cssText = "display:flex;gap:14px;width:100%;";
+  slRow1.append(SL.a.el, SL.b.el);
+  outer.appendChild(slRow1);
+  outer.appendChild(SL.q.el);
+
+  // ═══════════════════ INFO LINE (Mean + SD + quantile only) ═══════════════════
+  const infoEl = document.createElement("div");
+  infoEl.style.cssText = `font-size:13px;color:${C.txt};text-align:center;line-height:1.7;font-weight:600;
+    background:${C.card};border-radius:12px;border:1px solid ${C.light};padding:10px 14px;font-family:${mono};`;
+  outer.appendChild(infoEl);
+
+  // ═══════════════════ PANELS ═══════════════════
+  const panelRow = document.createElement("div");
+  panelRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;";
+  outer.appendChild(panelRow);
+
+  function mkPanel(titleHtml, color){
+    const card = document.createElement("div");
+    card.style.cssText = `background:${C.card};border-radius:16px;border:1px solid ${C.light};
+      padding:14px;box-shadow:0 2px 16px rgba(0,0,0,.04);`;
+    const title = document.createElement("div");
+    title.style.cssText = `font-size:14px;font-weight:800;color:${color};margin-bottom:8px;text-align:center;`;
+    title.innerHTML = titleHtml;
+    card.appendChild(title);
+    const VW=460,VH=360;
+    const svg = d3.create("svg").attr("viewBox",[0,0,VW,VH])
+      .style("width","100%").style("display","block").style("border-radius","12px")
+      .style("background","#FAFBFD").style("border",`1px solid ${C.light}`);
+    card.appendChild(svg.node());
+    panelRow.appendChild(card);
+    return {svg,title,VW,VH};
+  }
+
+  const pdfPanel = mkPanel('PDF &mdash; f(x; \u03B1, \u03B2)', C.pdf);
+  const cdfPanel = mkPanel('CDF &mdash; F(x; \u03B1, \u03B2) &amp; Quantile', C.cdf);
+
+  // ═══════════════════ RENDER ═══════════════════
+  function renderAll(){
+    SL.a.sync(); SL.b.sync(); SL.q.sync();
+    const a=SL.a.val(), b=SL.b.val(), q=SL.q.val();
+    const mean=a/b, sd=Math.sqrt(a/(b*b));
+    const xQ=gammaQuantile(q,a,b);
+    const xHi=Math.max(gammaQuantile(0.999,a,b), xQ*1.2, mean+4*sd);
+    const xLo=0, nPts=300;
+
+    // Info: Mean + SD + quantile
+    infoEl.innerHTML = `Mean = \u03B1/\u03B2 = <span style="color:${C.pdf};">${mean.toFixed(4)}</span>`
+      +` &nbsp;\u2502&nbsp; SD = \u221A(\u03B1/\u03B2\u00B2) = <span style="color:${C.pdf};">${sd.toFixed(4)}</span>`
+      +` &nbsp;\u2502&nbsp; <span style="color:${C.quantLine};">F\u207B\u00B9(${q.toFixed(3)}) = ${xQ.toFixed(4)}</span>`;
+
+    // ═══════════════════ PDF ═══════════════════
+    {
+      const{svg,VW,VH}=pdfPanel;
+      svg.selectAll("*").remove();
+      const mg={l:52,r:14,t:16,b:42};
+      const iw=VW-mg.l-mg.r, ih=VH-mg.t-mg.b;
+      const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+      const pts=curvePts(x=>gammaPdf(x,a,b),Math.max(1e-6,xLo),xHi,nPts);
+      const capY=a<1?Math.min(d3.max(pts,d=>d.y)||5,b*20):(d3.max(pts,d=>d.y)||1);
+      pts.forEach(d=>{if(d.y>capY)d.y=capY;});
+      const yMax=capY*1.1;
+
+      const xS=d3.scaleLinear().domain([xLo,xHi]).range([0,iw]);
+      const yS=d3.scaleLinear().domain([0,yMax]).range([ih,0]);
+
+      // Grid
+      yS.ticks(5).forEach(v=>{
+        g.append("line").attr("x2",iw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke",C.grid);
+        g.append("text").attr("x",-6).attr("y",yS(v)+4).attr("text-anchor","end")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+      xS.ticks(6).forEach(v=>{
+        g.append("text").attr("x",xS(v)).attr("y",ih+18)
+          .attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(1));
+      });
+
+      // Shaded area under PDF up to quantile
+      const shadePts=pts.filter(d=>d.x<=xQ);
+      if(shadePts.length>1){
+        const last={x:xQ,y:Math.min(gammaPdf(xQ,a,b),capY)};
+        g.append("path")
+          .attr("d",d3.area().x(d=>xS(d.x)).y0(ih).y1(d=>yS(d.y)).curve(d3.curveLinear)([...shadePts,last]))
+          .attr("fill",C.quantFill).attr("opacity",0.7);
+        g.append("path")
+          .attr("d",d3.area().x(d=>xS(d.x)).y0(ih).y1(d=>yS(d.y)).curve(d3.curveLinear)([...shadePts,last]))
+          .attr("fill","none").attr("stroke",C.quantLine).attr("stroke-width",1).attr("opacity",0.25);
+      }
+
+      // PDF curve
+      g.append("path")
+        .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yS(d.y)).curve(d3.curveLinear)(pts))
+        .attr("fill","none").attr("stroke",C.pdf).attr("stroke-width",2.5);
+
+      // Quantile vertical line
+      {
+        const qPx=xS(xQ), qPdfY=Math.min(gammaPdf(xQ,a,b),capY);
+        g.append("line").attr("x1",qPx).attr("x2",qPx).attr("y1",yS(qPdfY)).attr("y2",ih)
+          .attr("stroke",C.quantLine).attr("stroke-width",2).attr("stroke-dasharray","5,3");
+        // x-value pill
+        const pillX=Math.max(0, Math.min(iw-60, qPx-30));
+        g.append("rect").attr("x",pillX).attr("y",ih+2).attr("width",60).attr("height",20)
+          .attr("rx",5).attr("fill",C.quantLine);
+        g.append("text").attr("x",pillX+30).attr("y",ih+15)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text(xQ.toFixed(2));
+      }
+
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+      svg.append("text").attr("x",mg.l+iw/2).attr("y",VH-2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text("x");
+      svg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("f(x)");
+    }
+
+    // ═══════════════════ CDF ═══════════════════
+    {
+      const{svg,VW,VH}=cdfPanel;
+      svg.selectAll("*").remove();
+      const mg={l:52,r:14,t:16,b:42};
+      const iw=VW-mg.l-mg.r, ih=VH-mg.t-mg.b;
+      const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+      const pts=curvePts(x=>gammaCdf(x,a,b),xLo,xHi,nPts);
+      const xS=d3.scaleLinear().domain([xLo,xHi]).range([0,iw]);
+      const yS=d3.scaleLinear().domain([0,1.05]).range([ih,0]);
+
+      [0,0.25,0.5,0.75,1].forEach(v=>{
+        g.append("line").attr("x2",iw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke",C.grid);
+        g.append("text").attr("x",-6).attr("y",yS(v)+4).attr("text-anchor","end")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+      xS.ticks(6).forEach(v=>{
+        g.append("text").attr("x",xS(v)).attr("y",ih+18)
+          .attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(1));
+      });
+
+      // Shaded CDF region
+      {
+        const qPx=xS(xQ), qPy=yS(q);
+        g.append("rect").attr("x",0).attr("y",qPy).attr("width",qPx).attr("height",ih-qPy)
+          .attr("fill",C.quantFill).attr("opacity",0.5);
+      }
+
+      // CDF curve
+      g.append("path")
+        .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yS(d.y)).curve(d3.curveLinear)(pts))
+        .attr("fill","none").attr("stroke",C.cdf).attr("stroke-width",2.5);
+
+      // Quantile lookup
+      {
+        const qPx=xS(xQ), qPy=yS(q);
+        g.append("line").attr("x1",0).attr("y1",qPy).attr("x2",qPx).attr("y2",qPy)
+          .attr("stroke",C.quantLine).attr("stroke-width",2).attr("stroke-dasharray","6,4");
+        g.append("line").attr("x1",qPx).attr("y1",qPy).attr("x2",qPx).attr("y2",ih)
+          .attr("stroke",C.quantLine).attr("stroke-width",2).attr("stroke-dasharray","6,4");
+        // q pill
+        g.append("rect").attr("x",-48).attr("y",qPy-11).attr("width",42).attr("height",22)
+          .attr("rx",5).attr("fill",C.quantLine);
+        g.append("text").attr("x",-27).attr("y",qPy+5)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text(q.toFixed(3));
+        // dot
+        g.append("circle").attr("cx",qPx).attr("cy",qPy).attr("r",5.5)
+          .attr("fill",C.quantLine).attr("stroke","#fff").attr("stroke-width",2);
+        // x pill
+        const pillX=Math.max(0, Math.min(iw-60, qPx-30));
+        g.append("rect").attr("x",pillX).attr("y",ih+2).attr("width",60).attr("height",20)
+          .attr("rx",5).attr("fill",C.quantLine);
+        g.append("text").attr("x",pillX+30).attr("y",ih+15)
+          .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+          .attr("fill","#fff").attr("font-family",mono).text(xQ.toFixed(2));
+      }
+
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+      svg.append("text").attr("x",mg.l+iw/2).attr("y",VH-2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text("x");
+      svg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("F(x)");
+    }
+  }
+
+  // ═══════════════════ EVENTS ═══════════════════
+  SL.a.input.addEventListener("input",renderAll);
+  SL.b.input.addEventListener("input",renderAll);
+  SL.q.input.addEventListener("input",renderAll);
+
+  renderAll();
+  outer.value={}; return outer;
+}
+```
+
+Một số ứng dụng khác trong y tế công cộng:
+
+-   Thời gian để công bố hết dịch của một số bệnh như Ebola, sốt Lassa... được WHO xác định là không có ca mới sau "2 lần thời gian ủ bệnh tối đa" [@djaafara2020]
+
+-   Ngưỡng cảnh báo dịch là $Q(0.95 \text{ hoặc } 0.99 \mid \theta)$ của phân phối số ca theo dữ liệu lịch sử
 
 ## Moment
 
@@ -45,17 +1656,17 @@ $$M = \underbrace{d}_{\text{Khoảng cách đến điểm tựa}} \times \underb
 
 Trong thống kê, hãy tưởng tượng trục số như một cái bập bênh. Mỗi giá trị $x$ là một vị trí trên thanh đòn, và "sức nặng" tại điểm đó chính là xác suất xảy ra của nó. Khi đó, ta thấy sự tương đồng với moment trong vật lý:
 
-- Lực ($F$): Tương ứng với Xác suất $f(x)$ (hoặc $\mathbb{P}(X=x)$). Giá trị nào có xác suất càng cao thì "lực" đè xuống càng nặng.
+-   Lực ($F$): Tương ứng với Xác suất $f(x)$ (hoặc $\mathbb{P}(X=x)$). Giá trị nào có xác suất càng cao thì "lực" đè xuống càng nặng.
 
-- Khoảng cách đến điểm tựa ($d$): Tương ứng với $(x - a)$ là khoảng cách từ giá trị dữ liệu $x$ tới một điểm mốc $a$ (ví dụ: gốc 0 hoặc giá trị trung bình).
+-   Khoảng cách đến điểm tựa ($d$): Tương ứng với $(x - a)$ là khoảng cách từ giá trị dữ liệu $x$ tới một điểm mốc $a$ (ví dụ: gốc 0 hoặc giá trị trung bình).
 
 Tổng hợp lại, moment chính là tổng (hoặc tích phân) của các tích số giữa khoảng cách và xác suất. Trong ngôn ngữ thống kê, phép tổng có trọng số này chính là Kỳ vọng ($E$).
 
 Công thức moment bậc $n$ quanh điểm $a$ được viết là:
 
-$$E[(X - a)^n] = \begin{cases} \sum (x_i - a)^n \mathbb{P}(x_i) & \text{(Rời rạc)} \\ \int_{-\infty}^{\infty} (x - a)^n f(x) dx & \text{(Liên tục)} \end{cases}$$
+$$E[(X - a)^n] = \begin{cases} \sum \underbrace{(x_i - a)^n}_{\text{Khoảng cách đến điểm tựa}} \overbrace{\mathbb{P}(x_i)}^{\text{Lực tác dụng}} & \text{(Rời rạc)} \\ \int_{-\infty}^{\infty} \underbrace{(x - a)^n}_{\text{Khoảng cách đến điểm tựa}} \overbrace{f(x)}^{\text{Lực tác dụng}} dx & \text{(Liên tục)} \end{cases}$$
 
-::: {.callout-important}
+::: callout-important
 Ký hiệu $E[g(X)]$ chính là định nghĩa toán học của việc lấy giá trị $g(X)$ nhân với xác suất rồi cộng lại. Bất cứ khi nào thấy "Lấy một giá trị, nhân với xác suất của nó, rồi cộng hết lại", thì đó chính là Kỳ vọng ($E$).
 :::
 
@@ -71,13 +1682,13 @@ Có 2 loại moment:
 Bậc của moment có thể từ 0 đến $\infty$. Chúng ta thường quan tâm tới 4 loại moment sau:
 
 | Loại moment | Kí hiệu | Tên thường gọi | Ý nghĩa |
-|----|----|----|----|
+|------------------|------------------|------------------|------------------|
 | Gốc bậc 1 | $E[X]$ | Kỳ vọng (Mean) | Vị trí (tâm của phân phối) |
 | Tập trung bậc 2 | $E[(X - E[X])^2]$ | Phương sai (Variance) | Độ phân tán (dữ liệu biến động thế nào) |
 | Tập trung bậc 3 | $E[(X - E[X])^3]$ | Độ lệch (Skewness)\* | Tính bất đối xứng (bên nào có đuôi dài hơn) |
 | Tập trung bậc 4 | $E[(X - E[X])^4]$ | Độ nhọn (Kurtosis)\* | Độ dày của đuôi |
 
-*Độ lệch và Độ nhọn thường được chuẩn hóa (standardised) bằng cách chia cho độ lệch chuẩn $\sigma$, ý nghĩa là gấp bao nhiêu lần độ lệch chuẩn.
+\*Độ lệch và Độ nhọn thường được chuẩn hóa (standardised) bằng cách chia cho độ lệch chuẩn $\sigma$, ý nghĩa là gấp bao nhiêu lần độ lệch chuẩn.
 
 ```{ojs}
 viewof moment_seesaw = {
@@ -693,7 +2304,7 @@ $$E\left[\left(\frac{X - E[X]}{\sigma}\right)^4\right]$$
 
 Lũy thừa bậc 4 làm cho những giá trị nhỏ (gần trung bình) trở nên siêu nhỏ, và những giá trị lớn (xa trung bình - outliers) trở nên lớn hơn nhiều lần. Moment này càng lớn thì đuôi của phân phối càng dày, nghĩa là xác suất xảy ra các sự kiện cực đoan càng lớn.
 
-Leptokurtic (tiền tố lepto- nghĩa là nhỏ, mảnh khảnh): độ nhọn > 3.
+Leptokurtic (tiền tố lepto- nghĩa là nhỏ, mảnh khảnh): độ nhọn \> 3.
 
 ## Tại sao lại học moment?
 

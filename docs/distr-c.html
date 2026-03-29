@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Phân phối liên tục – Statistics for babies</title>
+<title>4&nbsp; Phân phối liên tục – Statistics for babies</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,8 +30,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./distr-norm.html" rel="next">
-<link href="./distr-pois.html" rel="prev">
+<link href="./lik.html" rel="next">
+<link href="./distr-d.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -121,7 +121,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-c.html">Phân phối liên tục</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./distr-c.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối liên tục</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -164,86 +164,40 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Phân phối xác suất</span></span></a>
   </div>
 </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="./distr-d.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Phân phối rời rạc</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./distr-bin.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Phân phối nhị thức</span></span></a>
+  <a href="./distr-d.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
+        <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./distr-pois.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối Poisson</span></span></a>
+  <a href="./distr-c.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối liên tục</span></span></a>
   </div>
 </li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="./distr-c.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Phân phối liên tục</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./distr-norm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối bình thường</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./distr-lnorm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Phân phối log-normal</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./distr-exp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Phân phối mũ</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./distr-pl.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Phân phối quy tắc lũy thừa</span></span></a>
-  </div>
-</li>
-      </ul>
-  </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lik.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./bayes.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./mcmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">MCMC</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">MCMC</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./unc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -268,11 +222,11 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#phân-loại" id="toc-phân-loại" class="nav-link active" data-scroll-target="#phân-loại">Phân loại</a>
+  <li><a href="#phân-loại" id="toc-phân-loại" class="nav-link active" data-scroll-target="#phân-loại"><span class="header-section-number">4.1</span> Phân loại</a>
   <ul class="collapse">
-  <li><a href="#phép-tính-cơ-bản-trên-biến-ngẫu-nhiên" id="toc-phép-tính-cơ-bản-trên-biến-ngẫu-nhiên" class="nav-link" data-scroll-target="#phép-tính-cơ-bản-trên-biến-ngẫu-nhiên">Phép tính cơ bản trên biến ngẫu nhiên</a></li>
-  <li><a href="#thời-gian-chờ" id="toc-thời-gian-chờ" class="nav-link" data-scroll-target="#thời-gian-chờ">Thời gian chờ</a></li>
-  <li><a href="#khoảng-giới-hạn" id="toc-khoảng-giới-hạn" class="nav-link" data-scroll-target="#khoảng-giới-hạn">Khoảng giới hạn</a></li>
+  <li><a href="#phép-tính-cơ-bản-trên-biến-ngẫu-nhiên" id="toc-phép-tính-cơ-bản-trên-biến-ngẫu-nhiên" class="nav-link" data-scroll-target="#phép-tính-cơ-bản-trên-biến-ngẫu-nhiên"><span class="header-section-number">4.1.1</span> Phép tính cơ bản trên biến ngẫu nhiên</a></li>
+  <li><a href="#thời-gian-chờ" id="toc-thời-gian-chờ" class="nav-link" data-scroll-target="#thời-gian-chờ"><span class="header-section-number">4.1.2</span> Thời gian chờ</a></li>
+  <li><a href="#khoảng-giới-hạn" id="toc-khoảng-giới-hạn" class="nav-link" data-scroll-target="#khoảng-giới-hạn"><span class="header-section-number">4.1.3</span> Khoảng giới hạn</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -282,7 +236,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Phân phối liên tục</h1>
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối liên tục</span></h1>
 </div>
 
 
@@ -299,16 +253,16 @@ window.Quarto = {
 </header>
 
 
-<section id="phân-loại" class="level2">
-<h2 class="anchored" data-anchor-id="phân-loại">Phân loại</h2>
+<section id="phân-loại" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="phân-loại"><span class="header-section-number">4.1</span> Phân loại</h2>
 <p>Dựa trên cơ chế tạo ra dữ liệu, phân phối liên tục có các nhóm chính sau:</p>
-<section id="phép-tính-cơ-bản-trên-biến-ngẫu-nhiên" class="level3">
-<h3 class="anchored" data-anchor-id="phép-tính-cơ-bản-trên-biến-ngẫu-nhiên">Phép tính cơ bản trên biến ngẫu nhiên</h3>
+<section id="phép-tính-cơ-bản-trên-biến-ngẫu-nhiên" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="phép-tính-cơ-bản-trên-biến-ngẫu-nhiên"><span class="header-section-number">4.1.1</span> Phép tính cơ bản trên biến ngẫu nhiên</h3>
 <p>Phép cộng: Normal</p>
 <p>Phép nhân: Log-normal</p>
 </section>
-<section id="thời-gian-chờ" class="level3">
-<h3 class="anchored" data-anchor-id="thời-gian-chờ">Thời gian chờ</h3>
+<section id="thời-gian-chờ" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="thời-gian-chờ"><span class="header-section-number">4.1.2</span> Thời gian chờ</h3>
 <p>giá trị từ <span class="math inline">\((0, +\infty)\)</span></p>
 <ul>
 <li><p>Phân phối mũ (Exponential)</p></li>
@@ -316,8 +270,8 @@ window.Quarto = {
 <li><p>Weibull</p></li>
 </ul>
 </section>
-<section id="khoảng-giới-hạn" class="level3">
-<h3 class="anchored" data-anchor-id="khoảng-giới-hạn">Khoảng giới hạn</h3>
+<section id="khoảng-giới-hạn" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="khoảng-giới-hạn"><span class="header-section-number">4.1.3</span> Khoảng giới hạn</h3>
 <ul>
 <li><p>Uniform: giá trị từ <span class="math inline">\([a, b]\)</span></p></li>
 <li><p>Beta: giá trị từ <span class="math inline">\([0, 1]\)</span></p></li>
@@ -759,13 +713,13 @@ window.Quarto = {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./distr-pois.html" class="pagination-link" aria-label="Phân phối Poisson">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Phân phối Poisson</span></span>
+      <a href="./distr-d.html" class="pagination-link" aria-label="Phân phối rời rạc">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Phân phối rời rạc</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./distr-norm.html" class="pagination-link" aria-label="Phân phối bình thường">
-        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phân phối bình thường</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./lik.html" class="pagination-link" aria-label="Hàm hợp lý">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

@@ -3,6 +3,7 @@ title: "Phân phối bình thường"
 format: html
 execute:
   echo: false
+draft: true
 ---
 
 ```{ojs}

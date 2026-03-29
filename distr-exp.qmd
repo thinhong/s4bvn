@@ -1,6 +1,7 @@
 ---
 title: "Phân phối mũ"
 format: html
+draft: true
 ---
 
 ## Định nghĩa

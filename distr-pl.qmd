@@ -1,6 +1,7 @@
 ---
 title: "Phân phối quy tắc lũy thừa"
 format: html
+draft: true
 ---
 
 

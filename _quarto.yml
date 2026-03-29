@@ -14,20 +14,13 @@ book:
     - index.qmd
     - prob.qmd
     - distr.qmd
-    - part: distr-d.qmd
-      chapters:
-        - distr-bin.qmd
-        - distr-pois.qmd
-    - part: distr-c.qmd
-      chapters: 
-        - distr-norm.qmd
-        - distr-lnorm.qmd
-        - distr-exp.qmd
-        - distr-pl.qmd
+    - distr-d.qmd
+    - distr-c.qmd
     - lik.qmd
     - bayes.qmd
     - mcmc.qmd
     - unc.qmd
+    - sa.qmd
     - thanks.qmd
     - references.qmd
 
