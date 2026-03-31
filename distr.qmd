@@ -843,6 +843,18 @@ $$F(\underbrace{X \le x}_{\text{Giá trị biến ngẫu nhiên}} \mid \underbra
 
 Hàm cdf đơn giản là phép cộng dồn tất cả các xác suất của pmf/pdf, từ đầu đến giá trị giới hạn $x$.
 
+Với biến rời rạc, cdf được tính bằng tổng ($\sum$) của pmf:
+
+$$F(x) = \mathbb{P}(X \le x) = \sum_{x_i \le x} f(x_i)$$
+
+Với biến liên tục, cdf được tính bằng tích phân ($\int$) của pdf:
+
+$$F(x) = \mathbb{P}(X \le x) = \int_{-\infty}^{x} f(t) \, dt$$
+
+Khi lấy đạo hàm bậc nhất của cdf thì chúng ta có pdf:
+
+$$F'(x) = f(x)$$
+
 ```{ojs}
 viewof cdfAccum = {
   const C = {
