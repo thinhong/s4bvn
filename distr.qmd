@@ -79,9 +79,9 @@ viewof binomViz = {
 
   // ═══════════════════ SLIDERS ═══════════════════
   const SL = {};
-  SL.n = createSlider("n (number of trials)",1,20,1,8,C.pmf,"blue");
-  SL.p = createSlider("p (success probability)",0.01,0.99,0.01,0.40,'#E53935',"red");
-  SL.alpha = createSlider("\u03B1 (quantile level)",0.01,0.99,0.01,0.50,C.quant,"pink");
+  SL.n = createSlider("Số phép thử (n)",1,20,1,8,C.pmf,"blue");
+  SL.p = createSlider("Xác suất thành công mỗi lần (p)",0.01,0.99,0.01,0.40,'#E53935',"red");
+  SL.alpha = createSlider("Phân vị (\u03B1)",0.01,0.99,0.01,0.50,C.quant,"pink");
   const slRow1 = document.createElement("div");
   slRow1.style.cssText = "display:flex;gap:14px;width:100%;";
   slRow1.append(SL.n.el, SL.p.el);
@@ -123,11 +123,6 @@ viewof binomViz = {
     slRowAlpha.style.display = mode==='quantile'?'flex':'none';
   }
 
-  // ═══════════════════ INFO LINE ═══════════════════
-  const formulaEl = document.createElement("div");
-  formulaEl.style.cssText = `font-size:12px;color:${C.sub};text-align:center;line-height:1.6;font-weight:500;`;
-  outer.appendChild(formulaEl);
-
   // ═══════════════════ PANELS ═══════════════════
   const panelRow = document.createElement("div");
   panelRow.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;";
@@ -156,13 +151,6 @@ viewof binomViz = {
   leftPanel.card.appendChild(leftSvg.node());
   rightPanel.card.appendChild(rightSvg.node());
   panelRow.append(leftPanel.card, rightPanel.card);
-
-  // Hover info
-  const hoverInfo = document.createElement("div");
-  hoverInfo.style.cssText = `font-size:13px;font-weight:600;color:${C.txt};text-align:center;
-    min-height:24px;font-family:${mono};padding:6px 12px;
-    background:${C.card};border-radius:10px;border:1px solid ${C.light};`;
-  outer.appendChild(hoverInfo);
 
   // ═══════════════════ SQUARIFIED TREEMAP ═══════════════════
   function squarify(probs, x, y, w, h){
@@ -232,15 +220,6 @@ viewof binomViz = {
       ? `Q(\u03B1) = min{k : F(k) \u2265 \u03B1}`
       : isCDF ? `CDF`
       : `PMF`;
-
-    // Formula
-    if(isQ){
-      formulaEl.innerHTML = `<b style="color:${C.quant};">Quantile:</b> Q(${alpha.toFixed(2)}) = smallest k where F(k) \u2265 ${alpha.toFixed(2)} &rarr; <b style="color:${C.quant};">k = ${qK}</b> &nbsp; (F(${qK}) = ${cdfs[qK].toFixed(4)})`;
-    } else if(isCDF){
-      formulaEl.innerHTML = `<b style="color:${C.cdf};">CDF:</b> F(k) = \u2211<sub>i=0</sub><sup>k</sup> C(${n},i) \u00B7 ${p.toFixed(2)}<sup>i</sup> \u00B7 ${(1-p).toFixed(2)}<sup>${n}-i</sup>`;
-    } else {
-      formulaEl.innerHTML = `<b style="color:${C.pmf};">PMF:</b> P(X=k) = C(${n},k) \u00B7 ${p.toFixed(2)}<sup>k</sup> \u00B7 ${(1-p).toFixed(2)}<sup>${n}-k</sup>`;
-    }
 
     leftSvg.selectAll("*").remove();
     rightSvg.selectAll("*").remove();
@@ -486,29 +465,6 @@ viewof binomViz = {
           .on("mouseleave",()=>{hoveredK=-1;renderAll();});
       }
     }
-
-    // ═══════════════════ HOVER INFO ═══════════════════
-    if(isQ){
-      const fq = cdfs[qK];
-      hoverInfo.innerHTML = `\u03B1 = <span style="color:${C.quant};font-weight:900;">${alpha.toFixed(2)}</span>`
-        +` &rarr; Q(\u03B1) = <span style="color:${C.quant};font-weight:900;">${qK}</span>`
-        +` &nbsp;|&nbsp; F(${qK}) = ${fq.toFixed(4)} \u2265 ${alpha.toFixed(2)}`
-        +(qK>0?` &nbsp;|&nbsp; F(${qK-1}) = ${cdfs[qK-1].toFixed(4)} < ${alpha.toFixed(2)}`:'')
-        +` &nbsp;|&nbsp; Shaded area = <span style="color:${C.quant};">${(fq*100).toFixed(1)}%</span> of \u03A9`;
-    } else if(effectiveHover>=0){
-      const k=effectiveHover, pk=probs[k], ck=cdfs[k];
-      if(isCDF){
-        hoverInfo.innerHTML = `k = <b>${k}</b> &rarr; P(X=${k}) = <span style="color:${kCol(k,n)};">${pk.toFixed(4)}</span>`
-          +` &nbsp;|&nbsp; F(${k}) = P(X\u2264${k}) = <span style="color:${C.cdf};font-weight:900;">${ck.toFixed(4)}</span>`
-          +` = <span style="color:${C.cdf};">${(ck*100).toFixed(1)}%</span> of \u03A9`;
-      } else {
-        hoverInfo.innerHTML = `k = <b>${k}</b> &rarr; P(X=${k}) = C(${n},${k})\u00B7${p.toFixed(2)}<sup>${k}</sup>\u00B7${(1-p).toFixed(2)}<sup>${n-k}</sup>`
-          +` = <span style="color:${kCol(k,n)};font-weight:900;">${pk.toFixed(4)}</span>`
-          +` = <span style="color:${kCol(k,n)};">${(pk*100).toFixed(1)}%</span> of \u03A9`;
-      }
-    } else {
-      hoverInfo.innerHTML = `<span style="color:${C.sub};">Hover either panel to explore the distribution</span>`;
-    }
   }
 
   // ═══════════════════ EVENTS ═══════════════════
@@ -660,7 +616,7 @@ viewof binomial_dist = (() => {
   const SL = {};
   // Changed default 'n' from 20 to 10
   SL.n = createSlider("Số phép thử (n)", 1, 100, 1, 10, "#1e293b", "dark");
-  SL.p = createSlider("Xác suất thành công mỗi lần thử (p)", 0.01, 0.99, 0.01, 0.50, "#3b82f6", "blue");
+  SL.p = createSlider("Xác suất thành công mỗi lần (p)", 0.01, 0.99, 0.01, 0.50, "#3b82f6", "blue");
 
   const ctrlRow = document.createElement("div");
   ctrlRow.style.cssText = "display:flex;gap:28px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
@@ -887,6 +843,552 @@ $$F(\underbrace{X \le x}_{\text{Giá trị biến ngẫu nhiên}} \mid \underbra
 
 Hàm cdf đơn giản là phép cộng dồn tất cả các xác suất của pmf/pdf, từ đầu đến giá trị giới hạn $x$.
 
+```{ojs}
+viewof cdfAccum = {
+  const C = {
+    txt:'#16213E', sub:'#8294AA', light:'#E4E9F0',
+    card:'#fff', grid:'#F0F2F5',
+    pdf:'#0d9488', pdfFill:'#ccfbf1',
+    cdf:'#6366f1', cdfFill:'#dbeafe',
+    cursor:'#e11d48', cursorSoft:'#ffe4e6',
+    slope:'#d97706',
+    dimmed:'#e2e8f0',
+  };
+  const mono = "'SF Mono',SFMono-Regular,Menlo,monospace";
+
+  // ═══════════════════ MATH ═══════════════════
+  const _lf=[0];
+  function lf(n){while(_lf.length<=n)_lf.push(_lf[_lf.length-1]+Math.log(_lf.length));return _lf[n];}
+  function lnC(n,k){return(k<0||k>n)?-Infinity:lf(n)-lf(k)-lf(n-k);}
+  function binPmf(k,n,p){
+    if(k<0||k>n)return 0;if(p<=0)return k===0?1:0;if(p>=1)return k===n?1:0;
+    return Math.exp(lnC(n,k)+k*Math.log(p)+(n-k)*Math.log(1-p));
+  }
+  function binCdf(k,n,p){let s=0;for(let i=0;i<=Math.floor(k);i++)s+=binPmf(i,n,p);return Math.min(1,s);}
+
+  function lnGamma(z){
+    if(z<0.5)return Math.log(Math.PI/Math.sin(Math.PI*z))-lnGamma(1-z);
+    z-=1;const c=[0.99999999999980993,676.5203681218851,-1259.1392167224028,771.32342877765313,
+      -176.61502916214059,12.507343278686905,-0.13857109526572012,9.9843695780195716e-6,1.5056327351493116e-7];
+    let x=c[0];for(let i=1;i<9;i++)x+=c[i]/(z+i);const t=z+7.5;
+    return 0.5*Math.log(2*Math.PI)+(z+0.5)*Math.log(t)-t+Math.log(x);
+  }
+  function gammaPdf(x,a,b){
+    if(x<=0)return a<1?Infinity:a===1?b:0;if(x<1e-300)return 0;
+    return Math.exp(a*Math.log(b)-lnGamma(a)+(a-1)*Math.log(x)-b*x);
+  }
+  function gammainc(a,x){
+    if(x<=0)return 0;if(x>a+40||x>200)return 1-gammainc_ucf(a,x);
+    let sum=1/a,term=1/a;
+    for(let n=1;n<300;n++){term*=x/(a+n);sum+=term;if(Math.abs(term)<Math.abs(sum)*1e-14)break;}
+    return Math.exp(-x+a*Math.log(x)-lnGamma(a))*sum;
+  }
+  function gammainc_ucf(a,x){
+    const lnp=-x+a*Math.log(x)-lnGamma(a);
+    let d=x+1-a;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;let f=d,cc=1e-30;
+    for(let i=1;i<200;i++){const an=i*(a-i),bn=x+2*i+1-a;
+      d=bn+an*d;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;
+      cc=bn+an/cc;if(Math.abs(cc)<1e-30)cc=1e-30;
+      const delta=cc*d;f*=delta;if(Math.abs(delta-1)<1e-14)break;}
+    return Math.exp(lnp)*f;
+  }
+  function gammaCdf(x,a,b){return x<=0?0:gammainc(a,b*x);}
+  function curvePts(fn,lo,hi,n){
+    const p=[],dx=(hi-lo)/(n-1);
+    for(let i=0;i<n;i++){const x=lo+i*dx,y=fn(x);if(isFinite(y))p.push({x,y});}
+    return p;
+  }
+
+  // ═══════════════════ DOM ═══════════════════
+  const outer=document.createElement("div");
+  outer.style.cssText=`display:flex;flex-direction:column;gap:14px;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  if(!document.querySelector('link[href*="Inter"]')){
+    const lk=document.createElement('link');lk.rel='stylesheet';
+    lk.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(lk);
+  }
+  outer.appendChild(injectStyle());
+
+  // ═══════════════════ MODE TOGGLE ═══════════════════
+  let mode='discrete'; // 'discrete' | 'continuous'
+  const toggleRow=document.createElement("div");
+  toggleRow.style.cssText="display:flex;gap:6px;justify-content:center;";
+  const modeConfig={
+    discrete:{label:'Rời rạc',color:C.pdf},
+    continuous:{label:'Liên tục',color:C.cdf},
+  };
+  const modeBtns={};
+  Object.entries(modeConfig).forEach(([k,cfg])=>{
+    const b=document.createElement("button");
+    b.style.cssText=`padding:10px 28px;border-radius:10px;border:2px solid ${C.light};
+      font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.15s;`;
+    b.textContent=cfg.label;
+    b.addEventListener('click',()=>{mode=k;styleMode();renderAll();});
+    toggleRow.appendChild(b);modeBtns[k]=b;
+  });
+  outer.appendChild(toggleRow);
+  function styleMode(){
+    Object.entries(modeBtns).forEach(([k,b])=>{
+      const on=k===mode,col=modeConfig[k].color;
+      b.style.background=on?col:C.card;b.style.color=on?'#fff':C.txt;b.style.borderColor=on?col:C.light;
+    });
+    // Show/hide relevant sliders
+    slDiscrete.style.display=mode==='discrete'?'flex':'none';
+    slContinuous.style.display=mode==='continuous'?'flex':'none';
+  }
+
+  // ═══════════════════ SLIDERS ═══════════════════
+  const SL={};
+  // Discrete params
+  SL.n=createSlider("n",2,30,1,12,C.pdf,"teal");
+  SL.p=createSlider("p",0.01,0.99,0.01,0.35,C.pdf,"teal");
+  const slDiscrete=document.createElement("div");
+  slDiscrete.style.cssText="display:flex;gap:14px;width:100%;";
+  slDiscrete.append(SL.n.el,SL.p.el);
+  outer.appendChild(slDiscrete);
+
+  // Continuous params
+  SL.a=createSlider("shape",0.5,10,0.5,3,C.cdf,"purple");
+  SL.b=createSlider("rate",0.2,4,0.2,1,C.cdf,"purple");
+  const slContinuous=document.createElement("div");
+  slContinuous.style.cssText="display:flex;gap:14px;width:100%;";
+  slContinuous.append(SL.a.el,SL.b.el);
+  outer.appendChild(slContinuous);
+
+  // ═══════════════════ INFO LINE ═══════════════════
+  const infoEl=document.createElement("div");
+  infoEl.style.cssText=`font-size:13px;color:${C.txt};text-align:center;line-height:1.7;font-weight:600;
+    background:${C.card};border-radius:12px;border:1px solid ${C.light};padding:10px 14px;font-family:${mono};`;
+  outer.appendChild(infoEl);
+
+  // ═══════════════════ PANELS ═══════════════════
+  const panelRow=document.createElement("div");
+  panelRow.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;";
+  outer.appendChild(panelRow);
+
+  const VW=460,VH=380;
+  function mkPanel(titleHtml,color){
+    const card=document.createElement("div");
+    card.style.cssText=`background:${C.card};border-radius:16px;border:1px solid ${C.light};
+      padding:14px;box-shadow:0 2px 16px rgba(0,0,0,.04);`;
+    const title=document.createElement("div");
+    title.style.cssText=`font-size:14px;font-weight:800;color:${color};margin-bottom:8px;text-align:center;`;
+    title.innerHTML=titleHtml;card.appendChild(title);
+    const svg=d3.create("svg").attr("viewBox",[0,0,VW,VH])
+      .style("width","100%").style("display","block").style("border-radius","12px")
+      .style("background","#FAFBFD").style("border",`1px solid ${C.light}`);
+    card.appendChild(svg.node());panelRow.appendChild(card);
+    return{svg,title,VW,VH};
+  }
+  const pdfPanel=mkPanel('PDF / PMF',C.pdf);
+  const cdfPanel=mkPanel('CDF — Accumulating',C.cdf);
+
+  // ═══════════════════ STATE ═══════════════════
+  let cursorX=null; // the x-value where the scanline sits (null = show everything)
+  let dragging=false;
+
+  // ═══════════════════ RENDER ═══════════════════
+  function renderAll(){
+    Object.values(SL).forEach(s=>s.sync());
+    const isD=mode==='discrete';
+
+    if(isD){
+      const n=SL.n.val(), p=SL.p.val();
+      renderDiscrete(n,p);
+    } else {
+      const a=SL.a.val(), b=SL.b.val();
+      renderContinuous(a,b);
+    }
+  }
+
+  // ═══════════════════ DISCRETE RENDER ═══════════════════
+  function renderDiscrete(n,p){
+    const mg={l:52,r:14,t:16,b:44};
+    const iw=VW-mg.l-mg.r,ih=VH-mg.t-mg.b;
+
+    // Domain
+    const domain=d3.range(0,n+1);
+    const pmfVals=domain.map(k=>binPmf(k,n,p));
+    const cdfVals=domain.map(k=>binCdf(k,n,p));
+    const yMaxPmf=d3.max(pmfVals)*1.18;
+
+    const xS=d3.scaleBand().domain(domain).range([0,iw]).padding(0.2);
+    const yPmf=d3.scaleLinear().domain([0,yMaxPmf]).range([ih,0]);
+    const yCdf=d3.scaleLinear().domain([0,1.05]).range([ih,0]);
+
+    // xS continuous for cursor mapping
+    const xLinear=d3.scaleLinear().domain([-0.5,n+0.5]).range([0,iw]);
+    const cursorK=cursorX!==null?Math.round(Math.max(-0.5,Math.min(n+0.5,cursorX))):n;
+    const cursorXPx=xLinear(cursorX!==null?cursorX:n+0.5);
+
+    // Current CDF value at cursor
+    const cdfAtCursor=cursorK>=0?binCdf(cursorK,n,p):0;
+    const pmfAtCursor=cursorK>=0&&cursorK<=n?binPmf(cursorK,n,p):0;
+
+    pdfPanel.title.innerHTML=`PMF — Bin(${n}, ${p.toFixed(2)})`;
+    cdfPanel.title.innerHTML=`CDF — Accumulating the PMF`;
+
+    // ── PMF panel ──
+    {
+      const{svg}=pdfPanel; svg.selectAll("*").remove();
+      const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+      // Grid
+      yPmf.ticks(5).forEach(v=>{
+        g.append("line").attr("x2",iw).attr("y1",yPmf(v)).attr("y2",yPmf(v)).attr("stroke",C.grid);
+        g.append("text").attr("x",-6).attr("y",yPmf(v)+4).attr("text-anchor","end")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+
+      // Bars
+      domain.forEach(k=>{
+        const pk=pmfVals[k],bx=xS(k),by=yPmf(pk),bh=ih-by;
+        const active=k<=cursorK;
+        const isCurrent=k===cursorK&&cursorK>=0&&cursorK<=n;
+        g.append("rect").attr("x",bx).attr("y",by).attr("width",xS.bandwidth()).attr("height",bh)
+          .attr("rx",4).attr("fill",active?C.pdf:C.dimmed)
+          .attr("opacity",active?(isCurrent?1:0.6):0.3);
+        if(isCurrent){
+          // Highlight the bar that's being "added" right now
+          g.append("rect").attr("x",bx-2).attr("y",by-2).attr("width",xS.bandwidth()+4).attr("height",bh+4)
+            .attr("rx",6).attr("fill","none").attr("stroke",C.cursor).attr("stroke-width",2.5);
+          // Label
+          g.append("text").attr("x",bx+xS.bandwidth()/2).attr("y",by-8)
+            .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+            .attr("fill",C.cursor).attr("font-family",mono).text(`+${pk.toFixed(3)}`);
+        }
+      });
+
+      // X labels
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+      const step=n>20?2:1;
+      domain.forEach(k=>{
+        if(k%step!==0&&k!==n)return;
+        g.append("text").attr("x",xS(k)+xS.bandwidth()/2).attr("y",ih+18)
+          .attr("text-anchor","middle").attr("font-size",11)
+          .attr("font-weight",k===cursorK?800:500)
+          .attr("fill",k===cursorK?C.cursor:C.sub).attr("font-family",mono).text(k);
+      });
+      svg.append("text").attr("x",mg.l+iw/2).attr("y",VH-2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text("k");
+      svg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("P(X = k)");
+
+      // Hit area for dragging
+      g.append("rect").attr("width",iw).attr("height",ih).attr("fill","transparent").attr("cursor","col-resize")
+        .on("mousedown",()=>{dragging=true;})
+        .on("mousemove",(e)=>{if(!dragging)return;const[mx]=d3.pointer(e);cursorX=xLinear.invert(mx);renderAll();})
+        .on("mouseup",()=>{dragging=false;})
+        .on("mouseleave",()=>{dragging=false;})
+        .on("click",(e)=>{const[mx]=d3.pointer(e);cursorX=xLinear.invert(mx);renderAll();});
+    }
+
+    // ── CDF panel ──
+    {
+      const{svg}=cdfPanel; svg.selectAll("*").remove();
+      const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+      [0,0.25,0.5,0.75,1].forEach(v=>{
+        g.append("line").attr("x2",iw).attr("y1",yCdf(v)).attr("y2",yCdf(v)).attr("stroke",C.grid);
+        g.append("text").attr("x",-6).attr("y",yCdf(v)+4).attr("text-anchor","end")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+
+      // Draw CDF as step function up to cursorK
+      // Full CDF in dimmed
+      for(let k=0;k<=n;k++){
+        const cx=xS(k)+xS.bandwidth()/2;
+        if(k<n){
+          const nx=xS(k+1)+xS.bandwidth()/2;
+          g.append("line").attr("x1",cx).attr("x2",nx).attr("y1",yCdf(cdfVals[k])).attr("y2",yCdf(cdfVals[k]))
+            .attr("stroke",C.cdf).attr("stroke-width",1).attr("opacity",0.15);
+        }
+      }
+
+      // Active CDF steps (up to cursor)
+      for(let k=0;k<=Math.min(cursorK,n);k++){
+        const cx=xS(k)+xS.bandwidth()/2;
+        const prevCdf=k>0?cdfVals[k-1]:0;
+        // Vertical riser (the "jump")
+        if(k<=cursorK){
+          g.append("line").attr("x1",cx).attr("x2",cx)
+            .attr("y1",yCdf(prevCdf)).attr("y2",yCdf(cdfVals[k]))
+            .attr("stroke",k===cursorK?C.cursor:C.cdf)
+            .attr("stroke-width",k===cursorK?3:2)
+            .attr("opacity",k===cursorK?1:0.7);
+        }
+        // Horizontal segment
+        if(k<Math.min(cursorK,n)){
+          const nx=xS(k+1)+xS.bandwidth()/2;
+          g.append("line").attr("x1",cx).attr("x2",nx)
+            .attr("y1",yCdf(cdfVals[k])).attr("y2",yCdf(cdfVals[k]))
+            .attr("stroke",C.cdf).attr("stroke-width",2).attr("opacity",0.7);
+        } else if(k===cursorK&&k<=n){
+          // Extend to cursor position or rightward
+          const nx=k<n?xS(k+1)+xS.bandwidth()/2:iw;
+          g.append("line").attr("x1",cx).attr("x2",Math.min(nx,cursorXPx+mg.l>mg.l?cursorXPx:nx))
+            .attr("y1",yCdf(cdfVals[k])).attr("y2",yCdf(cdfVals[k]))
+            .attr("stroke",C.cdf).attr("stroke-width",2);
+        }
+        // Dot at each step
+        g.append("circle").attr("cx",cx).attr("cy",yCdf(cdfVals[k]))
+          .attr("r",k===cursorK?5:3)
+          .attr("fill",k===cursorK?C.cursor:C.cdf)
+          .attr("stroke","#fff").attr("stroke-width",k===cursorK?2:1);
+      }
+
+      // Jump annotation: show the height of the current jump
+      if(cursorK>=0&&cursorK<=n){
+        const cx=xS(cursorK)+xS.bandwidth()/2;
+        const prevCdf_=cursorK>0?cdfVals[cursorK-1]:0;
+        const jumpH=pmfAtCursor;
+        // Bracket showing jump height
+        const bx=cx+14;
+        g.append("line").attr("x1",bx).attr("x2",bx)
+          .attr("y1",yCdf(prevCdf_)).attr("y2",yCdf(cdfVals[cursorK]))
+          .attr("stroke",C.slope).attr("stroke-width",2.5);
+        g.append("line").attr("x1",bx-4).attr("x2",bx+4)
+          .attr("y1",yCdf(prevCdf_)).attr("y2",yCdf(prevCdf_))
+          .attr("stroke",C.slope).attr("stroke-width",2);
+        g.append("line").attr("x1",bx-4).attr("x2",bx+4)
+          .attr("y1",yCdf(cdfVals[cursorK])).attr("y2",yCdf(cdfVals[cursorK]))
+          .attr("stroke",C.slope).attr("stroke-width",2);
+        g.append("text").attr("x",bx+8).attr("y",(yCdf(prevCdf_)+yCdf(cdfVals[cursorK]))/2+4)
+          .attr("font-size",11).attr("font-weight",800).attr("fill",C.slope)
+          .attr("font-family",mono).text(`+${jumpH.toFixed(3)}`);
+      }
+
+      // CDF value label
+      g.append("rect").attr("x",-50).attr("y",yCdf(cdfAtCursor)-11).attr("width",44).attr("height",22)
+        .attr("rx",5).attr("fill",C.cdf);
+      g.append("text").attr("x",-28).attr("y",yCdf(cdfAtCursor)+5)
+        .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+        .attr("fill","#fff").attr("font-family",mono).text(cdfAtCursor.toFixed(3));
+
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+      const step=n>20?2:1;
+      domain.forEach(k=>{
+        if(k%step!==0&&k!==n)return;
+        g.append("text").attr("x",xS(k)+xS.bandwidth()/2).attr("y",ih+18)
+          .attr("text-anchor","middle").attr("font-size",11)
+          .attr("font-weight",k===cursorK?800:500)
+          .attr("fill",k===cursorK?C.cursor:C.sub).attr("font-family",mono).text(k);
+      });
+      svg.append("text").attr("x",mg.l+iw/2).attr("y",VH-2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text("k");
+      svg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("F(k)");
+
+      // Hit area
+      g.append("rect").attr("width",iw).attr("height",ih).attr("fill","transparent").attr("cursor","col-resize")
+        .on("mousedown",()=>{dragging=true;})
+        .on("mousemove",(e)=>{if(!dragging)return;const[mx]=d3.pointer(e);cursorX=xLinear.invert(mx);renderAll();})
+        .on("mouseup",()=>{dragging=false;})
+        .on("mouseleave",()=>{dragging=false;})
+        .on("click",(e)=>{const[mx]=d3.pointer(e);cursorX=xLinear.invert(mx);renderAll();});
+    }
+
+    // Info
+    infoEl.innerHTML=`<span style="color:${C.cursor};">k = ${cursorK}</span> &nbsp;\u2502&nbsp; `
+      +`PMF: P(X=${cursorK}) = <span style="color:${C.pdf};">${pmfAtCursor.toFixed(4)}</span> &nbsp;\u2502&nbsp; `
+      +`CDF: F(${cursorK}) = <span style="color:${C.cdf};">${cdfAtCursor.toFixed(4)}</span>`;
+  }
+
+  // ═══════════════════ CONTINUOUS RENDER ═══════════════════
+  function renderContinuous(a,b){
+    const mg={l:52,r:14,t:16,b:44};
+    const iw=VW-mg.l-mg.r,ih=VH-mg.t-mg.b;
+    const mean=a/b, sd=Math.sqrt(a/(b*b));
+    const xLo=0, xHi=Math.max(mean+4.5*sd, 1);
+    const nPts=300;
+
+    const xS=d3.scaleLinear().domain([xLo,xHi]).range([0,iw]);
+    const cx=cursorX!==null?Math.max(xLo,Math.min(xHi,cursorX)):xHi;
+    const cxPx=xS(cx);
+
+    const pdfVal=gammaPdf(cx,a,b);
+    const cdfVal=gammaCdf(cx,a,b);
+    const peakPdf=a>=1?gammaPdf((a-1)/b,a,b):gammaPdf(0.01,a,b);
+    const capY=a<1?Math.min(peakPdf,b*15):peakPdf;
+    const yMaxPdf=capY*1.15;
+
+    const yPdf=d3.scaleLinear().domain([0,yMaxPdf]).range([ih,0]);
+    const yCdf=d3.scaleLinear().domain([0,1.05]).range([ih,0]);
+
+    pdfPanel.title.innerHTML=`PDF — Gamma(\u03B1=${a.toFixed(1)}, \u03B2=${b.toFixed(1)})`;
+    cdfPanel.title.innerHTML=`CDF — Accumulating the PDF`;
+
+    const pts=curvePts(x=>Math.min(gammaPdf(x,a,b),capY),Math.max(1e-6,xLo),xHi,nPts);
+
+    // ── PDF panel ──
+    {
+      const{svg}=pdfPanel;svg.selectAll("*").remove();
+      const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+      yPdf.ticks(5).forEach(v=>{
+        g.append("line").attr("x2",iw).attr("y1",yPdf(v)).attr("y2",yPdf(v)).attr("stroke",C.grid);
+        g.append("text").attr("x",-6).attr("y",yPdf(v)+4).attr("text-anchor","end")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+      xS.ticks(6).forEach(v=>{
+        g.append("text").attr("x",xS(v)).attr("y",ih+18)
+          .attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(1));
+      });
+
+      // Full curve dimmed
+      g.append("path")
+        .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yPdf(d.y)).curve(d3.curveLinear)(pts))
+        .attr("fill","none").attr("stroke",C.pdf).attr("stroke-width",1.5).attr("opacity",0.2);
+
+      // Shaded area up to cursor
+      const shadePts=pts.filter(d=>d.x<=cx);
+      if(shadePts.length>1){
+        const last={x:cx,y:Math.min(gammaPdf(cx,a,b),capY)};
+        g.append("path")
+          .attr("d",d3.area().x(d=>xS(d.x)).y0(ih).y1(d=>yPdf(d.y)).curve(d3.curveLinear)([...shadePts,last]))
+          .attr("fill",C.pdfFill).attr("opacity",0.8);
+      }
+
+      // Active curve up to cursor
+      const activePts=pts.filter(d=>d.x<=cx);
+      if(activePts.length>1){
+        g.append("path")
+          .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yPdf(d.y)).curve(d3.curveLinear)(activePts))
+          .attr("fill","none").attr("stroke",C.pdf).attr("stroke-width",2.5);
+      }
+
+      // Cursor line with dot
+      {
+        const pdfCapped=Math.min(pdfVal,capY);
+        g.append("line").attr("x1",cxPx).attr("x2",cxPx).attr("y1",yPdf(pdfCapped)).attr("y2",ih)
+          .attr("stroke",C.cursor).attr("stroke-width",2).attr("stroke-dasharray","5,3");
+        g.append("circle").attr("cx",cxPx).attr("cy",yPdf(pdfCapped)).attr("r",5)
+          .attr("fill",C.cursor).attr("stroke","#fff").attr("stroke-width",2);
+        // PDF height label
+        g.append("text").attr("x",cxPx+8).attr("y",yPdf(pdfCapped)-6)
+          .attr("font-size",11).attr("font-weight",800).attr("fill",C.cursor)
+          .attr("font-family",mono).text(`f(x)=${pdfCapped.toFixed(3)}`);
+      }
+
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+      svg.append("text").attr("x",mg.l+iw/2).attr("y",VH-2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text("x");
+      svg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("f(x)");
+
+      g.append("rect").attr("width",iw).attr("height",ih).attr("fill","transparent").attr("cursor","col-resize")
+        .on("mousedown",()=>{dragging=true;})
+        .on("mousemove",(e)=>{if(!dragging)return;const[mx]=d3.pointer(e);cursorX=xS.invert(mx);renderAll();})
+        .on("mouseup",()=>{dragging=false;})
+        .on("mouseleave",()=>{dragging=false;})
+        .on("click",(e)=>{const[mx]=d3.pointer(e);cursorX=xS.invert(mx);renderAll();});
+    }
+
+    // ── CDF panel ──
+    {
+      const{svg}=cdfPanel;svg.selectAll("*").remove();
+      const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+      [0,0.25,0.5,0.75,1].forEach(v=>{
+        g.append("line").attr("x2",iw).attr("y1",yCdf(v)).attr("y2",yCdf(v)).attr("stroke",C.grid);
+        g.append("text").attr("x",-6).attr("y",yCdf(v)+4).attr("text-anchor","end")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+      });
+      xS.ticks(6).forEach(v=>{
+        g.append("text").attr("x",xS(v)).attr("y",ih+18)
+          .attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(1));
+      });
+
+      // Full CDF dimmed
+      const fullCdf=curvePts(x=>gammaCdf(x,a,b),xLo,xHi,nPts);
+      g.append("path")
+        .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yCdf(d.y)).curve(d3.curveLinear)(fullCdf))
+        .attr("fill","none").attr("stroke",C.cdf).attr("stroke-width",1.5).attr("opacity",0.15);
+
+      // Active CDF up to cursor
+      const activeCdf=fullCdf.filter(d=>d.x<=cx);
+      if(activeCdf.length>1){
+        // Filled area under CDF
+        g.append("path")
+          .attr("d",d3.area().x(d=>xS(d.x)).y0(ih).y1(d=>yCdf(d.y)).curve(d3.curveLinear)(activeCdf))
+          .attr("fill",C.cdfFill).attr("opacity",0.35);
+        // CDF line
+        g.append("path")
+          .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yCdf(d.y)).curve(d3.curveLinear)(activeCdf))
+          .attr("fill","none").attr("stroke",C.cdf).attr("stroke-width",2.5);
+      }
+
+      // Cursor point on CDF
+      {
+        g.append("line").attr("x1",cxPx).attr("x2",cxPx).attr("y1",yCdf(cdfVal)).attr("y2",ih)
+          .attr("stroke",C.cursor).attr("stroke-width",2).attr("stroke-dasharray","5,3");
+        g.append("line").attr("x1",0).attr("y1",yCdf(cdfVal)).attr("x2",cxPx).attr("y2",yCdf(cdfVal))
+          .attr("stroke",C.cdf).attr("stroke-width",1.5).attr("stroke-dasharray","4,3").attr("opacity",0.5);
+        g.append("circle").attr("cx",cxPx).attr("cy",yCdf(cdfVal)).attr("r",5)
+          .attr("fill",C.cursor).attr("stroke","#fff").attr("stroke-width",2);
+      }
+
+      // Slope indicator: tangent line on CDF showing dF/dx = f(x)
+      {
+        const dydx_data = pdfVal;
+        const slopePx = dydx_data * (-ih / 1.05) * ((xHi - xLo) / iw);
+        const halfLen = 30;
+        const norm = Math.sqrt(1 + slopePx * slopePx);
+        const dx = halfLen / norm;
+        const dy = slopePx * dx;
+        const cy = yCdf(cdfVal);
+        g.append("line")
+          .attr("x1", cxPx - dx).attr("y1", cy - dy)
+          .attr("x2", cxPx + dx).attr("y2", cy + dy)
+          .attr("stroke",C.slope).attr("stroke-width",3).attr("stroke-linecap","round");
+        g.append("text").attr("x",cxPx+dx+6).attr("y",cy+dy+4)
+          .attr("font-size",11).attr("font-weight",800).attr("fill",C.slope)
+          .attr("font-family",mono).text(pdfVal.toFixed(3));
+      }
+
+      // CDF value pill
+      g.append("rect").attr("x",-50).attr("y",yCdf(cdfVal)-11).attr("width",44).attr("height",22)
+        .attr("rx",5).attr("fill",C.cdf);
+      g.append("text").attr("x",-28).attr("y",yCdf(cdfVal)+5)
+        .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+        .attr("fill","#fff").attr("font-family",mono).text(cdfVal.toFixed(3));
+
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+      svg.append("text").attr("x",mg.l+iw/2).attr("y",VH-2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text("x");
+      svg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub)
+        .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("F(x)");
+
+      g.append("rect").attr("width",iw).attr("height",ih).attr("fill","transparent").attr("cursor","col-resize")
+        .on("mousedown",()=>{dragging=true;})
+        .on("mousemove",(e)=>{if(!dragging)return;const[mx]=d3.pointer(e);cursorX=xS.invert(mx);renderAll();})
+        .on("mouseup",()=>{dragging=false;})
+        .on("mouseleave",()=>{dragging=false;})
+        .on("click",(e)=>{const[mx]=d3.pointer(e);cursorX=xS.invert(mx);renderAll();});
+    }
+
+    infoEl.innerHTML=`<span style="color:${C.cursor};">x = ${cx.toFixed(3)}</span> &nbsp;\u2502&nbsp; `
+      +`f(x) = <span style="color:${C.pdf};">${Math.min(pdfVal,capY).toFixed(4)}</span> &nbsp;\u2502&nbsp; `
+      +`F(x) = <span style="color:${C.cdf};">${cdfVal.toFixed(4)}</span>`;
+  }
+
+  // ═══════════════════ GLOBAL MOUSE UP ═══════════════════
+  document.addEventListener("mouseup",()=>{dragging=false;});
+
+  // ═══════════════════ EVENTS ═══════════════════
+  Object.values(SL).forEach(s=>s.input.addEventListener("input",()=>{cursorX=null;renderAll();}));
+
+  styleMode();
+  renderAll();
+  outer.value={};return outer;
+}
+```
 
 
 ### Hàm phân vị
@@ -995,9 +1497,9 @@ viewof normalQViz = {
 
   // ═══════════════════ SLIDERS ═══════════════════
   const SL = {};
-  SL.mu = createEditableSlider("\u03BC (mean)", -5, 5, 0.01, 0, 2, '#e11d48', "red");
-  SL.sigma = createEditableSlider("\u03C3 (std dev)", 0.1, 5, 0.01, 1, 2, C.pdf, "teal");
-  SL.q = createSlider("Quantile level", 0.005, 0.995, 0.005, 0.975, C.quantLine, "blue");
+  SL.mu = createEditableSlider("Trung bình", -5, 5, 0.01, 0, 2, '#e11d48', "red");
+  SL.sigma = createEditableSlider("Độ lệch chuẩn", 0.1, 5, 0.01, 1, 2, C.pdf, "teal");
+  SL.q = createSlider("Phân vị", 0.005, 0.995, 0.005, 0.975, C.quantLine, "blue");
 
   const slRow1 = document.createElement("div");
   slRow1.style.cssText = "display:flex;gap:14px;width:100%;";
@@ -1027,8 +1529,8 @@ viewof normalQViz = {
     return {svg,title,VW,VH};
   }
 
-  const pdfPanel = mkPanel('PDF &mdash; \u03C6(x; \u03BC, \u03C3)', C.pdf);
-  const cdfPanel = mkPanel('CDF &mdash; \u03A6(x; \u03BC, \u03C3) &amp; Quantile', C.cdf);
+  const pdfPanel = mkPanel('PDF', C.pdf);
+  const cdfPanel = mkPanel('CDF', C.cdf);
 
   // ═══════════════════ RENDER ═══════════════════
   function renderAll(){
@@ -1441,21 +1943,15 @@ viewof gammaViz = {
 
   // ═══════════════════ SLIDERS ═══════════════════
   const SL = {};
-  SL.a = createEditableSlider("\u03B1 (shape)", 0.10, 20, 0.01, 3, 2, C.pdf, "teal");
-  SL.b = createEditableSlider("\u03B2 (rate)",  0.01, 10, 0.001, 1, 3, C.cdf, "purple");
-  SL.q = createSlider("Quantile level", 0.005, 0.995, 0.005, 0.975, C.quantLine, "blue");
+  SL.a = createEditableSlider("shape", 0.10, 20, 0.01, 3, 2, C.pdf, "teal");
+  SL.b = createEditableSlider("rate",  0.01, 10, 0.001, 1, 3, C.cdf, "purple");
+  SL.q = createSlider("Phân vị", 0.005, 0.995, 0.005, 0.5, C.quantLine, "blue");
 
   const slRow1 = document.createElement("div");
   slRow1.style.cssText = "display:flex;gap:14px;width:100%;";
   slRow1.append(SL.a.el, SL.b.el);
   outer.appendChild(slRow1);
   outer.appendChild(SL.q.el);
-
-  // ═══════════════════ INFO LINE (Mean + SD + quantile only) ═══════════════════
-  const infoEl = document.createElement("div");
-  infoEl.style.cssText = `font-size:13px;color:${C.txt};text-align:center;line-height:1.7;font-weight:600;
-    background:${C.card};border-radius:12px;border:1px solid ${C.light};padding:10px 14px;font-family:${mono};`;
-  outer.appendChild(infoEl);
 
   // ═══════════════════ PANELS ═══════════════════
   const panelRow = document.createElement("div");
@@ -1479,8 +1975,8 @@ viewof gammaViz = {
     return {svg,title,VW,VH};
   }
 
-  const pdfPanel = mkPanel('PDF &mdash; f(x; \u03B1, \u03B2)', C.pdf);
-  const cdfPanel = mkPanel('CDF &mdash; F(x; \u03B1, \u03B2) &amp; Quantile', C.cdf);
+  const pdfPanel = mkPanel('PDF', C.pdf);
+  const cdfPanel = mkPanel('CDF', C.cdf);
 
   // ═══════════════════ RENDER ═══════════════════
   function renderAll(){
@@ -1490,11 +1986,6 @@ viewof gammaViz = {
     const xQ=gammaQuantile(q,a,b);
     const xHi=Math.max(gammaQuantile(0.999,a,b), xQ*1.2, mean+4*sd);
     const xLo=0, nPts=300;
-
-    // Info: Mean + SD + quantile
-    infoEl.innerHTML = `Mean = \u03B1/\u03B2 = <span style="color:${C.pdf};">${mean.toFixed(4)}</span>`
-      +` &nbsp;\u2502&nbsp; SD = \u221A(\u03B1/\u03B2\u00B2) = <span style="color:${C.pdf};">${sd.toFixed(4)}</span>`
-      +` &nbsp;\u2502&nbsp; <span style="color:${C.quantLine};">F\u207B\u00B9(${q.toFixed(3)}) = ${xQ.toFixed(4)}</span>`;
 
     // ═══════════════════ PDF ═══════════════════
     {
@@ -2304,14 +2795,438 @@ $$E\left[\left(\frac{X - E[X]}{\sigma}\right)^4\right]$$
 
 Lũy thừa bậc 4 làm cho những giá trị nhỏ (gần trung bình) trở nên siêu nhỏ, và những giá trị lớn (xa trung bình - outliers) trở nên lớn hơn nhiều lần. Moment này càng lớn thì đuôi của phân phối càng dày, nghĩa là xác suất xảy ra các sự kiện cực đoan càng lớn.
 
-Leptokurtic (tiền tố lepto- nghĩa là nhỏ, mảnh khảnh): độ nhọn \> 3.
+### Ứng dụng
 
-## Tại sao lại học moment?
+Một số kiểm định phân phối chuẩn đánh giá hình dáng dữ liệu thông qua độ lệch $S$ và độ nhọn $K$. Theo lý thuyết, phân phối chuẩn có độ lệch bằng 0 và độ nhọn bằng 3. Kiểm định Jarque-Bera (JB) sử dụng công thức sau để đo lường xem sự xê dịch của hai đại lượng này so với mức chuẩn có nằm trong mức độ chấp nhận được hay không:
 
-Dùng method of moments để xác định điểm bắt đầu của tham số ước lượng bằng MLE [@bolker2008]. Sẽ áp dụng ở bài likelihood.
+$$JB = \frac{n}{6} \left( S^2 + \frac{(K-3)^2}{4} \right)$$
 
-Estimate
+Chỉ số JB càng lớn nghĩa là độ lệch và độ nhọn càng không chuẩn. Chỉ số này tuân theo phân phối Chi bình phương ($\chi^2$) với 2 độ tự do. Chúng ta có thể xem cách nó hoạt động ở hình sau:
 
-Estimand
+```{ojs}
+viewof jbViz = {
+  const C = {
+    txt:'#16213E', sub:'#8294AA', light:'#E4E9F0',
+    card:'#fff', grid:'#F0F2F5',
+    hist:'#0d9488', histFill:'#ccfbf1',
+    chi:'#6366f1', chiFill:'#ede9fe',
+    jb:'#e11d48', jbFill:'#ffe4e6',
+    pass:'#10b981', fail:'#ef4444',
+    skew:'#d97706', kurt:'#2563eb',
+  };
+  const mono = "'SF Mono',SFMono-Regular,Menlo,monospace";
 
-Estimator
+  // ═══════════════════ MATH ═══════════════════
+  function chi2cdf(x){ return x>0 ? 1-Math.exp(-x/2) : 0; }
+
+  function sampleStats(data){
+    const n=data.length;
+    if(n<4) return {mean:0,sd:1,skew:0,kurt:3,jb:0,pval:1,zi:[],zi3:[],zi4:[]};
+    const mean=data.reduce((a,b)=>a+b,0)/n;
+    const m2=data.reduce((a,x)=>a+(x-mean)**2,0)/n;
+    const sd=Math.sqrt(m2);
+    const zi=data.map(x=>sd>0?(x-mean)/sd:0);
+    const zi3=zi.map(z=>z**3);
+    const zi4=zi.map(z=>z**4);
+    const skew=zi3.reduce((a,b)=>a+b,0)/n;
+    const kurt=zi4.reduce((a,b)=>a+b,0)/n;
+    const exKurt=kurt-3;
+    const jb=(n/6)*(skew**2+(1/4)*exKurt**2);
+    const pval=1-chi2cdf(jb);
+    return {mean,sd,skew,kurt,exKurt,jb,pval,zi,zi3,zi4};
+  }
+
+  function boxMuller(n){
+    const o=[];for(let i=0;i<n;i+=2){
+      const u1=Math.random(),u2=Math.random();
+      o.push(Math.sqrt(-2*Math.log(u1))*Math.cos(2*Math.PI*u2));
+      if(o.length<n)o.push(Math.sqrt(-2*Math.log(u1))*Math.sin(2*Math.PI*u2));
+    }return o;
+  }
+  const distributions=[
+    {key:'normal',label:'Phân phối chuẩn',fn:n=>boxMuller(n),desc:'S\u22480, K\u22483'},
+    {key:'rskew',label:'Lệch phải',fn:n=>Array.from({length:n},()=>-Math.log(Math.random())),desc:'S > 0'},
+    {key:'lskew',label:'Lệch trái',fn:n=>Array.from({length:n},()=>Math.log(Math.random())),desc:'S < 0'},
+    {key:'heavy',label:'Đuôi dày',fn:n=>{const z=boxMuller(n);return z.map(zi=>{const v=boxMuller(3).reduce((a,b)=>a+b*b,0)/3;return zi/Math.sqrt(v);});},desc:'K >> 3'},
+    {key:'uniform',label:'Đều',fn:n=>Array.from({length:n},()=>Math.random()*2-1),desc:'K < 3'},
+    {key:'bimodal',label:'Hai đỉnh',fn:n=>Array.from({length:n},()=>Math.random()<0.5?boxMuller(1)[0]-2:boxMuller(1)[0]+2),desc:'K < 3'},
+  ];
+
+  // ═══════════════════ DOM ═══════════════════
+  const outer=document.createElement("div");
+  outer.style.cssText=`display:flex;flex-direction:column;gap:14px;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:960px;margin:0 auto;`;
+  if(!document.querySelector('link[href*="Inter"]')){
+    const lk=document.createElement('link');lk.rel='stylesheet';
+    lk.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(lk);
+  }
+  outer.appendChild(injectStyle());
+
+  // ═══════════════════ DIST PICKER ═══════════════════
+  const distRow=document.createElement("div");
+  distRow.style.cssText="display:flex;gap:5px;flex-wrap:wrap;justify-content:center;";
+  let distIdx=0;
+  const distBtns=[];
+  distributions.forEach((d,i)=>{
+    const b=document.createElement("button");
+    b.style.cssText=`padding:8px 16px;border-radius:10px;border:2px solid ${C.light};
+      font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;
+      display:flex;flex-direction:column;align-items:center;gap:2px;`;
+    b.innerHTML=`${d.label}<span style="font-size:11px;font-weight:500;color:${C.sub};font-family:${mono};">${d.desc}</span>`;
+    b.addEventListener('click',()=>{distIdx=i;styleDist();drawSample();});
+    distRow.appendChild(b);distBtns.push(b);
+  });
+  outer.appendChild(distRow);
+  function styleDist(){distBtns.forEach((b,i)=>{
+    const on=i===distIdx;
+    b.style.background=on?C.hist:C.card;b.style.color=on?'#fff':C.txt;b.style.borderColor=on?C.hist:C.light;
+    b.querySelector('span').style.color=on?'rgba(255,255,255,0.7)':C.sub;
+  });}
+
+  const SL={};
+  SL.n=createSlider("Kích thước mẫu (n)",20,500,10,100,C.hist,"teal");
+  const ctrlRow=document.createElement("div");
+  ctrlRow.style.cssText="display:flex;gap:14px;width:100%;align-items:flex-end;";
+  ctrlRow.appendChild(SL.n.el);
+  const btnDraw=createButton("\u{1F3B2}  Lấy mẫu ngẫu nhiên","go");
+  btnDraw.el.style.cssText+=";min-width:150px;height:40px;font-size:14px;";
+  ctrlRow.appendChild(btnDraw.el);
+  outer.appendChild(ctrlRow);
+
+  // ═══════════════════ MAIN GRID ═══════════════════
+  const mainGrid=document.createElement("div");
+  mainGrid.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;align-items:start;";
+  outer.appendChild(mainGrid);
+
+  // ── LEFT: histogram + skewness strip + kurtosis strip ──
+  const leftCol=document.createElement("div");
+  leftCol.style.cssText="display:flex;flex-direction:column;gap:0;";
+  mainGrid.appendChild(leftCol);
+
+  // Shared x-range (will be set during render)
+  let sharedXLo=0, sharedXHi=1;
+  const LW=460;
+
+  // Histogram
+  const histCard=document.createElement("div");
+  histCard.style.cssText=`background:${C.card};border-radius:16px 16px 0 0;border:1px solid ${C.light};
+    border-bottom:none;padding:14px 14px 4px;`;
+  const histTitle=document.createElement("div");
+  histTitle.style.cssText=`font-size:14px;font-weight:800;color:${C.hist};margin-bottom:8px;text-align:center;`;
+  histTitle.textContent="Biểu đồ phân phối mẫu (Histogram)";
+  histCard.appendChild(histTitle);
+  const histSvg=d3.create("svg").attr("viewBox",[0,0,LW,220])
+    .style("width","100%").style("display","block");
+  histCard.appendChild(histSvg.node());
+  leftCol.appendChild(histCard);
+
+  // Skewness strip
+  function mkStrip(title,color,showBottom){
+    const card=document.createElement("div");
+    const br=showBottom?'0 0 16px 16px':'0';
+    card.style.cssText=`background:${C.card};border-radius:${br};border:1px solid ${C.light};
+      border-top:none;${showBottom?'':'border-bottom:none;'}padding:4px 14px ${showBottom?'14px':'4px'};`;
+    const head=document.createElement("div");
+    head.style.cssText=`display:flex;justify-content:space-between;align-items:center;margin-bottom:2px;`;
+    const lbl=document.createElement("div");
+    lbl.style.cssText=`font-size:12px;font-weight:800;color:${color};`;
+    lbl.textContent=title;
+    const valEl=document.createElement("div");
+    valEl.style.cssText=`font-size:16px;font-weight:900;color:${color};font-family:${mono};`;
+    head.append(lbl,valEl);card.appendChild(head);
+    const svg=d3.create("svg").attr("viewBox",[0,0,LW,80])
+      .style("width","100%").style("display","block");
+    card.appendChild(svg.node());
+    leftCol.appendChild(card);
+    return{svg,valEl,color};
+  }
+  const skewStrip=mkStrip("Độ lệch (S)",C.skew,false);
+  const kurtStrip=mkStrip("Độ nhọn (K)",C.kurt,true);
+
+  // ── RIGHT: CDF chi-sq + formula + verdict ──
+  const rightCol=document.createElement("div");
+  rightCol.style.cssText="display:flex;flex-direction:column;gap:14px;";
+  mainGrid.appendChild(rightCol);
+
+  const chiCard=document.createElement("div");
+  chiCard.style.cssText=`background:${C.card};border-radius:16px;border:1px solid ${C.light};
+    padding:14px;box-shadow:0 2px 16px rgba(0,0,0,.04);`;
+  const chiTitle=document.createElement("div");
+  chiTitle.style.cssText=`font-size:14px;font-weight:800;color:${C.chi};margin-bottom:8px;text-align:center;`;
+  chiTitle.textContent="Hàm phân phối tích lũy \u03C7\u00B2(2)";
+  chiCard.appendChild(chiTitle);
+  const CW=460,CH=320;
+  const chiSvg=d3.create("svg").attr("viewBox",[0,0,CW,CH])
+    .style("width","100%").style("display","block").style("border-radius","12px")
+    .style("background","#FAFBFD").style("border",`1px solid ${C.light}`);
+  chiCard.appendChild(chiSvg.node());
+  rightCol.appendChild(chiCard);
+
+  // Formula
+  const formulaEl=document.createElement("div");
+  formulaEl.style.cssText=`background:${C.card};border-radius:14px;border:1px solid ${C.light};
+    padding:14px 18px;font-family:${mono};font-size:14px;line-height:2.2;text-align:center;color:${C.txt};`;
+  rightCol.appendChild(formulaEl);
+
+  // Verdict
+  const resultEl=document.createElement("div");
+  resultEl.style.cssText=`font-size:15px;font-weight:700;text-align:center;padding:14px;
+    border-radius:14px;border:2px solid ${C.light};`;
+  rightCol.appendChild(resultEl);
+
+  // ═══════════════════ STATE ═══════════════════
+  let data=[],stats={mean:0,sd:1,skew:0,kurt:3,exKurt:0,jb:0,pval:1,zi:[],zi3:[],zi4:[]};
+
+  function drawSample(){
+    SL.n.sync();
+    data=distributions[distIdx].fn(SL.n.val());
+    stats=sampleStats(data);
+    renderAll();
+  }
+
+  // ═══════════════════ RENDER ═══════════════════
+  function renderAll(){
+    const n=data.length;
+    if(n<4) return;
+
+    // Shared x range for all left panels
+    const lo=d3.min(data),hi=d3.max(data);
+    const pad=Math.max((hi-lo)*0.08,stats.sd*0.3);
+    sharedXLo=lo-pad; sharedXHi=hi+pad;
+
+    // Formula
+    formulaEl.innerHTML=`JB = <sup style="font-size:12px;">n</sup>\u2044<sub style="font-size:12px;">6</sub>`
+      +` [ <span style="color:${C.skew};">S</span>\u00B2 + \u00BC(<span style="color:${C.kurt};">K</span>\u22123)\u00B2 ]`
+      +`<br>= <sup style="font-size:12px;">${n}</sup>\u2044<sub style="font-size:12px;">6</sub>`
+      +` [ <span style="color:${C.skew};">${stats.skew.toFixed(3)}</span>\u00B2`
+      +` + \u00BC(<span style="color:${C.kurt};">${stats.kurt.toFixed(3)}</span>\u22123)\u00B2 ]`
+      +` = <b style="color:${C.jb};font-size:17px;">${stats.jb.toFixed(3)}</b>`;
+
+    renderHist();
+    renderStrip(skewStrip, data, stats.zi3, stats.skew, 0);
+    renderStrip(kurtStrip, data, stats.zi4, stats.kurt, 0);
+    renderChi();
+
+    // Verdict
+    const reject=stats.pval<0.05;
+    resultEl.style.background=reject?C.jbFill:C.card;
+    resultEl.style.borderColor=reject?C.fail:C.pass;
+    resultEl.style.color=reject?C.fail:C.pass;
+    resultEl.innerHTML=reject
+      ?`<b>\u2718 Bác bỏ H\u2080</b> &nbsp;\u2502&nbsp; JB = ${stats.jb.toFixed(2)} > 5.99 &nbsp;\u2502&nbsp; p = ${stats.pval<0.0001?stats.pval.toExponential(2):stats.pval.toFixed(4)}`
+      :`<b>\u2714 Không đủ cơ sở bác bỏ H\u2080</b> &nbsp;\u2502&nbsp; JB = ${stats.jb.toFixed(2)} \u2264 5.99 &nbsp;\u2502&nbsp; p = ${stats.pval.toFixed(4)}`;
+  }
+
+  // ═══════════════════ HISTOGRAM ═══════════════════
+  function renderHist(){
+    histSvg.selectAll("*").remove();
+    const n=data.length;
+    const HH=220;
+    const mg={l:44,r:12,t:8,b:14}; // minimal bottom (no x labels — shared with strips)
+    const iw=LW-mg.l-mg.r,ih=HH-mg.t-mg.b;
+    const g=histSvg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+    const xS=d3.scaleLinear().domain([sharedXLo,sharedXHi]).range([0,iw]);
+
+    const sorted=[...data].sort((a,b)=>a-b);
+    const q1=sorted[Math.floor(n*0.25)],q3=sorted[Math.floor(n*0.75)];
+    const iqr=q3-q1;
+    const fdBinW=iqr>0?2*iqr*Math.pow(n,-1/3):((sharedXHi-sharedXLo)/10||1);
+    const nBins=Math.max(8,Math.min(50,Math.round((sharedXHi-sharedXLo)/fdBinW)));
+    const bins=d3.bin().domain([sharedXLo,sharedXHi]).thresholds(nBins)(data);
+    const binW_=bins[0]?(bins[0].x1-bins[0].x0):1;
+    const maxDens=d3.max(bins,b=>b.length/(n*binW_));
+    const yS=d3.scaleLinear().domain([0,maxDens*1.15]).range([ih,0]);
+
+    yS.ticks(3).forEach(v=>{
+      g.append("line").attr("x2",iw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke",C.grid);
+      g.append("text").attr("x",-6).attr("y",yS(v)+4).attr("text-anchor","end")
+        .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+    });
+
+    bins.forEach(bin=>{
+      const dens=bin.length/(n*binW_);
+      if(dens===0)return;
+      const bx=xS(bin.x0),bw=xS(bin.x1)-xS(bin.x0);
+      g.append("rect").attr("x",bx+0.5).attr("y",yS(dens))
+        .attr("width",Math.max(1,bw-1)).attr("height",ih-yS(dens))
+        .attr("rx",2).attr("fill",C.hist).attr("opacity",0.45);
+    });
+
+    // Mean line
+    const meanPx=xS(stats.mean);
+    g.append("line").attr("x1",meanPx).attr("x2",meanPx).attr("y1",0).attr("y2",ih)
+      .attr("stroke",C.jb).attr("stroke-width",2).attr("stroke-dasharray","5,3");
+    g.append("text").attr("x",meanPx+5).attr("y",12)
+      .attr("font-size",12).attr("font-weight",800).attr("fill",C.jb)
+      .attr("font-family",mono).text(`x\u0304=${stats.mean.toFixed(2)}`);
+
+    g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.3);
+  }
+
+  // ═══════════════════ MOMENT STRIP (shared x-axis) ═══════════════════
+  function renderStrip(panel, rawData, momentVals, summary, refLine){
+    const{svg,valEl,color}=panel;
+    svg.selectAll("*").remove();
+    valEl.textContent=summary.toFixed(4);
+
+    const SH=80;
+    const mg={l:44,r:12,t:4,b:16};
+    const iw=LW-mg.l-mg.r,ih=SH-mg.t-mg.b;
+    const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+    const xS=d3.scaleLinear().domain([sharedXLo,sharedXHi]).range([0,iw]);
+
+    const n=rawData.length;
+    const maxAbs=Math.max(d3.max(momentVals,d=>Math.abs(d)),0.1);
+    const yS=d3.scaleLinear().domain([-maxAbs*1.1,maxAbs*1.1]).range([ih,0]);
+    const zeroY=yS(0);
+
+    // Zero line
+    g.append("line").attr("x2",iw).attr("y1",zeroY).attr("y2",zeroY)
+      .attr("stroke",C.sub).attr("stroke-width",0.8).attr("opacity",0.5);
+
+    // Bars at actual x positions
+    const barHalf=Math.max(0.8, iw/(n*2.5));
+    for(let i=0;i<n;i++){
+      const bx=xS(rawData[i]);
+      const v=momentVals[i];
+      g.append("line").attr("x1",bx).attr("x2",bx)
+        .attr("y1",zeroY).attr("y2",yS(v))
+        .attr("stroke",v>=0?color:C.sub).attr("stroke-width",barHalf).attr("opacity",0.45)
+        .attr("stroke-linecap","round");
+    }
+
+    // Mean line (= the summary statistic)
+    const clampedSummary=Math.max(-maxAbs*1.1,Math.min(maxAbs*1.1,summary));
+    g.append("line").attr("x2",iw).attr("y1",yS(clampedSummary)).attr("y2",yS(clampedSummary))
+      .attr("stroke",color).attr("stroke-width",2).attr("stroke-dasharray","5,3");
+
+    // Y labels
+    g.append("text").attr("x",-6).attr("y",yS(maxAbs*0.7)+4).attr("text-anchor","end")
+      .attr("font-size",10).attr("fill",C.sub).attr("font-family",mono).text(`+`);
+    g.append("text").attr("x",-6).attr("y",yS(-maxAbs*0.7)+4).attr("text-anchor","end")
+      .attr("font-size",10).attr("fill",C.sub).attr("font-family",mono).text(`\u2212`);
+
+    // X axis ticks (only on kurtosis strip — the bottom one)
+    if(panel===kurtStrip){
+      g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.3);
+      xS.ticks(6).forEach(v=>{
+        g.append("text").attr("x",xS(v)).attr("y",ih+12).attr("text-anchor","middle")
+          .attr("font-size",11).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(1));
+      });
+    }
+  }
+
+  // ═══════════════════ CHI-SQ CDF PANEL ═══════════════════
+  function renderChi(){
+    chiSvg.selectAll("*").remove();
+    const mg={l:52,r:16,t:16,b:44};
+    const iw=CW-mg.l-mg.r,ih=CH-mg.t-mg.b;
+    const g=chiSvg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+
+    const crit=5.991;
+    const xHi=Math.max(14,stats.jb*1.3,crit*2);
+    const xS=d3.scaleLinear().domain([0,xHi]).range([0,iw]);
+    const yS=d3.scaleLinear().domain([0,1.05]).range([ih,0]);
+
+    // Grid
+    [0,0.25,0.5,0.75,1].forEach(v=>{
+      g.append("line").attr("x2",iw).attr("y1",yS(v)).attr("y2",yS(v)).attr("stroke",C.grid);
+      g.append("text").attr("x",-8).attr("y",yS(v)+5).attr("text-anchor","end")
+        .attr("font-size",12).attr("fill",C.sub).attr("font-family",mono).text(v.toFixed(2));
+    });
+
+    // CDF curve
+    const pts=[];
+    for(let i=0;i<300;i++){const x=xHi*i/299;pts.push({x,y:chi2cdf(x)});}
+    g.append("path")
+      .attr("d",d3.line().x(d=>xS(d.x)).y(d=>yS(d.y)).curve(d3.curveLinear)(pts))
+      .attr("fill","none").attr("stroke",C.chi).attr("stroke-width",3);
+
+    // Critical value vertical
+    g.append("line").attr("x1",xS(crit)).attr("x2",xS(crit)).attr("y1",0).attr("y2",ih)
+      .attr("stroke",C.sub).attr("stroke-width",1.5).attr("stroke-dasharray","5,3");
+    g.append("text").attr("x",xS(crit)).attr("y",-6).attr("text-anchor","middle")
+      .attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).attr("font-family",mono)
+      .text("5.991");
+
+    // Significance level line at 0.95
+    g.append("line").attr("x1",0).attr("x2",xS(crit)).attr("y1",yS(0.95)).attr("y2",yS(0.95))
+      .attr("stroke",C.sub).attr("stroke-width",1).attr("stroke-dasharray","4,3").attr("opacity",0.5);
+    g.append("text").attr("x",-8).attr("y",yS(0.95)+5).attr("text-anchor","end")
+      .attr("font-size",11).attr("fill",C.fail).attr("font-family",mono).attr("font-weight",700).text("0.95");
+
+    // JB lookup
+    if(data.length>=4){
+      const jbClamp=Math.min(stats.jb,xHi*0.98);
+      const jbPx=xS(jbClamp);
+      const cdfVal=chi2cdf(jbClamp);
+      const cdfPy=yS(cdfVal);
+      const pval=1-cdfVal;
+
+      // Vertical from x-axis to curve
+      g.append("line").attr("x1",jbPx).attr("x2",jbPx).attr("y1",cdfPy).attr("y2",ih)
+        .attr("stroke",C.jb).attr("stroke-width",2.5).attr("stroke-dasharray","6,4");
+      // Horizontal from curve to y-axis
+      g.append("line").attr("x1",0).attr("x2",jbPx).attr("y1",cdfPy).attr("y2",cdfPy)
+        .attr("stroke",C.jb).attr("stroke-width",2).attr("stroke-dasharray","6,4");
+      // Dot on curve
+      g.append("circle").attr("cx",jbPx).attr("cy",cdfPy).attr("r",6)
+        .attr("fill",C.jb).attr("stroke","#fff").attr("stroke-width",2);
+
+      // JB pill on x-axis
+      const pillX=Math.max(0,Math.min(iw-64,jbPx-32));
+      g.append("rect").attr("x",pillX).attr("y",ih+4).attr("width",64).attr("height",22)
+        .attr("rx",6).attr("fill",C.jb);
+      g.append("text").attr("x",pillX+32).attr("y",ih+18)
+        .attr("text-anchor","middle").attr("font-size",12).attr("font-weight",800)
+        .attr("fill","#fff").attr("font-family",mono).text(`JB=${stats.jb.toFixed(2)}`);
+
+      // CDF value pill on y-axis
+      g.append("rect").attr("x",-52).attr("y",cdfPy-12).attr("width",44).attr("height",24)
+        .attr("rx",6).attr("fill",C.jb);
+      g.append("text").attr("x",-30).attr("y",cdfPy+4)
+        .attr("text-anchor","middle").attr("font-size",11).attr("font-weight",800)
+        .attr("fill","#fff").attr("font-family",mono).text(cdfVal.toFixed(3));
+
+      // p-value annotation: bracket from CDF value to 1.0
+      const bracketX=jbPx+16;
+      g.append("line").attr("x1",bracketX).attr("x2",bracketX)
+        .attr("y1",yS(1)).attr("y2",cdfPy)
+        .attr("stroke",C.fail).attr("stroke-width",2.5);
+      g.append("line").attr("x1",bracketX-4).attr("x2",bracketX+4)
+        .attr("y1",yS(1)).attr("y2",yS(1))
+        .attr("stroke",C.fail).attr("stroke-width",2);
+      g.append("line").attr("x1",bracketX-4).attr("x2",bracketX+4)
+        .attr("y1",cdfPy).attr("y2",cdfPy)
+        .attr("stroke",C.fail).attr("stroke-width",2);
+      g.append("text").attr("x",bracketX+8).attr("y",(yS(1)+cdfPy)/2+5)
+        .attr("font-size",13).attr("font-weight",800).attr("fill",C.fail)
+        .attr("font-family",mono).text(`p=${pval<0.0001?pval.toExponential(1):pval.toFixed(3)}`);
+    }
+
+    // X axis
+    g.append("line").attr("x2",iw).attr("y1",ih).attr("y2",ih).attr("stroke",C.sub).attr("opacity",0.25);
+    xS.ticks(6).forEach(v=>{
+      g.append("text").attr("x",xS(v)).attr("y",ih+18).attr("text-anchor","middle")
+        .attr("font-size",12).attr("fill",C.sub).attr("font-family",mono)
+        .text(Number.isInteger(v)?v:v.toFixed(1));
+    });
+    chiSvg.append("text").attr("x",mg.l+iw/2).attr("y",CH-2)
+      .attr("text-anchor","middle").attr("font-size",13).attr("font-weight",700).attr("fill",C.sub).text("Giá trị thống kê JB");
+    chiSvg.append("text").attr("x",12).attr("y",mg.t+ih/2)
+      .attr("text-anchor","middle").attr("font-size",13).attr("font-weight",700).attr("fill",C.sub)
+      .attr("transform",`rotate(-90,12,${mg.t+ih/2})`).text("F(x) = P(\u03C7\u00B2 \u2264 x)");
+  }
+
+  // ═══════════════════ EVENTS ═══════════════════
+  btnDraw.el.addEventListener("click",drawSample);
+  SL.n.input.addEventListener("input",drawSample);
+
+  styleDist();drawSample();
+  outer.value={};return outer;
+}
+```
+
+Một ứng dụng khác của moments là phương pháp "method of moments" dùng để xác định điểm bắt đầu của tham số ước lượng khi chúng ta sử dụng maximum likelihood estimation [@bolker2008]. Sẽ được hướng dẫn chi tiết và áp dụng ở bài likelihood.

@@ -20,7 +20,6 @@ book:
     - bayes.qmd
     - mcmc.qmd
     - unc.qmd
-    - sa.qmd
     - thanks.qmd
     - references.qmd
 
