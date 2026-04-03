@@ -198,17 +198,17 @@ viewof convViz = {
     for(let k=0;k<=n1;k++){const v=fP[k];if(v<1e-9)continue;const bh=fH*(v/(fMx*1.2));
       staticG.append("rect").attr("x",xS(k)+bPad).attr("y",fBase-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",C.f).attr("opacity",.18);}
     staticG.append("line").attr("x1",0).attr("y1",axY+axH/2).attr("x2",iw).attr("y2",axY+axH/2).attr("stroke",C.mute).attr("stroke-width",.5).attr("stroke-dasharray","3,3");
-    for(let k=gMin;k<=gMax;k++)staticG.append("text").attr("x",xC(k)).attr("y",axY+axH/2+4).attr("text-anchor","middle").attr("font-size",fs).attr("font-weight",500).attr("fill",C.sub).attr("font-family",M).text(k);
+    for(let k=0;k<=n1;k++)staticG.append("text").attr("x",xC(k)).attr("y",axY+axH/2+4).attr("text-anchor","middle").attr("font-size",fs).attr("font-weight",500).attr("fill",C.sub).attr("font-family",M).text(k);
     staticG.append("line").attr("x1",0).attr("y1",sepY+4).attr("x2",iw).attr("y2",sepY+4).attr("stroke",C.brd).attr("stroke-dasharray","6,4");
     staticG.append("text").attr("x",-4).attr("y",sepY+9).attr("text-anchor","end").attr("font-size",18).attr("font-weight",900).attr("fill",C.mute).text("=");
-    staticG.append("text").attr("x",-5).attr("y",sepY+20+rH/2).attr("text-anchor","end").attr("font-size",13).attr("font-weight",800).attr("fill",C.r).text("P");
-    staticG.append("text").attr("x",-2).attr("y",sepY+20+rH/2+10).attr("text-anchor","end").attr("font-size",9).attr("font-weight",700).attr("fill",C.r).text("X+Y");
+    staticG.append("text").attr("x",-5).attr("y",sepY+20+rH/2).attr("text-anchor","end").attr("font-size",12).attr("font-weight",800).attr("fill",C.r).text("P");
+    staticG.append("text").attr("x",-2).attr("y",sepY+20+rH/2+10).attr("text-anchor","end").attr("font-size",8).attr("font-weight",700).attr("fill",C.r).text("X+Y");
     const cMax=Math.max(d3.max(conv),.01);
     for(let n=0;n<cL;n++){const x0=rOff+n*rCW;
       staticG.append("line").attr("x1",x0).attr("y1",sepY+16).attr("x2",x0).attr("y2",rBase+2).attr("stroke",C.grid);
       const v=conv[n];if(v<1e-9)continue;const bh=rH*(v/(cMax*1.2));
       staticG.append("rect").attr("x",x0+(rCW-bW)/2).attr("y",rBase-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",C.r).attr("opacity",.14);
-      staticG.append("text").attr("x",x0+rCW/2).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-weight",500).attr("font-family",M).text(n);}
+      staticG.append("text").attr("x",x0+rCW/2).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",10).attr("fill",C.sub).attr("font-weight",500).attr("font-family",M).text(n);}
     dragG.append("rect").attr("x",0).attr("y",axY+axH-10).attr("width",iw).attr("height",gH+50).attr("fill","transparent").attr("cursor","ew-resize")
       .on("mousedown",e=>{drag=true;updateFromPointer(e);}).on("touchstart",e=>{drag=true;updateFromPointer(e);},{passive:true});
     dDynamic();}
@@ -237,8 +237,8 @@ viewof convViz = {
     if(nP>=0&&nP<cL){const v=conv[nP],x0=rOff+nP*rCW,bx=x0+(rCW-bW)/2,bh=rH*(v/(cMax*1.2));
       if(v>1e-9){dynG.append("rect").attr("x",bx).attr("y",rBase-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",C.r);
         dynG.append("rect").attr("x",bx-2).attr("y",rBase-bh-2).attr("width",bW+4).attr("height",bh+4).attr("rx",4).attr("fill","none").attr("stroke",C.rBrd).attr("stroke-width",2);
-        dynG.append("text").attr("x",x0+rCW/2).attr("y",rBase-bh-8).attr("text-anchor","middle").attr("font-size",13).attr("font-weight",900).attr("fill",C.r).attr("font-family",M).text(v.toFixed(4));}
-      dynG.append("text").attr("x",x0+rCW/2).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",11).attr("fill",C.r).attr("font-weight",800).attr("font-family",M).text(nP);}
+        dynG.append("text").attr("x",x0+rCW/2).attr("y",rBase-bh-8).attr("text-anchor","middle").attr("font-size",11).attr("font-weight",900).attr("fill",C.r).attr("font-family",M).text(v.toFixed(4));}
+      dynG.append("text").attr("x",x0+rCW/2).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",10).attr("fill",C.r).attr("font-weight",800).attr("font-family",M).text(nP);}
     const te=[];ovl.forEach(({fv},k)=>{const j=nP-k;te.push(`<span style="color:${C.f}">f(${k})</span>·<span style="color:${C.g}">g(${j})</span>`);});
     const cv2=nP>=0&&nP<cL?conv[nP]:0;
     info.innerHTML=`(f∗g)[<span style="color:${C.r};font-weight:900">${nP}</span>] = `+(te.length?`<span style="font-size:15px">${te.join(' + ')}</span>`:'0')+` = <b style="color:${C.r};font-size:20px">${cv2.toFixed(4)}</b>`;}
@@ -295,9 +295,9 @@ viewof convViz = {
     staticG.append("line").attr("x1",0).attr("y1",sepY+4).attr("x2",iw).attr("y2",sepY+4).attr("stroke",C.brd).attr("stroke-dasharray","6,4");
     staticG.append("text").attr("x",-4).attr("y",sepY+9).attr("text-anchor","end").attr("font-size",18).attr("font-weight",900).attr("fill",C.mute).text("=");
 
-    staticG.append("text").attr("x",-4).attr("y",sepY+20+rH/2).attr("text-anchor","end").attr("font-size",14).attr("font-weight",800).attr("fill",C.r).text("(f∗g)");
+    staticG.append("text").attr("x",-4).attr("y",sepY+20+rH/2).attr("text-anchor","end").attr("font-size",12).attr("font-weight",800).attr("fill",C.r).text("(f∗g)");
     mkCurve(staticG,xs.map((x,i)=>[x,cv[i]]),rH,rBase,cMax,C.r,.3);
-    xSc.ticks(10).filter(v=>v>=0).forEach(v=>staticG.append("text").attr("x",xSc(v)).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-weight",500).attr("font-family",M).text(Number.isInteger(v)?v:v.toFixed(1)));
+    xSc.ticks(10).filter(v=>v>=0).forEach(v=>staticG.append("text").attr("x",xSc(v)).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",10).attr("fill",C.sub).attr("font-weight",500).attr("font-family",M).text(Number.isInteger(v)?v:v.toFixed(1)));
 
     dragG.append("rect").attr("x",0).attr("y",axY+axH-10).attr("width",iw).attr("height",gH+60).attr("fill","transparent").attr("cursor","ew-resize")
       .on("mousedown",e=>{drag=true;updateFromPointer(e);}).on("touchstart",e=>{drag=true;updateFromPointer(e);},{passive:true});
@@ -357,7 +357,7 @@ viewof convViz = {
     if(cvt>1e-9){
       const px=xSc(t),py=rBase-ySr(cvt);
       dynG.append("circle").attr("cx",px).attr("cy",py).attr("r",5).attr("fill",C.r).attr("stroke","#fff").attr("stroke-width",2);
-      dynG.append("text").attr("x",px).attr("y",py-10).attr("text-anchor","middle").attr("font-size",13).attr("font-weight",900).attr("fill",C.r).attr("font-family",M).text(cvt.toFixed(4));
+      dynG.append("text").attr("x",px).attr("y",py-10).attr("text-anchor","middle").attr("font-size",11).attr("font-weight",900).attr("fill",C.r).attr("font-family",M).text(cvt.toFixed(4));
       dynG.append("line").attr("x1",px).attr("y1",sepY+16).attr("x2",px).attr("y2",rBase).attr("stroke",C.r).attr("stroke-width",1).attr("stroke-dasharray","3,3").attr("opacity",.4);}
 
     info.innerHTML=`(f∗g)(<span style="color:${C.r};font-weight:900">${t.toFixed(2)}</span>) = ∫ f(x)·g(${t.toFixed(2)}−x) dx = <b style="color:${C.r};font-size:20px">${cvt.toFixed(4)}</b>`;}
