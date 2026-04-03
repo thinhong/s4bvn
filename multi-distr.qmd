@@ -71,7 +71,7 @@ viewof convViz = {
   const mkTog=(txt,key)=>{const b=document.createElement("button");b.textContent=txt;
     b.dataset.key=key;b.style.cssText=`padding:8px 28px;font-size:13px;font-weight:700;border:none;
     cursor:pointer;font-family:inherit;transition:all .15s;`;return b;};
-  const tD=mkTog("Rời rạc (Discrete)","d"),tC=mkTog("Liên tục (Continuous)","c");
+  const tD=mkTog("Rời rạc","d"),tC=mkTog("Liên tục","c");
   tog.append(tD,tC);$.appendChild(tog);
   const updTog=()=>{[tD,tC].forEach(b=>{const a=b.dataset.key===mode;
     b.style.background=a?C.f:'#fff';b.style.color=a?'#fff':C.sub;});};
@@ -241,7 +241,7 @@ viewof convViz = {
       dynG.append("text").attr("x",x0+rCW/2).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",10).attr("fill",C.r).attr("font-weight",800).attr("font-family",M).text(nP);}
     const te=[];ovl.forEach(({fv},k)=>{const j=nP-k;te.push(`<span style="color:${C.f}">f(${k})</span>·<span style="color:${C.g}">g(${j})</span>`);});
     const cv2=nP>=0&&nP<cL?conv[nP]:0;
-    info.innerHTML=`(f∗g)[<span style="color:${C.r};font-weight:900">${nP}</span>] = `+(te.length?`<span style="font-size:15px">${te.join(' + ')}</span>`:'0')+` = <b style="color:${C.r};font-size:20px">${cv2.toFixed(4)}</b>`;}
+    info.innerHTML=`(f∗g)[<span style="color:${C.r};font-weight:900">${nP}</span>] = `+(te.length?`<span style="font-size:15px">${te.join(' + ')}</span>`:'0')+` = <b style="color:${C.r};font-size:17px">${cv2.toFixed(4)}</b>`;}
 
   /* ═══════════════ CONTINUOUS ═══════════════ */
   function cStatic(){
@@ -255,7 +255,7 @@ viewof convViz = {
     let cutF=1;for(let i=N;i>=0;i--){if(fR[i]>fPk*0.015){cutF=xs0[i];break;}}
     let cutG=1;for(let i=N;i>=0;i--){if(gR[i]>gPk*0.015){cutG=xs0[i];break;}}
     const fStop=cutF*1.02;
-    const xMax=(cutF+cutG)*1.03;
+    const xMax=cutF*1.05 + cutG*1.25;
     const leftPad=cutG*0.75; // negative x space so g is visible at t=0
     const dx=xMax/N,xs=Array.from({length:N+1},(_,i)=>i*dx);
     const fV=xs.map(x=>gamP(x,a1,b1)),gV=xs.map(x=>gamP(x,a2,b2));
@@ -288,8 +288,7 @@ viewof convViz = {
     staticG.append("line").attr("x1",0).attr("y1",axY+axH/2-2).attr("x2",iw).attr("y2",axY+axH/2-2).attr("stroke",C.mute).attr("stroke-width",.5).attr("stroke-dasharray","3,3");
     xSc.ticks(10).filter(v=>v>=0).forEach(v=>
       staticG.append("text").attr("x",xSc(v)).attr("y",axY+axH/2+4).attr("text-anchor","middle").attr("font-size",11).attr("font-weight",500).attr("fill",C.sub).attr("font-family",M).text(Number.isInteger(v)?v:v.toFixed(1)));
-    /* Mark x=0 boundary */
-    staticG.append("line").attr("x1",xSc(0)).attr("y1",8).attr("x2",xSc(0)).attr("y2",gBase+4).attr("stroke",C.mute).attr("stroke-width",1).attr("opacity",.4);
+
 
     /* Separator */
     staticG.append("line").attr("x1",0).attr("y1",sepY+4).attr("x2",iw).attr("y2",sepY+4).attr("stroke",C.brd).attr("stroke-dasharray","6,4");
@@ -309,17 +308,6 @@ viewof convViz = {
     const t=tI*dx;
     const ySf=v=>fH*(v/fMax),ySg=v=>gH*(v/gMx),ySr=v=>rH*(v/cMax);
 
-    /* Highlight overlap region: only where x >= 0 AND x <= t (both f and g nonzero) */
-    if(t>0){
-      const x0px=xSc(0),tw=xSc(Math.min(t,xMax))-x0px;
-      dynG.append("rect").attr("x",x0px).attr("y",fBase-fH).attr("width",tw).attr("height",fH).attr("fill",C.hi).attr("rx",3);
-      dynG.append("rect").attr("x",x0px).attr("y",gBase-gH).attr("width",tw).attr("height",gH).attr("fill",C.hi).attr("rx",3);
-      const hiIdx=Math.min(tI+1,N);
-      const fHi=xs.slice(0,hiIdx+1).map((x,i)=>[x,fV[i]]).filter(d=>d[0]<=DC.fStop);
-      if(fHi.length>1){
-        dynG.append("path").datum(fHi).attr("d",d3.area().x(d=>xSc(d[0])).y0(fBase).y1(d=>fBase-ySf(d[1])).curve(d3.curveMonotoneX)).attr("fill",C.f).attr("opacity",.3);
-        dynG.append("path").datum(fHi).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>fBase-ySf(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",C.f).attr("stroke-width",2).attr("opacity",.9);}}
-
     /* g(t-x) curve — only scan the relevant range */
     const gPts=[];
     const gStart=Math.max(-leftPad,t-cutG*1.15);
@@ -333,9 +321,37 @@ viewof convViz = {
         } else if(gPts.length>0){gPts.push([xi,0]);break;}
       } else if(gPts.length>0){gPts.push([xi,0]);break;}
     }
+
+    /* Highlight overlap region: only where both f and g are visually nonzero */
+    let fVisEnd = 0, gVisStart = t;
+    const threshF = fMax * 0.002, threshG = gMx * 0.002;
+    for(let i=tI; i>=0; i--) if(fV[i] > threshF){ fVisEnd = xs[i]; break; }
+    for(let i=0; i<=tI; i++) if(gV[tI-i] > threshG){ gVisStart = xs[i]; break; }
+
+    const oStart = Math.max(0, gPts.length > 0 ? gPts[0][0] : t);
+    const oEnd = Math.min(t, DC.fStop);
+    
+    if(oStart < oEnd && fVisEnd >= gVisStart){
+      const ox = xSc(oStart), ow = xSc(oEnd) - ox;
+      dynG.append("rect").attr("x",ox).attr("y",fBase-fH).attr("width",ow).attr("height",fH).attr("fill",C.hi).attr("rx",3);
+      dynG.append("rect").attr("x",ox).attr("y",gBase-gH).attr("width",ow).attr("height",gH).attr("fill",C.hi).attr("rx",3);
+      
+      const fHi = xs.map((x,i)=>[x,fV[i]]).filter(d => d[0] >= oStart && d[0] <= oEnd);
+      if(fHi.length>1){
+        dynG.append("path").datum(fHi).attr("d",d3.area().x(d=>xSc(d[0])).y0(fBase).y1(d=>fBase-ySf(d[1])).curve(d3.curveMonotoneX)).attr("fill",C.f).attr("opacity",.3);
+        dynG.append("path").datum(fHi).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>fBase-ySf(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",C.f).attr("stroke-width",2).attr("opacity",.9);}
+    }
+
+    /* Draw full g(t-x) faint, then draw the overlap part bright */
     if(gPts.length>1){
-      dynG.append("path").datum(gPts).attr("d",d3.area().x(d=>xSc(d[0])).y0(gBase).y1(d=>gBase-ySg(d[1])).curve(d3.curveMonotoneX)).attr("fill",C.g).attr("opacity",.3);
-      dynG.append("path").datum(gPts).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>gBase-ySg(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",C.g).attr("stroke-width",2).attr("opacity",.9);}
+      dynG.append("path").datum(gPts).attr("d",d3.area().x(d=>xSc(d[0])).y0(gBase).y1(d=>gBase-ySg(d[1])).curve(d3.curveMonotoneX)).attr("fill",C.g).attr("opacity",.15);
+      dynG.append("path").datum(gPts).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>gBase-ySg(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",C.g).attr("stroke-width",1.5).attr("opacity",.4);
+      
+      const gHi = gPts.filter(d => d[0] >= oStart && d[0] <= oEnd);
+      if(gHi.length>1 && oStart < oEnd && fVisEnd >= gVisStart){
+        dynG.append("path").datum(gHi).attr("d",d3.area().x(d=>xSc(d[0])).y0(gBase).y1(d=>gBase-ySg(d[1])).curve(d3.curveMonotoneX)).attr("fill",C.g).attr("opacity",.3);
+        dynG.append("path").datum(gHi).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>gBase-ySg(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",C.g).attr("stroke-width",2).attr("opacity",.9);}
+    }
 
     /* g(t-x) axis: labels at fixed g-argument values that MOVE with the curve */
     const gArgSc=d3.scaleLinear().domain([0,cutG*1.05]);
@@ -348,8 +364,7 @@ viewof convViz = {
     dynG.append("text").attr("x",-4).attr("y",gBase+13).attr("text-anchor","end")
       .attr("font-size",9).attr("font-weight",700).attr("fill",C.g).attr("opacity",.5).text("g(·)");
 
-    /* Vertical line at t */
-    if(t>0) dynG.append("line").attr("x1",xSc(t)).attr("y1",8).attr("x2",xSc(t)).attr("y2",gBase+4).attr("stroke",C.r).attr("stroke-width",1).attr("stroke-dasharray","4,3").attr("opacity",.5);
+
     dynG.append("text").attr("x",iw/2).attr("y",gBase+26).attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text(`t = ${t.toFixed(2)}    ◂ kéo ▸`);
 
     /* Active point on result curve */
@@ -360,7 +375,7 @@ viewof convViz = {
       dynG.append("text").attr("x",px).attr("y",py-10).attr("text-anchor","middle").attr("font-size",11).attr("font-weight",900).attr("fill",C.r).attr("font-family",M).text(cvt.toFixed(4));
       dynG.append("line").attr("x1",px).attr("y1",sepY+16).attr("x2",px).attr("y2",rBase).attr("stroke",C.r).attr("stroke-width",1).attr("stroke-dasharray","3,3").attr("opacity",.4);}
 
-    info.innerHTML=`(f∗g)(<span style="color:${C.r};font-weight:900">${t.toFixed(2)}</span>) = ∫ f(x)·g(${t.toFixed(2)}−x) dx = <b style="color:${C.r};font-size:20px">${cvt.toFixed(4)}</b>`;}
+    info.innerHTML=`(f∗g)(<span style="color:${C.r};font-weight:900">${t.toFixed(2)}</span>) = ∫ f(x)·g(${t.toFixed(2)}−x) dx = <b style="color:${C.r};font-size:17px">${cvt.toFixed(4)}</b>`;}
 
   /* ═══════════════ MODE SWITCHING ═══════════════ */
   function switchMode(m){mode=m;updTog();dRow.style.display=m==='d'?'flex':'none';cRow.style.display=m==='c'?'flex':'none';
