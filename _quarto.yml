@@ -20,6 +20,7 @@ book:
     - lik.qmd
     - bayes.qmd
     - mcmc.qmd
+    - eval-metrics.qmd
     - unc.qmd
     - thanks.qmd
     - references.qmd
