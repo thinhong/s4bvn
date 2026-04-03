@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>6&nbsp; Bayesian – Statistics for babies</title>
+<title>7&nbsp; Bayesian – Statistics for babies</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -158,7 +158,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./bayes.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Bayesian</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./bayes.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bayesian</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -215,26 +215,32 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./multi-distr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phép tính trên biến ngẫu nhiên</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./lik.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./bayes.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./mcmc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">MCMC</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">MCMC</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./unc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -259,11 +265,11 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#định-lý-bayes" id="toc-định-lý-bayes" class="nav-link active" data-scroll-target="#định-lý-bayes"><span class="header-section-number">6.1</span> Định lý Bayes</a></li>
-  <li><a href="#ví-dụ" id="toc-ví-dụ" class="nav-link" data-scroll-target="#ví-dụ"><span class="header-section-number">6.2</span> Ví dụ</a></li>
-  <li><a href="#ứng-dụng" id="toc-ứng-dụng" class="nav-link" data-scroll-target="#ứng-dụng"><span class="header-section-number">6.3</span> Ứng dụng</a></li>
-  <li><a href="#xấp-xỉ-lưới" id="toc-xấp-xỉ-lưới" class="nav-link" data-scroll-target="#xấp-xỉ-lưới"><span class="header-section-number">6.4</span> Xấp xỉ lưới</a></li>
-  <li><a href="#markov-chain-monte-carlo" id="toc-markov-chain-monte-carlo" class="nav-link" data-scroll-target="#markov-chain-monte-carlo"><span class="header-section-number">6.5</span> Markov chain Monte Carlo</a></li>
+  <li><a href="#định-lý-bayes" id="toc-định-lý-bayes" class="nav-link active" data-scroll-target="#định-lý-bayes"><span class="header-section-number">7.1</span> Định lý Bayes</a></li>
+  <li><a href="#ví-dụ" id="toc-ví-dụ" class="nav-link" data-scroll-target="#ví-dụ"><span class="header-section-number">7.2</span> Ví dụ</a></li>
+  <li><a href="#ứng-dụng" id="toc-ứng-dụng" class="nav-link" data-scroll-target="#ứng-dụng"><span class="header-section-number">7.3</span> Ứng dụng</a></li>
+  <li><a href="#xấp-xỉ-lưới" id="toc-xấp-xỉ-lưới" class="nav-link" data-scroll-target="#xấp-xỉ-lưới"><span class="header-section-number">7.4</span> Xấp xỉ lưới</a></li>
+  <li><a href="#markov-chain-monte-carlo" id="toc-markov-chain-monte-carlo" class="nav-link" data-scroll-target="#markov-chain-monte-carlo"><span class="header-section-number">7.5</span> Markov chain Monte Carlo</a></li>
   </ul>
 </nav>
     </div>
@@ -272,7 +278,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Bayesian</span></h1>
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bayesian</span></h1>
 </div>
 
 
@@ -297,8 +303,8 @@ window.Quarto = {
 </div>
 </div>
 </div>
-<section id="định-lý-bayes" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="định-lý-bayes"><span class="header-section-number">6.1</span> Định lý Bayes</h2>
+<section id="định-lý-bayes" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="định-lý-bayes"><span class="header-section-number">7.1</span> Định lý Bayes</h2>
 <p>Trong ví dụ chọn ngẫu nhiên 1 học sinh trong trường, chúng ta có hai câu hỏi trái ngược nhau:</p>
 <ul>
 <li>Nếu đã biết là học sinh Lớp A, xác suất đó là Nữ là bao nhiêu?</li>
@@ -328,8 +334,8 @@ window.Quarto = {
 <p>Đặt <span class="math inline">\(A = \text{Lớp A}\)</span>, <span class="math inline">\(B = \text{Nữ}\)</span>. Thay vào <span class="math inline">\((3)\)</span>, ta có <strong>Định lý Bayes</strong>:</p>
 <p><span class="math display">\[\mathbb{P}(A \mid B) = \frac{\mathbb{P}(B \mid A) \times \mathbb{P}(A)}{\mathbb{P}(B)}\]</span></p>
 </section>
-<section id="ví-dụ" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="ví-dụ"><span class="header-section-number">6.2</span> Ví dụ</h2>
+<section id="ví-dụ" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="ví-dụ"><span class="header-section-number">7.2</span> Ví dụ</h2>
 <p>Bạn đang muốn tìm một đối tượng để hẹn hò nghiêm túc. Bạn có 2 ứng viên mập mờ tiềm năng: A và B. Bạn cần quyết định chọn ai trong 2 người để thực sự nghiêm túc.</p>
 <p>Trước khi đi hẹn hò, bạn đã có sẵn một thiên kiến ban đầu. Có thể bạn hơi nghiêng về A vì cả hai có nhiều sở thích chung hơn, hoặc có thể bạn hoàn toàn trung lập.</p>
 <ul>
@@ -582,8 +588,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="ứng-dụng" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="ứng-dụng"><span class="header-section-number">6.3</span> Ứng dụng</h2>
+<section id="ứng-dụng" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="ứng-dụng"><span class="header-section-number">7.3</span> Ứng dụng</h2>
 <p>Giả sử một bệnh nhân nhận kết quả xét nghiệm dương tính với một căn bệnh. Các thông số của xét nghiệm như sau:</p>
 <ul>
 <li>Độ nhạy (Sensitivity): 95%</li>
@@ -874,8 +880,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="xấp-xỉ-lưới" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="xấp-xỉ-lưới"><span class="header-section-number">6.4</span> Xấp xỉ lưới</h2>
+<section id="xấp-xỉ-lưới" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="xấp-xỉ-lưới"><span class="header-section-number">7.4</span> Xấp xỉ lưới</h2>
 <p>Chúng ta đã</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb5" data-startfrom="533" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 532;"><span id="cb5-533"><a href="#cb5-533" aria-hidden="true" tabindex="-1"></a>viewof bayes_grid <span class="op">=</span> (() <span class="kw">=&gt;</span> {</span>
@@ -1284,8 +1290,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="markov-chain-monte-carlo" class="level2" data-number="6.5">
-<h2 data-number="6.5" class="anchored" data-anchor-id="markov-chain-monte-carlo"><span class="header-section-number">6.5</span> Markov chain Monte Carlo</h2>
+<section id="markov-chain-monte-carlo" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="markov-chain-monte-carlo"><span class="header-section-number">7.5</span> Markov chain Monte Carlo</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb6" data-startfrom="939" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 938;"><span id="cb6-939"><a href="#cb6-939" aria-hidden="true" tabindex="-1"></a>viewof grid_vs_mcmc <span class="op">=</span> (() <span class="kw">=&gt;</span> {</span>
 <span id="cb6-940"><a href="#cb6-940" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ══════════════════════════════════════════════════════</span></span>
@@ -2136,12 +2142,12 @@ window._ojs.runtime.interpretFromScriptTags();
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./lik.html" class="pagination-link" aria-label="Hàm hợp lý">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./mcmc.html" class="pagination-link" aria-label="MCMC">
-        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">MCMC</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">MCMC</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

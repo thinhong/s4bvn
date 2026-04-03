@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>7&nbsp; MCMC – Statistics for babies</title>
+<title>8&nbsp; MCMC – Statistics for babies</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -129,7 +129,7 @@ gtag('config', 'G-N2T5TFNFY7', { 'anonymize_ip': true});
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./mcmc.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">MCMC</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./mcmc.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">MCMC</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -186,26 +186,32 @@ gtag('config', 'G-N2T5TFNFY7', { 'anonymize_ip': true});
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./multi-distr.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Phép tính trên biến ngẫu nhiên</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./lik.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Hàm hợp lý</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./bayes.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bayesian</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./mcmc.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">MCMC</span></span></a>
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">MCMC</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./unc.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -230,8 +236,8 @@ gtag('config', 'G-N2T5TFNFY7', { 'anonymize_ip': true});
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#thuật-toán-metropolis---hastings" id="toc-thuật-toán-metropolis---hastings" class="nav-link active" data-scroll-target="#thuật-toán-metropolis---hastings"><span class="header-section-number">7.1</span> Thuật toán Metropolis - Hastings</a></li>
-  <li><a href="#fit-mô-hình" id="toc-fit-mô-hình" class="nav-link" data-scroll-target="#fit-mô-hình"><span class="header-section-number">7.2</span> Fit mô hình</a></li>
+  <li><a href="#thuật-toán-metropolis---hastings" id="toc-thuật-toán-metropolis---hastings" class="nav-link active" data-scroll-target="#thuật-toán-metropolis---hastings"><span class="header-section-number">8.1</span> Thuật toán Metropolis - Hastings</a></li>
+  <li><a href="#fit-mô-hình" id="toc-fit-mô-hình" class="nav-link" data-scroll-target="#fit-mô-hình"><span class="header-section-number">8.2</span> Fit mô hình</a></li>
   </ul>
 </nav>
     </div>
@@ -240,7 +246,7 @@ gtag('config', 'G-N2T5TFNFY7', { 'anonymize_ip': true});
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">MCMC</span></h1>
+<h1 class="title"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">MCMC</span></h1>
 </div>
 
 
@@ -275,8 +281,8 @@ gtag('config', 'G-N2T5TFNFY7', { 'anonymize_ip': true});
 </div>
 </div>
 </div>
-<section id="thuật-toán-metropolis---hastings" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="thuật-toán-metropolis---hastings"><span class="header-section-number">7.1</span> Thuật toán Metropolis - Hastings</h2>
+<section id="thuật-toán-metropolis---hastings" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="thuật-toán-metropolis---hastings"><span class="header-section-number">8.1</span> Thuật toán Metropolis - Hastings</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb2" data-startfrom="15" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 14;"><span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>viewof mh <span class="op">=</span> {</span>
 <span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ═══════════════════ MATH ═══════════════════</span></span>
@@ -813,8 +819,8 @@ gtag('config', 'G-N2T5TFNFY7', { 'anonymize_ip': true});
 </div>
 </div>
 </section>
-<section id="fit-mô-hình" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="fit-mô-hình"><span class="header-section-number">7.2</span> Fit mô hình</h2>
+<section id="fit-mô-hình" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="fit-mô-hình"><span class="header-section-number">8.2</span> Fit mô hình</h2>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code hidden" id="cb3" data-startfrom="548" data-source-offset="0"><pre class="sourceCode js code-with-copy"><code class="sourceCode javascript" style="counter-reset: source-line 547;"><span id="cb3-548"><a href="#cb3-548" aria-hidden="true" tabindex="-1"></a>viewof sir <span class="op">=</span> {</span>
 <span id="cb3-549"><a href="#cb3-549" aria-hidden="true" tabindex="-1"></a>  <span class="co">// ═══════════════════ MATH UTILITIES ═══════════════════</span></span>
@@ -1682,12 +1688,12 @@ window._ojs.runtime.interpretFromScriptTags();
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./bayes.html" class="pagination-link" aria-label="Bayesian">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Bayesian</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Bayesian</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./unc.html" class="pagination-link" aria-label="Sự không chắc chắn">
-        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sự không chắc chắn</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

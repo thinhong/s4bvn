@@ -16,6 +16,7 @@ book:
     - distr.qmd
     - distr-d.qmd
     - distr-c.qmd
+    - multi-distr.qmd
     - lik.qmd
     - bayes.qmd
     - mcmc.qmd

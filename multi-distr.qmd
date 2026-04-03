@@ -1,0 +1,390 @@
+---
+title: "Phép tính trên biến ngẫu nhiên"
+format: html
+execute: 
+  echo: false
+---
+
+```{ojs}
+import { createSlider, createButton, injectStyle } from "./_slider.js"
+d3 = require("d3@7")
+```
+
+Mỗi biến ngẫu nhiên đại diện cho một phân phối xác suất. Trên thực tế, chúng ta hiếm khi phân tích một biến đơn lẻ, mà luôn phải xử lý nhiều biến tương tác với nhau. Việc kết hợp các biến này thực chất là thực hiện các phép tính giữa các phân phối, từ đó tạo ra một phân phối hoàn toàn mới. Chương này sẽ trình bày các phép tính thường gặp nhất.
+
+## Tích chập
+
+Tích chập (convolution) được sử dụng để xác định hàm pmf/pdf của một chuỗi sự kiện nối tiếp.
+
+Với biến rời rạc:
+
+$$\mathbb{P}(Z=z) = \sum_{k=-\infty}^{\infty} \mathbb{P}(X=k) \cdot \mathbb{P}(Y = z - k)$$
+
+Với biến liên tục:
+
+$$f_Z(z) = \int_{-\infty}^{\infty} f_X(x) f_Y(z - x) \, dx$$
+
+Một bệnh nhân đến khám vào ngày thứ 10 sau phơi nhiễm ($z = 10$). Rất nhiều trường hợp có thể xảy ra:
+
+- Ủ bệnh 2 ngày ($x = 2$) VÀ đến khám sau 8 ngày ($10 - 2$).
+- Ủ bệnh 5 ngày ($x = 5$) VÀ đến khám sau 5 ngày ($10 - 5$).
+- Ủ bệnh 8 ngày ($x = 8$) VÀ đến khám sau 2 ngày ($10 - 8$).
+
+
+```{ojs}
+viewof convViz = {
+  const C={bg:'#f7f9fc',card:'#fff',brd:'#dfe3ea',sh:'0 1px 6px rgba(0,0,0,0.045)',
+    txt:'#1a2035',sub:'#8690a7',mute:'#c4c9d6',grid:'rgba(0,0,0,0.035)',
+    f:'#2563eb',g:'#eab308',r:'#7c3aed',rBrd:'#6d28d9',
+    hi:'rgba(37,99,235,0.07)',hTxt:'#7c5e10'};
+  const M="'SF Mono',SFMono-Regular,Menlo,Consolas,monospace";
+
+  /* ── Math helpers ── */
+  const _lf=[0];
+  const lf=n=>{while(_lf.length<=n)_lf.push(_lf[_lf.length-1]+Math.log(_lf.length));return _lf[n];};
+  const binP=(k,n,p)=>k<0||k>n?0:Math.exp(lf(n)-lf(k)-lf(n-k)+k*Math.log(p)+(n-k)*Math.log(1-p));
+
+  const lgC=[0.9999999999998099,676.5203681218851,-1259.1392167224028,
+    771.3234287776531,-176.6150291621406,12.507343278686905,
+    -0.13857109526572012,9.984369578019572e-6,1.5056327351493116e-7];
+  const lg=x=>{if(x<.5)return Math.log(Math.PI/Math.sin(Math.PI*x))-lg(1-x);
+    x--;let a=lgC[0];for(let i=1;i<9;i++)a+=lgC[i]/(x+i);
+    const t=x+7.5;return .5*Math.log(2*Math.PI)+(x+.5)*Math.log(t)-t+Math.log(a);};
+  const gamP=(x,a,b)=>x<=1e-12?0:Math.exp(a*Math.log(b)-lg(a)+(a-1)*Math.log(x)-b*x);
+
+  /* ── DOM ── */
+  const $=document.createElement("div");
+  $.style.cssText=`display:flex;flex-direction:column;gap:14px;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:940px;margin:0 auto;user-select:none;`;
+  if(!document.querySelector('link[href*="Inter"]')){
+    const l=document.createElement('link');l.rel='stylesheet';
+    l.href='https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+    document.head.appendChild(l);}
+  $.appendChild(injectStyle());
+
+  /* ── Mode toggle ── */
+  let mode='d';
+  const tog=document.createElement("div");
+  tog.style.cssText=`display:flex;border-radius:10px;overflow:hidden;border:1px solid ${C.brd};
+    box-shadow:${C.sh};width:fit-content;align-self:center;`;
+  const mkTog=(txt,key)=>{const b=document.createElement("button");b.textContent=txt;
+    b.dataset.key=key;b.style.cssText=`padding:8px 28px;font-size:13px;font-weight:700;border:none;
+    cursor:pointer;font-family:inherit;transition:all .15s;`;return b;};
+  const tD=mkTog("Rời rạc (Discrete)","d"),tC=mkTog("Liên tục (Continuous)","c");
+  tog.append(tD,tC);$.appendChild(tog);
+  const updTog=()=>{[tD,tC].forEach(b=>{const a=b.dataset.key===mode;
+    b.style.background=a?C.f:'#fff';b.style.color=a?'#fff':C.sub;});};
+  updTog();
+
+  /* ── Slider cards ── */
+  const mkBox=(title,color,sliders)=>{
+    const c=document.createElement("div");
+    c.style.cssText=`flex:1;background:${C.card};border:1px solid ${C.brd};border-radius:14px;
+      padding:16px 18px 10px;box-shadow:${C.sh};display:flex;flex-direction:column;gap:10px;`;
+    const h=document.createElement("div");
+    h.style.cssText=`font-size:12px;font-weight:700;color:${color};letter-spacing:.4px;text-transform:uppercase;`;
+    h.innerHTML=title;c.appendChild(h);
+    const sg=document.createElement("div");sg.style.cssText="display:flex;flex-direction:column;gap:6px;";
+    sliders.forEach(s=>sg.appendChild(s.el));c.appendChild(sg);
+    const sv=d3.create("svg");c.appendChild(sv.node());
+    return{el:c,svg:sv};};
+
+  /* Discrete sliders */
+  const SD={n1:createSlider("n₁",1,8,1,5,C.f,"blue"),p1:createSlider("p₁",0.1,0.9,0.1,0.5,C.f,"blue"),
+    n2:createSlider("n₂",1,8,1,3,C.g,"amber"),p2:createSlider("p₂",0.1,0.9,0.1,0.4,C.g,"amber")};
+  const dRow=document.createElement("div");dRow.style.cssText="display:flex;gap:16px;width:100%;";
+  const dBX=mkBox('X ~ Bin(n₁, p₁)',C.f,[SD.n1,SD.p1]);
+  const dBY=mkBox('Y ~ Bin(n₂, p₂)',C.g,[SD.n2,SD.p2]);
+  dRow.append(dBX.el,dBY.el);
+
+  /* Continuous sliders */
+  const SC={a1:createSlider("α₁",1,10,0.5,2,C.f,"blue"),b1:createSlider("β₁",0.2,3,0.2,1,C.f,"blue"),
+    a2:createSlider("α₂",1,10,0.5,3,C.g,"amber"),b2:createSlider("β₂",0.2,3,0.2,1.5,C.g,"amber")};
+  const cRow=document.createElement("div");cRow.style.cssText="display:flex;gap:16px;width:100%;display:none;";
+  const cBX=mkBox('X ~ Gamma(α₁, β₁)',C.f,[SC.a1,SC.b1]);
+  const cBY=mkBox('Y ~ Gamma(α₂, β₂)',C.g,[SC.a2,SC.b2]);
+  cRow.append(cBX.el,cBY.el);
+  $.append(dRow,cRow);
+
+  /* ── Main SVG + Info ── */
+  const VW=900,VH=510;
+  const mainSvg=d3.create("svg").attr("viewBox",[0,0,VW,VH])
+    .style("width","100%").style("display","block")
+    .style("border-radius","14px").style("box-shadow",C.sh).style("border",`1px solid ${C.brd}`);
+  $.appendChild(mainSvg.node());
+  const info=document.createElement("div");
+  info.style.cssText=`font-size:16px;color:${C.txt};text-align:center;line-height:1.9;font-weight:600;
+    background:${C.card};border-radius:12px;border:1px solid ${C.brd};padding:12px 20px;font-family:${M};box-shadow:${C.sh};`;
+  $.appendChild(info);
+
+  /* ── State ── */
+  let nP=0,tI=0,drag=false,rafId=0;
+  let D=null,DC=null,staticG,dynG,dragG;
+
+  function updateFromPointer(e) {
+    if(!mainSvg.node()) return;
+    const mx = d3.pointer(e.touches ? e.touches[0] : e, mainSvg.node())[0];
+    if (mode === 'd' && D) {
+      const k = Math.round((mx - D.mgL) / D.cW) + D.gMin;
+      const nn = Math.max(0, Math.min(D.n1 + D.n2, k));
+      if (nn !== nP) { nP = nn; dDynamic(); }
+    } else if (mode === 'c' && DC) {
+      const t = DC.xSc.invert(mx - DC.mgL);
+      const nn = Math.max(0, Math.min(DC.N, Math.round(t / DC.dx)));
+      if (nn !== tI) { tI = nn; cDynamic(); }
+    }
+  }
+
+  /* ── Mini bar chart ── */
+  function drawMiniBar(svg,pmf,n,color){
+    svg.selectAll("*").remove();
+    const W=400,H=90,mg={l:20,r:6,t:4,b:16};
+    svg.attr("viewBox",[0,0,W,H]).style("width","100%").style("display","block");
+    const iw=W-mg.l-mg.r,ih=H-mg.t-mg.b,cW=iw/(n+1),bW=cW*.6,pad=(cW-bW)/2,mx=d3.max(pmf)*1.2;
+    const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+    for(let k=0;k<=n;k++){const v=pmf[k];if(v<1e-9)continue;const bh=ih*(v/mx);
+      g.append("rect").attr("x",k*cW+pad).attr("y",ih-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",color).attr("opacity",.78);
+      if(cW>30)g.append("text").attr("x",k*cW+cW/2).attr("y",ih-bh-3).attr("text-anchor","middle").attr("font-size",11).attr("font-weight",600).attr("fill",C.sub).attr("font-family",M).text(v.toFixed(2));}
+    for(let k=0;k<=n;k++)g.append("text").attr("x",k*cW+cW/2).attr("y",ih+12).attr("text-anchor","middle").attr("font-size",12).attr("font-weight",500).attr("fill",C.sub).attr("font-family",M).text(k);}
+
+  /* ── Mini curve chart ── */
+  function drawMiniCurve(svg,xs,vals,color){
+    svg.selectAll("*").remove();
+    const W=400,H=90,mg={l:20,r:6,t:4,b:16};
+    svg.attr("viewBox",[0,0,W,H]).style("width","100%").style("display","block");
+    const iw=W-mg.l-mg.r,ih=H-mg.t-mg.b;
+    const xSc=d3.scaleLinear().domain([0,d3.max(xs)]).range([0,iw]);
+    const mx=d3.max(vals)*1.15||1,ySc=v=>ih*(v/mx);
+    const g=svg.append("g").attr("transform",`translate(${mg.l},${mg.t})`);
+    const pts=xs.map((x,i)=>[x,vals[i]]);
+    g.append("path").datum(pts).attr("d",d3.area().x(d=>xSc(d[0])).y0(ih).y1(d=>ih-ySc(d[1])).curve(d3.curveMonotoneX)).attr("fill",color).attr("opacity",.2);
+    g.append("path").datum(pts).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>ih-ySc(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",color).attr("stroke-width",1.5).attr("opacity",.7);
+    xSc.ticks(5).forEach(v=>g.append("text").attr("x",xSc(v)).attr("y",ih+12).attr("text-anchor","middle").attr("font-size",11).attr("font-weight",500).attr("fill",C.sub).attr("font-family",M).text(Number.isInteger(v)?v:v.toFixed(1)));}
+
+  /* ── Shared SVG setup ── */
+  function initSvg(mgL,iw){
+    mainSvg.selectAll("*").remove();
+    mainSvg.append("rect").attr("width",VW).attr("height",VH).attr("rx",14).attr("fill",C.bg);
+    staticG=mainSvg.append("g").attr("transform",`translate(${mgL},0)`);
+    dynG=mainSvg.append("g").attr("transform",`translate(${mgL},0)`);
+    dragG=mainSvg.append("g").attr("transform",`translate(${mgL},0)`);
+    mainSvg.append("defs").append("clipPath").attr("id","mc")
+      .append("rect").attr("x",mgL).attr("y",0).attr("width",iw).attr("height",VH);
+    dynG.attr("clip-path","url(#mc)");}
+
+  /* ═══════════════ DISCRETE ═══════════════ */
+  function dStatic(){
+    [SD.n1,SD.p1,SD.n2,SD.p2].forEach(s=>s.sync());
+    const n1=SD.n1.val(),p1=SD.p1.val(),n2=SD.n2.val(),p2=SD.p2.val();
+    const fP=Array.from({length:n1+1},(_,k)=>binP(k,n1,p1));
+    const gPm=Array.from({length:n2+1},(_,k)=>binP(k,n2,p2));
+    const cL=n1+n2+1,conv=new Array(cL).fill(0);
+    for(let n=0;n<cL;n++)for(let k=0;k<=n1;k++){const j=n-k;if(j>=0&&j<=n2)conv[n]+=fP[k]*gPm[j];}
+    const mgL=54,iw=VW-mgL-14,gMin=-n2,gMax=n1+n2,cols=gMax-gMin+1;
+    const cW=iw/cols,bW=cW*.6,bPad=(cW-bW)/2,fs=cW<34?10:cW<44?12:13;
+    const xS=k=>(k-gMin)*cW,xC=k=>xS(k)+cW/2;
+    const fH=124,axH=26,gH=110,fBase=8+fH,axY=fBase,gBase=axY+axH+gH;
+    const sepY=gBase+22,rH=100,rBase=sepY+20+rH;
+    const rCW=Math.min(cW,iw/(cL+1)),rOff=(iw-cL*rCW)/2;
+    D={n1,n2,fP,gPm,conv,cL,cW,bW,bPad,fs,xS,xC,iw,mgL,fH,fBase,axY,axH,gH,gBase,sepY,rH,rBase,rCW,rOff,gMin,gMax};
+    nP=Math.max(0,Math.min(n1+n2,nP));
+    drawMiniBar(dBX.svg,fP,n1,C.f);drawMiniBar(dBY.svg,gPm,n2,C.g);
+    initSvg(mgL,iw);
+    for(let k=gMin;k<=gMax;k++)staticG.append("line").attr("x1",xS(k)).attr("y1",8).attr("x2",xS(k)).attr("y2",gBase+4).attr("stroke",C.grid);
+    staticG.append("text").attr("x",-4).attr("y",8+fH/2+4).attr("text-anchor","end").attr("font-size",15).attr("font-weight",800).attr("fill",C.f).text("Pₓ");
+    staticG.append("text").attr("x",-4).attr("y",axY+axH+gH/2+4).attr("text-anchor","end").attr("font-size",15).attr("font-weight",800).attr("fill",C.g).text("Pᵧ");
+    const fMx=d3.max(fP);
+    for(let k=0;k<=n1;k++){const v=fP[k];if(v<1e-9)continue;const bh=fH*(v/(fMx*1.2));
+      staticG.append("rect").attr("x",xS(k)+bPad).attr("y",fBase-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",C.f).attr("opacity",.18);}
+    staticG.append("line").attr("x1",0).attr("y1",axY+axH/2).attr("x2",iw).attr("y2",axY+axH/2).attr("stroke",C.mute).attr("stroke-width",.5).attr("stroke-dasharray","3,3");
+    for(let k=gMin;k<=gMax;k++)staticG.append("text").attr("x",xC(k)).attr("y",axY+axH/2+4).attr("text-anchor","middle").attr("font-size",fs).attr("font-weight",500).attr("fill",C.sub).attr("font-family",M).text(k);
+    staticG.append("line").attr("x1",0).attr("y1",sepY+4).attr("x2",iw).attr("y2",sepY+4).attr("stroke",C.brd).attr("stroke-dasharray","6,4");
+    staticG.append("text").attr("x",-4).attr("y",sepY+9).attr("text-anchor","end").attr("font-size",18).attr("font-weight",900).attr("fill",C.mute).text("=");
+    staticG.append("text").attr("x",-5).attr("y",sepY+20+rH/2).attr("text-anchor","end").attr("font-size",13).attr("font-weight",800).attr("fill",C.r).text("P");
+    staticG.append("text").attr("x",-2).attr("y",sepY+20+rH/2+10).attr("text-anchor","end").attr("font-size",9).attr("font-weight",700).attr("fill",C.r).text("X+Y");
+    const cMax=Math.max(d3.max(conv),.01);
+    for(let n=0;n<cL;n++){const x0=rOff+n*rCW;
+      staticG.append("line").attr("x1",x0).attr("y1",sepY+16).attr("x2",x0).attr("y2",rBase+2).attr("stroke",C.grid);
+      const v=conv[n];if(v<1e-9)continue;const bh=rH*(v/(cMax*1.2));
+      staticG.append("rect").attr("x",x0+(rCW-bW)/2).attr("y",rBase-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",C.r).attr("opacity",.14);
+      staticG.append("text").attr("x",x0+rCW/2).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-weight",500).attr("font-family",M).text(n);}
+    dragG.append("rect").attr("x",0).attr("y",axY+axH-10).attr("width",iw).attr("height",gH+50).attr("fill","transparent").attr("cursor","ew-resize")
+      .on("mousedown",e=>{drag=true;updateFromPointer(e);}).on("touchstart",e=>{drag=true;updateFromPointer(e);},{passive:true});
+    dDynamic();}
+
+  function dDynamic(){
+    if(!D)return;const{n1,n2,fP,gPm,conv,cL,cW,bW,bPad,fs,xS,xC,iw,fH,fBase,axY,axH,gH,gBase,sepY,rH,rBase,rCW,rOff}=D;
+    nP=Math.max(0,Math.min(n1+n2,nP));dynG.selectAll("*").remove();
+    const ovl=new Map();
+    for(let k=0;k<=n1;k++){const j=nP-k;if(j>=0&&j<=n2&&fP[k]>1e-9&&gPm[j]>1e-9)ovl.set(k,{fv:fP[k],gv:gPm[j],pr:fP[k]*gPm[j]});}
+    const fMx=d3.max(fP),gMx=d3.max(gPm);
+    ovl.forEach(({fv},k)=>{const bh=fH*(fv/(fMx*1.2));
+      dynG.append("rect").attr("x",xS(k)+1).attr("y",fBase-fH).attr("width",cW-2).attr("height",fH).attr("fill",C.hi).attr("rx",3);
+      dynG.append("rect").attr("x",xS(k)+bPad).attr("y",fBase-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",C.f).attr("opacity",.88);
+      dynG.append("text").attr("x",xC(k)).attr("y",fBase-bh-3).attr("text-anchor","middle").attr("font-size",fs).attr("font-weight",700).attr("fill",C.txt).attr("font-family",M).text(fv.toFixed(2));});
+    ovl.forEach(({pr},k)=>{
+      dynG.append("text").attr("x",xC(k)).attr("y",axY+axH/2+4).attr("text-anchor","middle").attr("font-size",fs).attr("font-weight",800).attr("fill",C.txt).attr("font-family",M).text(k);
+      dynG.append("text").attr("x",xC(k)).attr("y",axY+axH/2+16).attr("text-anchor","middle").attr("font-size",Math.max(fs,10)).attr("font-weight",700).attr("fill",C.hTxt).attr("font-family",M).text(pr.toFixed(3));});
+    for(let c=nP-n2;c<=nP;c++){const j=nP-c;if(j<0||j>n2)continue;const v=gPm[j];if(v<1e-9)continue;
+      const bh=gH*(v/(gMx*1.2)),isO=ovl.has(c);
+      if(isO)dynG.append("rect").attr("x",xS(c)+1).attr("y",gBase-gH).attr("width",cW-2).attr("height",gH).attr("fill",C.hi).attr("rx",3);
+      dynG.append("rect").attr("x",xS(c)+bPad).attr("y",gBase-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",C.g).attr("opacity",isO?.88:.2);
+      dynG.append("text").attr("x",xC(c)).attr("y",gBase-bh-3).attr("text-anchor","middle").attr("font-size",fs).attr("font-weight",700).attr("fill",isO?C.txt:C.mute).attr("font-family",M).text(v.toFixed(2));
+      dynG.append("text").attr("x",xC(c)).attr("y",gBase+12).attr("text-anchor","middle").attr("font-size",Math.max(fs,10)).attr("font-weight",600).attr("fill",C.g).attr("opacity",.65).attr("font-family",M).text(j);}
+    dynG.append("text").attr("x",iw/2).attr("y",gBase+26).attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text(`n = ${nP}    ◂ kéo ▸`);
+    const cMax=Math.max(d3.max(conv),.01);
+    if(nP>=0&&nP<cL){const v=conv[nP],x0=rOff+nP*rCW,bx=x0+(rCW-bW)/2,bh=rH*(v/(cMax*1.2));
+      if(v>1e-9){dynG.append("rect").attr("x",bx).attr("y",rBase-bh).attr("width",bW).attr("height",bh).attr("rx",2.5).attr("fill",C.r);
+        dynG.append("rect").attr("x",bx-2).attr("y",rBase-bh-2).attr("width",bW+4).attr("height",bh+4).attr("rx",4).attr("fill","none").attr("stroke",C.rBrd).attr("stroke-width",2);
+        dynG.append("text").attr("x",x0+rCW/2).attr("y",rBase-bh-8).attr("text-anchor","middle").attr("font-size",13).attr("font-weight",900).attr("fill",C.r).attr("font-family",M).text(v.toFixed(4));}
+      dynG.append("text").attr("x",x0+rCW/2).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",11).attr("fill",C.r).attr("font-weight",800).attr("font-family",M).text(nP);}
+    const te=[];ovl.forEach(({fv},k)=>{const j=nP-k;te.push(`<span style="color:${C.f}">f(${k})</span>·<span style="color:${C.g}">g(${j})</span>`);});
+    const cv2=nP>=0&&nP<cL?conv[nP]:0;
+    info.innerHTML=`(f∗g)[<span style="color:${C.r};font-weight:900">${nP}</span>] = `+(te.length?`<span style="font-size:15px">${te.join(' + ')}</span>`:'0')+` = <b style="color:${C.r};font-size:20px">${cv2.toFixed(4)}</b>`;}
+
+  /* ═══════════════ CONTINUOUS ═══════════════ */
+  function cStatic(){
+    [SC.a1,SC.b1,SC.a2,SC.b2].forEach(s=>s.sync());
+    const a1=SC.a1.val(),b1=SC.b1.val(),a2=SC.a2.val(),b2=SC.b2.val();
+    const N=400;
+    const roughMax=(a1/b1+6*Math.sqrt(a1)/b1)+(a2/b2+6*Math.sqrt(a2)/b2);
+    const dx0=roughMax/N,xs0=Array.from({length:N+1},(_,i)=>i*dx0);
+    const fR=xs0.map(x=>gamP(x,a1,b1)),gR=xs0.map(x=>gamP(x,a2,b2));
+    const fPk=d3.max(fR)||1,gPk=d3.max(gR)||1;
+    let cutF=1;for(let i=N;i>=0;i--){if(fR[i]>fPk*0.015){cutF=xs0[i];break;}}
+    let cutG=1;for(let i=N;i>=0;i--){if(gR[i]>gPk*0.015){cutG=xs0[i];break;}}
+    const fStop=cutF*1.02;
+    const xMax=(cutF+cutG)*1.03;
+    const leftPad=cutG*0.75; // negative x space so g is visible at t=0
+    const dx=xMax/N,xs=Array.from({length:N+1},(_,i)=>i*dx);
+    const fV=xs.map(x=>gamP(x,a1,b1)),gV=xs.map(x=>gamP(x,a2,b2));
+    const cv=new Array(N+1).fill(0);
+    for(let i=0;i<=N;i++){let s=0;for(let j=0;j<=i;j++)s+=fV[j]*gV[i-j];cv[i]=s*dx;}
+
+    const mgL=54,iw=VW-mgL-14;
+    const fH=124,axH=20,gH=110,fBase=8+fH,axY=fBase,gBase=axY+axH+gH;
+    const sepY=gBase+32,rH=100,rBase=sepY+20+rH;
+    const xSc=d3.scaleLinear().domain([-leftPad,xMax]).range([0,iw]);
+    const fMax=d3.max(fV)*1.15||1,gMax2=d3.max(gV)*1.15||1,cMax=d3.max(cv)*1.15||1;
+
+    DC={N,dx,xs,xMax,leftPad,cutG,fStop,fV,gV,cv,iw,mgL,xSc,fH,fBase,axY,axH,gH,gBase,sepY,rH,rBase,fMax,gMax:gMax2,cMax,a1,b1,a2,b2};
+    tI=Math.max(0,Math.min(N,tI));
+    const fXs=xs.filter(x=>x<=cutF*1.1),gXs=xs.filter(x=>x<=cutG*1.1);
+    drawMiniCurve(cBX.svg,fXs,fXs.map(x=>gamP(x,a1,b1)),C.f);
+    drawMiniCurve(cBY.svg,gXs,gXs.map(x=>gamP(x,a2,b2)),C.g);
+    initSvg(mgL,iw);
+
+    const mkCurve=(g,pts,h,base,mx,color,op)=>{
+      const ySc=v=>h*(v/mx);
+      g.append("path").datum(pts).attr("d",d3.area().x(d=>xSc(d[0])).y0(base).y1(d=>base-ySc(d[1])).curve(d3.curveMonotoneX)).attr("fill",color).attr("opacity",op*.25);
+      g.append("path").datum(pts).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>base-ySc(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",color).attr("stroke-width",1.5).attr("opacity",op);};
+
+    staticG.append("text").attr("x",-4).attr("y",8+fH/2+4).attr("text-anchor","end").attr("font-size",15).attr("font-weight",800).attr("fill",C.f).text("f(x)");
+    staticG.append("text").attr("x",-4).attr("y",axY+axH+gH/2+4).attr("text-anchor","end").attr("font-size",15).attr("font-weight",800).attr("fill",C.g).text("g(t−x)");
+    mkCurve(staticG,xs.map((x,i)=>[x,fV[i]]).filter(d=>d[0]<=fStop),fH,fBase,fMax,C.f,.35);
+
+    /* Shared x-axis */
+    staticG.append("line").attr("x1",0).attr("y1",axY+axH/2-2).attr("x2",iw).attr("y2",axY+axH/2-2).attr("stroke",C.mute).attr("stroke-width",.5).attr("stroke-dasharray","3,3");
+    xSc.ticks(10).filter(v=>v>=0).forEach(v=>
+      staticG.append("text").attr("x",xSc(v)).attr("y",axY+axH/2+4).attr("text-anchor","middle").attr("font-size",11).attr("font-weight",500).attr("fill",C.sub).attr("font-family",M).text(Number.isInteger(v)?v:v.toFixed(1)));
+    /* Mark x=0 boundary */
+    staticG.append("line").attr("x1",xSc(0)).attr("y1",8).attr("x2",xSc(0)).attr("y2",gBase+4).attr("stroke",C.mute).attr("stroke-width",1).attr("opacity",.4);
+
+    /* Separator */
+    staticG.append("line").attr("x1",0).attr("y1",sepY+4).attr("x2",iw).attr("y2",sepY+4).attr("stroke",C.brd).attr("stroke-dasharray","6,4");
+    staticG.append("text").attr("x",-4).attr("y",sepY+9).attr("text-anchor","end").attr("font-size",18).attr("font-weight",900).attr("fill",C.mute).text("=");
+
+    staticG.append("text").attr("x",-4).attr("y",sepY+20+rH/2).attr("text-anchor","end").attr("font-size",14).attr("font-weight",800).attr("fill",C.r).text("(f∗g)");
+    mkCurve(staticG,xs.map((x,i)=>[x,cv[i]]),rH,rBase,cMax,C.r,.3);
+    xSc.ticks(10).filter(v=>v>=0).forEach(v=>staticG.append("text").attr("x",xSc(v)).attr("y",rBase+12).attr("text-anchor","middle").attr("font-size",11).attr("fill",C.sub).attr("font-weight",500).attr("font-family",M).text(Number.isInteger(v)?v:v.toFixed(1)));
+
+    dragG.append("rect").attr("x",0).attr("y",axY+axH-10).attr("width",iw).attr("height",gH+60).attr("fill","transparent").attr("cursor","ew-resize")
+      .on("mousedown",e=>{drag=true;updateFromPointer(e);}).on("touchstart",e=>{drag=true;updateFromPointer(e);},{passive:true});
+    cDynamic();}
+
+  function cDynamic(){
+    if(!DC)return;const{N,dx,xs,xMax,leftPad,cutG,fV,gV,cv,iw,xSc,fH,fBase,axY,axH,gH,gBase,sepY,rH,rBase,fMax,gMax:gMx,cMax}=DC;
+    tI=Math.max(0,Math.min(N,tI));dynG.selectAll("*").remove();
+    const t=tI*dx;
+    const ySf=v=>fH*(v/fMax),ySg=v=>gH*(v/gMx),ySr=v=>rH*(v/cMax);
+
+    /* Highlight overlap region: only where x >= 0 AND x <= t (both f and g nonzero) */
+    if(t>0){
+      const x0px=xSc(0),tw=xSc(Math.min(t,xMax))-x0px;
+      dynG.append("rect").attr("x",x0px).attr("y",fBase-fH).attr("width",tw).attr("height",fH).attr("fill",C.hi).attr("rx",3);
+      dynG.append("rect").attr("x",x0px).attr("y",gBase-gH).attr("width",tw).attr("height",gH).attr("fill",C.hi).attr("rx",3);
+      const hiIdx=Math.min(tI+1,N);
+      const fHi=xs.slice(0,hiIdx+1).map((x,i)=>[x,fV[i]]).filter(d=>d[0]<=DC.fStop);
+      if(fHi.length>1){
+        dynG.append("path").datum(fHi).attr("d",d3.area().x(d=>xSc(d[0])).y0(fBase).y1(d=>fBase-ySf(d[1])).curve(d3.curveMonotoneX)).attr("fill",C.f).attr("opacity",.3);
+        dynG.append("path").datum(fHi).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>fBase-ySf(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",C.f).attr("stroke-width",2).attr("opacity",.9);}}
+
+    /* g(t-x) curve — only scan the relevant range */
+    const gPts=[];
+    const gStart=Math.max(-leftPad,t-cutG*1.15);
+    const gEnd=Math.min(t+dx,xMax);
+    for(let xi=gStart;xi<=gEnd;xi+=dx){
+      const y=t-xi;
+      if(y>1e-12){const v=gamP(y,DC.a2,DC.b2);
+        if(v>1e-12){
+          if(gPts.length===0)gPts.push([xi-dx,0]);
+          gPts.push([xi,v]);
+        } else if(gPts.length>0){gPts.push([xi,0]);break;}
+      } else if(gPts.length>0){gPts.push([xi,0]);break;}
+    }
+    if(gPts.length>1){
+      dynG.append("path").datum(gPts).attr("d",d3.area().x(d=>xSc(d[0])).y0(gBase).y1(d=>gBase-ySg(d[1])).curve(d3.curveMonotoneX)).attr("fill",C.g).attr("opacity",.3);
+      dynG.append("path").datum(gPts).attr("d",d3.line().x(d=>xSc(d[0])).y(d=>gBase-ySg(d[1])).curve(d3.curveMonotoneX)).attr("fill","none").attr("stroke",C.g).attr("stroke-width",2).attr("opacity",.9);}
+
+    /* g(t-x) axis: labels at fixed g-argument values that MOVE with the curve */
+    const gArgSc=d3.scaleLinear().domain([0,cutG*1.05]);
+    gArgSc.ticks(8).forEach(gArg=>{
+      const xPos=t-gArg; // g-argument gArg appears at x = t - gArg
+      if(xPos>=-leftPad-dx&&xPos<=xMax+dx){
+        dynG.append("text").attr("x",xSc(xPos)).attr("y",gBase+12).attr("text-anchor","middle")
+          .attr("font-size",10).attr("font-weight",600).attr("fill",C.g).attr("opacity",.6)
+          .attr("font-family",M).text(Number.isInteger(gArg)?gArg:gArg.toFixed(1));}});
+    dynG.append("text").attr("x",-4).attr("y",gBase+13).attr("text-anchor","end")
+      .attr("font-size",9).attr("font-weight",700).attr("fill",C.g).attr("opacity",.5).text("g(·)");
+
+    /* Vertical line at t */
+    if(t>0) dynG.append("line").attr("x1",xSc(t)).attr("y1",8).attr("x2",xSc(t)).attr("y2",gBase+4).attr("stroke",C.r).attr("stroke-width",1).attr("stroke-dasharray","4,3").attr("opacity",.5);
+    dynG.append("text").attr("x",iw/2).attr("y",gBase+26).attr("text-anchor","middle").attr("font-size",12).attr("font-weight",700).attr("fill",C.sub).text(`t = ${t.toFixed(2)}    ◂ kéo ▸`);
+
+    /* Active point on result curve */
+    const cvt=cv[tI]||0;
+    if(cvt>1e-9){
+      const px=xSc(t),py=rBase-ySr(cvt);
+      dynG.append("circle").attr("cx",px).attr("cy",py).attr("r",5).attr("fill",C.r).attr("stroke","#fff").attr("stroke-width",2);
+      dynG.append("text").attr("x",px).attr("y",py-10).attr("text-anchor","middle").attr("font-size",13).attr("font-weight",900).attr("fill",C.r).attr("font-family",M).text(cvt.toFixed(4));
+      dynG.append("line").attr("x1",px).attr("y1",sepY+16).attr("x2",px).attr("y2",rBase).attr("stroke",C.r).attr("stroke-width",1).attr("stroke-dasharray","3,3").attr("opacity",.4);}
+
+    info.innerHTML=`(f∗g)(<span style="color:${C.r};font-weight:900">${t.toFixed(2)}</span>) = ∫ f(x)·g(${t.toFixed(2)}−x) dx = <b style="color:${C.r};font-size:20px">${cvt.toFixed(4)}</b>`;}
+
+  /* ═══════════════ MODE SWITCHING ═══════════════ */
+  function switchMode(m){mode=m;updTog();dRow.style.display=m==='d'?'flex':'none';cRow.style.display=m==='c'?'flex':'none';
+    if(m==='d')dStatic();else cStatic();}
+  tD.onclick=()=>switchMode('d');tC.onclick=()=>switchMode('c');
+
+  /* ── Drag ── */
+  const onMove=e=>{if(!drag)return;if(rafId)return;
+    rafId=requestAnimationFrame(()=>{rafId=0;updateFromPointer(e);});};
+  mainSvg.on("mousemove",onMove).on("touchmove",onMove);
+  mainSvg.on("mouseup touchend",()=>{drag=false;});
+  mainSvg.on("mouseleave",()=>{drag=false;});
+
+  document.addEventListener("keydown",e=>{
+    if(mode==='d'&&D){if(e.key==="ArrowLeft"){nP=Math.max(0,nP-1);dDynamic();e.preventDefault();}
+      if(e.key==="ArrowRight"){nP=Math.min(D.n1+D.n2,nP+1);dDynamic();e.preventDefault();}}
+    if(mode==='c'&&DC){if(e.key==="ArrowLeft"){tI=Math.max(0,tI-4);cDynamic();e.preventDefault();}
+      if(e.key==="ArrowRight"){tI=Math.min(DC.N,tI+4);cDynamic();e.preventDefault();}}});
+
+  [SD.n1,SD.p1,SD.n2,SD.p2].forEach(s=>s.input.addEventListener("input",()=>{nP=0;dStatic();}));
+  [SC.a1,SC.b1,SC.a2,SC.b2].forEach(s=>s.input.addEventListener("input",()=>{tI=0;cStatic();}));
+
+  switchMode('d');
+  $.value={};return $;
+}
+```
+
