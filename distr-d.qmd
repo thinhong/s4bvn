@@ -1,7 +1,14 @@
 ---
 title: "Phân phối rời rạc"
 format: html
+execute: 
+  echo: false
 ---
+
+```{ojs}
+import { createSlider, createButton, injectStyle } from "./_slider.js"
+d3 = require("d3@7")
+```
 
 ## Phép thử Bernoulli (Bernoulli trial, hay binomial trial)
 
@@ -18,7 +25,392 @@ Hầu hết các phân phối rời rạc đều xuất phát từ chuỗi Berno
 
 ## Đếm số lần thành công
 
-Chúng ta quyết định trước sẽ bỏ ra bao nhiêu công sức ($n$ lần thử), và đếm xem thu được bao nhiêu phần thưởng ($k$ thành công).
+Chúng ta xác định trước cỡ mẫu ($n$ phép thử), sau đó đếm số biến cố mục tiêu thu được ($k$ ca thành công). Nếu lấy $\frac{k}{n}$ ta được tỉ lệ. Vì vậy các loại phân phối với mục tiêu này có thể được dùng để ước lượng tỉ lệ trong quần thể.
+
+Hai phân phối đại diện cho nhóm này là Nhị thức (Binomial) và Siêu bội (Hypergeometric). Xét bài toán: Thực hiện một khảo sát ngẫu nhiên để ước lượng tỷ lệ tiêm chủng trong dân số:
+
+- Phân phối Siêu bội: Quần thể mục tiêu có quy mô xác định là $N$ người, trong đó có $K$ người đã tiêm chủng. Chúng ta tiến hành chọn mẫu khảo sát $n$ người.
+
+- Phân phối Nhị thức: Quy mô quần thể là vô hạn (hoặc rất lớn). Giả định tỷ lệ tiêm chủng chung trong quần thể là $p$, tương đương với xác suất chọn ngẫu nhiên được một người đã tiêm chủng là $p$. Chúng ta tiến hành chọn mẫu khảo sát $n$ người.
+
+```{ojs}
+viewof app = {
+
+  const svgNS = "http://www.w3.org/2000/svg";
+
+  function lnF(n){let s=0;for(let i=2;i<=n;i++)s+=Math.log(i);return s}
+  function lnC(n,k){return(k<0||k>n)?-Infinity:lnF(n)-lnF(k)-lnF(n-k)}
+  function hPMF(k,N,K,n){return Math.exp(lnC(K,k)+lnC(N-K,n-k)-lnC(N,n))}
+  function bPMF(k,n,p){if(p<=0)return k===0?1:0;if(p>=1)return k===n?1:0;return Math.exp(lnC(n,k)+k*Math.log(p)+(n-k)*Math.log(1-p))}
+  function sampleHyper(N,K,n){let k=0,Ni=N,Ki=K;for(let i=0;i<n;i++){if(Math.random()<Ki/Ni){k++;Ki--}Ni--}return k}
+  function sampleBinom(n,p){let k=0;for(let i=0;i<n;i++)if(Math.random()<p)k++;return k}
+
+  const C={pd:"#e63946",pds:"#a4262f",pu:"#f4a6ad",pus:"#e07980",nd:"#457b9d",nds:"#1d3557",nu:"#a8c8dd",nus:"#7ba7c2"};
+
+  // Flood fill from seed
+  function floodBlock(total,cols,n,seed,validSet){
+    if(n<=0)return[];
+    let vs=validSet;if(!vs){vs=new Set();for(let i=0;i<total;i++)vs.add(i);}
+    if(n>=vs.size)return [...vs];
+    const rows=Math.ceil(total/cols);
+    if(!vs.has(seed)){const a=[...vs];if(a.length>0)seed=a[0];}
+    const chosen=new Set([seed]),inF=new Set(),frontier=[];
+    const push=i=>{const r=Math.floor(i/cols),c=i%cols;
+      for(const[dr,dc]of[[0,-1],[0,1],[-1,0],[1,0]]){
+        const nr=r+dr,nc=c+dc,ni=nr*cols+nc;
+        if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&ni<total&&vs.has(ni)&&!chosen.has(ni)&&!inF.has(ni)){frontier.push(ni);inF.add(ni)}}};
+    push(seed);
+    while(chosen.size<n&&frontier.length>0){
+      let maxN=-1,bestFi=[];for(let i=0;i<frontier.length;i++){const f=frontier[i];let cD=0;const r=Math.floor(f/cols),c=f%cols;if(c>0&&chosen.has(f-1))cD++;if(c<cols-1&&chosen.has(f+1))cD++;if(r>0&&chosen.has(f-cols))cD++;if(r<rows-1&&chosen.has(f+cols))cD++;if(cD>maxN){maxN=cD;bestFi=[i];}else if(cD===maxN)bestFi.push(i);}
+      const fi=bestFi[Math.floor(Math.random()*bestFi.length)];
+      const pick=frontier[fi];frontier[fi]=frontier[frontier.length-1];frontier.pop();inF.delete(pick);
+      if(!chosen.has(pick)){chosen.add(pick);push(pick)}}
+    if(chosen.size<n){for(const i of vs)if(!chosen.has(i)){chosen.add(i);if(chosen.size>=n)break}}
+    return[...chosen];
+  }
+
+  // Balanced block: exactly kPos positive + kNeg negative cells, straddling divider
+  function pickBalancedBlock(N,cols,rows,posSet,divCol,kPos,kNeg,validSet){
+    const total=kPos+kNeg;
+    if(total<=0)return[];
+    let vs=validSet;if(!vs){vs=new Set();for(let i=0;i<N;i++)vs.add(i);}
+    // All one type
+    if(kPos===0){const seeds=[];for(const i of vs)if(!posSet.has(i))seeds.push(i);
+      const s=seeds[Math.floor(Math.random()*seeds.length)]||(seeds[0]||0);return floodBlock(N,cols,kNeg,s,vs)}
+    if(kNeg===0){const seeds=[];for(const i of vs)if(posSet.has(i))seeds.push(i);
+      const s=seeds[Math.floor(Math.random()*seeds.length)]||(seeds[0]||0);return floodBlock(N,cols,kPos,s,vs)}
+
+    // Mixed: grow from divider, respecting quotas
+    const seedRow=Math.floor(Math.random()*rows);
+    let seedCell=Math.min(seedRow*cols+divCol,N-1);
+    if(!vs.has(seedCell)){const a=[...vs];if(a.length>0)seedCell=a[Math.floor(Math.random()*a.length)];}
+    const chosen=new Set();let gP=0,gN=0;
+    chosen.add(seedCell);if(posSet.has(seedCell))gP++;else gN++;
+    const inF=new Set(),frontier=[];
+    const push=i=>{const r=Math.floor(i/cols),c=i%cols;
+      for(const[dr,dc]of[[0,-1],[0,1],[-1,0],[1,0]]){
+        const nr=r+dr,nc=c+dc,ni=nr*cols+nc;
+        if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&ni<N&&vs.has(ni)&&!chosen.has(ni)&&!inF.has(ni)){frontier.push(ni);inF.add(ni)}}};
+    push(seedCell);
+    let safety=N*3;
+    while(chosen.size<total&&frontier.length>0&&safety-->0){
+      let maxN=-1,bestFi=[];for(let i=0;i<frontier.length;i++){const f=frontier[i];let cD=0;const r=Math.floor(f/cols),c=f%cols;if(c>0&&chosen.has(f-1))cD++;if(c<cols-1&&chosen.has(f+1))cD++;if(r>0&&chosen.has(f-cols))cD++;if(r<rows-1&&chosen.has(f+cols))cD++;if(cD>maxN){maxN=cD;bestFi=[i];}else if(cD===maxN)bestFi.push(i);}
+      const fi=bestFi[Math.floor(Math.random()*bestFi.length)];
+      const pick=frontier[fi];frontier[fi]=frontier[frontier.length-1];frontier.pop();inF.delete(pick);
+      if(chosen.has(pick))continue;
+      const isP=posSet.has(pick);
+      if(isP&&gP>=kPos){continue}
+      if(!isP&&gN>=kNeg){continue}
+      chosen.add(pick);if(isP)gP++;else gN++;push(pick)}
+    // Fallback: if didn't fill, relax constraints
+    while(chosen.size<total&&frontier.length>0){
+      let maxN=-1,bestFi=[];for(let i=0;i<frontier.length;i++){const f=frontier[i];let cD=0;const r=Math.floor(f/cols),c=f%cols;if(c>0&&chosen.has(f-1))cD++;if(c<cols-1&&chosen.has(f+1))cD++;if(r>0&&chosen.has(f-cols))cD++;if(r<rows-1&&chosen.has(f+cols))cD++;if(cD>maxN){maxN=cD;bestFi=[i];}else if(cD===maxN)bestFi.push(i);}
+      const fi=bestFi[Math.floor(Math.random()*bestFi.length)];
+      const pick=frontier[fi];frontier[fi]=frontier[frontier.length-1];frontier.pop();inF.delete(pick);
+      if(!chosen.has(pick)){chosen.add(pick);push(pick)}}
+    if(chosen.size<total){for(const i of vs){if(!chosen.has(i)){chosen.add(i);if(chosen.size>=total)break;}}}
+    return[...chosen];
+  }
+
+  // Squared boundary with rounded corners
+  function cellBoundaryPath(indices,cols,cellW,cellH,ox,oy,pad,radius){
+    const cells=new Set();
+    for(const i of indices)cells.add(Math.floor(i/cols)+","+i%cols);
+    const has=(r,c)=>cells.has(r+","+c);
+    const edges=[];
+    for(const key of cells){
+      const[r,c]=key.split(",").map(Number);
+      const l=ox+c*cellW,t=oy+r*cellH,ri=ox+(c+1)*cellW,b=oy+(r+1)*cellH;
+      if(!has(r-1,c))edges.push([l,t,ri,t]);
+      if(!has(r,c+1))edges.push([ri,t,ri,b]);
+      if(!has(r+1,c))edges.push([ri,b,l,b]);
+      if(!has(r,c-1))edges.push([l,b,l,t])}
+    if(edges.length<3)return"";
+    const eps=0.5,eq=(a,b)=>Math.abs(a-b)<eps;
+    const used=new Array(edges.length).fill(false),chains=[];
+    for(let start=0;start<edges.length;start++){
+      if(used[start])continue;const chain=[start];used[start]=true;
+      for(let s2=0;s2<edges.length+2;s2++){
+        const last=edges[chain[chain.length-1]],ex=last[2],ey=last[3];
+        const first=edges[chain[0]];
+        if(chain.length>2&&eq(ex,first[0])&&eq(ey,first[1]))break;
+        let found=false;
+        for(let j=0;j<edges.length;j++){if(used[j])continue;
+          if(eq(ex,edges[j][0])&&eq(ey,edges[j][1])){chain.push(j);used[j]=true;found=true;break}}
+        if(!found)break}
+      if(chain.length>=3)chains.push(chain)}
+    if(chains.length===0)return"";
+    const R=Math.min(radius,cellW*.35,cellH*.35);
+    let d="";
+    for(let cIdx=0;cIdx<chains.length;cIdx++){
+      const pts=chains[cIdx].map(i=>[edges[i][0],edges[i][1]]);
+      const len=pts.length;
+      const offset_pts=[];
+      for(let i=0;i<len;i++){
+        const prev=pts[(i-1+len)%len],cur=pts[i],next=pts[(i+1)%len];
+        const dx1=cur[0]-prev[0],dy1=cur[1]-prev[1];
+        const dx2=next[0]-cur[0],dy2=next[1]-cur[1];
+        const l1=Math.hypot(dx1,dy1),l2=Math.hypot(dx2,dy2);
+        if(l1===0||l2===0){offset_pts.push(cur);continue;}
+        const nx1=dy1/l1,ny1=-dx1/l1,nx2=dy2/l2,ny2=-dx2/l2;
+        offset_pts.push([cur[0]+pad*(nx1+nx2),cur[1]+pad*(ny1+ny2)]);
+      }
+      for(let i=0;i<len;i++){
+        const prev=offset_pts[(i-1+len)%len],cur=offset_pts[i],next=offset_pts[(i+1)%len];
+        const dx1=cur[0]-prev[0],dy1=cur[1]-prev[1],dx2=next[0]-cur[0],dy2=next[1]-cur[1];
+        const l1=Math.hypot(dx1,dy1),l2=Math.hypot(dx2,dy2);
+        if(l1===0||l2===0)continue;
+        const r2=Math.min(R,l1/2,l2/2);
+        const bx=cur[0]-(dx1/l1)*r2,by2=cur[1]-(dy1/l1)*r2;
+        const ax=cur[0]+(dx2/l2)*r2,ay=cur[1]+(dy2/l2)*r2;
+        if(i===0)d+=`M${bx.toFixed(1)},${by2.toFixed(1)} `;
+        else d+=`L${bx.toFixed(1)},${by2.toFixed(1)} `;
+        d+=`Q${cur[0].toFixed(1)},${cur[1].toFixed(1)} ${ax.toFixed(1)},${ay.toFixed(1)} `}
+      d+="Z ";
+    }
+    return d}
+
+  const root=document.createElement("div");root.className="hb-root";
+  const css = document.createElement("style");
+css.textContent = `@import url('https://fonts.googleapis.com/css2?family=Alegreya:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap');
+
+.hb-root {
+  --f-text: 'Alegreya Sans', system-ui, sans-serif;
+  --f-display: 'Alegreya', Georgia, serif;
+  --f-mono: 'Inter', system-ui, sans-serif;
+  --pos-drawn: #e63946;
+  --pos-drawn-s: #a4262f;
+  --pos-undrawn: #f4a6ad;
+  --pos-undrawn-s: #e07980;
+  --neg-drawn: #457b9d;
+  --neg-drawn-s: #1d3557;
+  --neg-undrawn: #a8c8dd;
+  --neg-undrawn-s: #7ba7c2;
+  --c-bg: #f8fafc;
+  --c-card: #ffffff;
+  --c-border: #e2e8f0;
+  --c-muted: #64748b;
+  --c-text: #0f172a;
+
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+  font-family: var(--f-text);
+  color: var(--c-text);
+  background: var(--c-bg);
+  border-radius: 24px;
+}
+
+.hb-bar{background:var(--c-card);border:1px solid var(--c-border);border-radius:20px;padding:20px 24px;margin-bottom:24px;box-shadow:0 10px 30px -10px rgba(0,0,0,0.06),0 4px 6px -4px rgba(0,0,0,0.03);display:flex;flex-direction:column;gap:16px}
+.hb-bar-row{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+.hb-bar-row>div{flex:1 1 140px;min-width:120px;max-width:250px}
+.hb-slider-disabled{opacity:.5;pointer-events:none}
+.hb-panels{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.hb-panel{background:var(--c-card);border:1px solid var(--c-border);border-radius:20px;overflow:hidden;box-shadow:0 12px 36px -12px rgba(0,0,0,0.08),0 4px 8px -4px rgba(0,0,0,0.04)}
+.hb-panel-head{padding:14px 20px 12px;border-bottom:1px solid var(--c-border);display:flex;align-items:baseline;gap:10px;background:linear-gradient(to bottom,#ffffff,#fafbfc)}
+.hb-ptag{font-family:var(--f-mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:4px 10px;border-radius:6px}
+.hb-ptag-h{background:#eff6ff;color:#1d4ed8}
+.hb-ptag-b{background:#faf5ff;color:#7e22ce}
+.hb-ptitle{font-family:var(--f-display);font-size:18px;font-weight:600;color:#1e293b}
+.hb-panel-btns{display:flex;gap:8px;padding:10px 20px;border-bottom:1px solid var(--c-border);background:#f8fafc;align-items:center;flex-wrap:wrap}
+.hb-panel-btns button{flex:1;min-width:80px;padding:8px 12px;font-weight:600;border-radius:8px;transition:color 0.15s, border-color 0.15s;background-color:#ffffff;border:1px solid #cbd5e1;color:#475569;cursor:pointer}
+.hb-panel-btns button:hover{color:#0f172a;border-color:#94a3b8}
+.hb-panel-count{font-family:var(--f-mono);font-size:12px;color:var(--c-muted);white-space:nowrap;margin-left:8px;font-weight:500}
+.hb-viz{padding:16px 16px 8px}
+.hb-pmf{padding:8px 16px 16px;border-top:1px solid var(--c-border);background:#fdfdfe}
+.hb-pmf-lbl{font-family:var(--f-mono);font-size:10px;color:var(--c-muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:6px;padding-top:8px;text-align:center}
+.hb-tip{position:fixed;background:rgba(15,23,42,0.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#f8fafc;font-family:var(--f-text);font-size:14px;line-height:1.5;padding:12px 18px;border-radius:12px;max-width:300px;pointer-events:none;z-index:1000;box-shadow:0 12px 36px rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);display:none;transition:opacity 0.1s}
+.hb-tip strong{font-family:var(--f-display);font-size:16px;display:block;margin-bottom:4px;letter-spacing:0.2px}
+.hb-tip b{color:#fbbf24}.hb-tip em{font-style:italic;color:#38bdf8}.hb-tip .warn{color:#f87171;font-weight:600}
+.hb-legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin-top:24px;padding:14px 20px;background:var(--c-card);border:1px solid var(--c-border);border-radius:16px;font-size:13px;color:#475569;font-weight:500;box-shadow:0 4px 12px -8px rgba(0,0,0,0.05)}
+.hb-legend-item{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.hb-ldot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+@media(max-width:1024px){.hb-panels{grid-template-columns:1fr}}
+@media(max-width:640px){.hb-root{padding:12px 0px 30px;border-radius:0;background:transparent}.hb-bar{padding:16px;gap:12px}.hb-bar-row{gap:12px}.hb-bar-row>div{flex:1 1 100%;max-width:none}.hb-panel{border-radius:16px}.hb-panel-head{padding:12px 16px 10px}.hb-panel-btns{padding:10px 16px}.hb-viz{padding:12px 8px 4px}.hb-pmf{padding:6px 8px 14px}.hb-legend{gap:12px;font-size:12px;padding:14px;flex-direction:column;align-items:center}}`;
+  root.appendChild(css);
+  const tip=document.createElement("div");tip.className="hb-tip";root.appendChild(tip);
+  function showTip(e,html){tip.innerHTML=html;tip.style.display="block";let x=e.clientX+14,y=e.clientY-8;if(x+290>window.innerWidth)x=e.clientX-296;if(y+160>window.innerHeight)y=e.clientY-164;if(y<4)y=4;if(x<4)x=4;tip.style.left=x+"px";tip.style.top=y+"px"}
+  function hideTip(){tip.style.display="none"}
+
+  const bar=document.createElement("div");bar.className="hb-bar";root.appendChild(bar);bar.appendChild(injectStyle());
+  const row1=document.createElement("div");row1.className="hb-bar-row";bar.appendChild(row1);
+  const row2=document.createElement("div");row2.className="hb-bar-row";bar.appendChild(row2);
+  const SL={};
+  SL.N=createSlider("\u{1D441}  population",10,200,1,60,"#1d2d3f","dark");
+  SL.K=createSlider("\u{1D43E}  positive",0,60,1,18,"#e63946","red");
+  SL.p=createSlider("\u{1D45D} = \u{1D43E} / \u{1D441}",0,1,0.001,0.300,"#7b2d8e","purple");
+  SL.n=createSlider("\u{1D45B}  draws",0,60,1,15,"#457b9d","blue");
+  row1.appendChild(SL.N.el);row1.appendChild(SL.K.el);row2.appendChild(SL.p.el);row2.appendChild(SL.n.el);
+  SL.p.el.classList.add("hb-slider-disabled");SL.p.input.tabIndex=-1;
+  for(const s of[SL.N,SL.K,SL.n,SL.p]){const lbl=s.el.querySelector("span");lbl.style.fontFamily="'SF Mono',monospace";lbl.style.textTransform="none";lbl.style.fontSize="14px";lbl.style.letterSpacing="0";s.valSpan.style.fontFamily="'SF Mono',monospace"}
+  function syncP(){const N=SL.N.val(),K=SL.K.val();SL.p.update(N>0?Math.round(K/N*1000)/1000:0,0,1);SL.p.sync()}
+  function clamp(){const N=SL.N.val();if(SL.K.val()>N)SL.K.update(N,0,N);else SL.K.update(SL.K.val(),0,N);if(SL.n.val()>N)SL.n.update(N,0,N);else SL.n.update(SL.n.val(),0,N);SL.K.sync();SL.n.sync();syncP()}
+
+  const ST={hK:null,hDrawn:false,bK:null,bDrawn:false,hHist:{},bHist:{},hN:0,bN:0,hAutoId:null,bAutoId:null};
+  function resetH(){ST.hK=null;ST.hDrawn=false;ST.hHist={};ST.hN=0;if(ST.hAutoId){clearInterval(ST.hAutoId);ST.hAutoId=null;hAutoBtn.setText("\u23E9 Auto")}}
+  function resetB(){ST.bK=null;ST.bDrawn=false;ST.bHist={};ST.bN=0;if(ST.bAutoId){clearInterval(ST.bAutoId);ST.bAutoId=null;bAutoBtn.setText("\u23E9 Auto")}}
+
+  function mkPanel(tag,tagCls,title){const p=document.createElement("div");p.className="hb-panel";const hd=document.createElement("div");hd.className="hb-panel-head";hd.innerHTML=`<span class="hb-ptag ${tagCls}">${tag}</span><span class="hb-ptitle">${title}</span>`;p.appendChild(hd);const btns=document.createElement("div");btns.className="hb-panel-btns";p.appendChild(btns);const viz=document.createElement("div");viz.className="hb-viz";p.appendChild(viz);const pmf=document.createElement("div");pmf.className="hb-pmf";const lbl=document.createElement("div");lbl.className="hb-pmf-lbl";pmf.appendChild(lbl);const psvg=document.createElementNS(svgNS,"svg");psvg.setAttribute("viewBox","0 0 540 170");psvg.style.cssText="width:100%;height:auto;display:block;";pmf.appendChild(psvg);p.appendChild(pmf);return{panel:p,btns,viz,pmfLbl:lbl,pmfSvg:psvg}}
+  const panels=document.createElement("div");panels.className="hb-panels";root.appendChild(panels);
+
+  // LEFT
+  const L=mkPanel("Finite","hb-ptag-h","Hypergeometric");panels.appendChild(L.panel);L.pmfLbl.textContent="PMF  P(X = k) \u2014 Hypergeometric";
+  const hDrawBtn=createButton("\u{1F3B2} Draw","go"),hAutoBtn=createButton("\u23E9 Auto","auto"),hResetBtn=createButton("\u21BA Reset","reset");
+  L.btns.appendChild(hDrawBtn.el);L.btns.appendChild(hAutoBtn.el);L.btns.appendChild(hResetBtn.el);
+  const hSvg=document.createElementNS(svgNS,"svg");hSvg.setAttribute("viewBox","0 0 540 390");hSvg.style.cssText="width:100%;height:auto;display:block;";L.viz.appendChild(hSvg);
+
+  function renderH(){
+    const N=SL.N.val(),K=SL.K.val(),n=SL.n.val();
+    while(hSvg.firstChild)hSvg.removeChild(hSvg.firstChild);
+    const bx=16,by=28,bw=508,bh=345;
+    const baseCols=Math.max(1,Math.ceil(Math.sqrt(N*(bw/bh))));
+    const rows=Math.ceil(N/baseCols);
+    const kCols=Math.ceil(K/rows),nCols=Math.ceil((N-K)/rows);
+    const cols=kCols+nCols;
+    const cellW=(bw-16)/Math.max(1,cols),cellH=(bh-28)/rows;
+    const dotR=Math.max(2.5,Math.min(Math.min(cellW,cellH)*.34,9));
+    const ox=bx+8,oy=by+8;
+    const hBg=document.createElementNS(svgNS,"rect");
+    hBg.setAttribute("x",bx);hBg.setAttribute("y",by);hBg.setAttribute("width",bw);hBg.setAttribute("height",bh);hBg.setAttribute("rx",8);hBg.setAttribute("ry",8);
+    hBg.setAttribute("fill","rgba(0,0,0,0)");hBg.setAttribute("stroke","#b0b8c4");hBg.setAttribute("stroke-width",1.8);
+    if(ST.hDrawn)hBg.dataset.cat="undrawn";
+    hSvg.appendChild(hBg);
+    // Separate items perfectly by columns with gap
+    const validSet=new Set();
+    const posSet=new Set();
+    for(let i=0;i<K;i++){const r=i%rows,c=(kCols-1)-Math.floor(i/rows);const idx=r*cols+c;validSet.add(idx);posSet.add(idx);}
+    for(let i=0;i<N-K;i++){const r=i%rows,c=kCols+Math.floor(i/rows);const idx=r*cols+c;validSet.add(idx);}
+    
+    let divCol=kCols;
+    if(K>0&&K<N){
+      const divX=ox+divCol*cellW;
+      mkLine(hSvg,divX,by+6,divX,by+bh-6,"#cdd3da",1,"4 3");}
+    let drawnCells=null;
+    if(ST.hDrawn){
+      drawnCells=pickBalancedBlock(cols*rows,cols,rows,posSet,divCol,ST.hK,n-ST.hK,validSet);
+      const pathD=cellBoundaryPath(drawnCells,cols,cellW,cellH,ox,oy,3,7);
+      if(pathD){const path=document.createElementNS(svgNS,"path");path.setAttribute("d",pathD);path.setAttribute("fill","rgba(26,111,160,0.07)");path.setAttribute("stroke","rgba(26,111,160,0.5)");path.setAttribute("stroke-width",2.2);path.setAttribute("stroke-dasharray","8 4");path.dataset.cat="drawn";path.dataset.origOp="1";hSvg.appendChild(path)}
+      const ys=drawnCells.map(i=>oy+Math.floor(i/cols)*cellH);const xs=drawnCells.map(i=>ox+(i%cols)*cellW);}
+    const drawnSet=drawnCells?new Set(drawnCells):null;
+    for(const i of validSet){const r=Math.floor(i/cols),c2=i%cols;
+      const cx=ox+c2*cellW+cellW/2,cy=oy+r*cellH+cellH/2;
+      const isP=posSet.has(i),isDrawn=drawnSet?drawnSet.has(i):false;
+      const st=dotStyle(isP,isDrawn,ST.hDrawn);
+      const ci=mkCircle(hSvg,cx,cy,dotR,st.fill,st.stroke,st.sw,st.op);
+      ci.dataset.cat=ST.hDrawn?(isDrawn?"drawn":"undrawn"):(isP?"pre_pos":"pre_neg");}
+    attachHover(hSvg,cat=>hTip(cat,n,N,K),()=>resetOp(hSvg));
+    renderPMF_H(N,K,n)}
+  function hTip(cat,n,N,K){
+    const k=ST.hK;
+    return({
+      pre_pos:"<strong style='color:"+C.pd+"'>Positive in population</strong><br><b>"+K+"</b> of <b>"+N+"</b> are positive.",
+      pre_neg:"<strong style='color:"+C.nd+"'>Negative in population</strong><br><b>"+(N-K)+"</b> are negative.",
+      drawn:"<strong style='color:"+C.pd+"'>Drawn Sample</strong><br><b>\u{1D458} = "+k+"</b> positive, <b>\u{1D45B} = "+n+"</b> samples.<br>This is the sample we observed.",
+      undrawn:"<strong style='color:"+C.nd+"'>Unobserved Population</strong><br><span class='warn'>\u26A0 This is the source of uncertainty.</span>"
+    })[cat]||"";
+  }
+  function renderPMF_H(N,K,n){const svg=L.pmfSvg;while(svg.firstChild)svg.removeChild(svg.firstChild);const kMin=Math.max(0,n-(N-K)),kMax=Math.min(n,K);if(kMax<kMin||n===0)return;const theo=[];for(let kk=kMin;kk<=kMax;kk++)theo.push({k:kk,p:hPMF(kk,N,K,n)});drawPMFChart(svg,theo,ST.hHist,ST.hN,ST.hK,"#e63946","#c0515c",kMin,kMax)}
+  function doDrawH(){const N=SL.N.val(),K=SL.K.val(),n=SL.n.val();if(n===0)return;ST.hK=sampleHyper(N,K,n);ST.hDrawn=true;ST.hHist[ST.hK]=(ST.hHist[ST.hK]||0)+1;ST.hN++;renderH()}
+  hDrawBtn.el.addEventListener("click",doDrawH);hResetBtn.el.addEventListener("click",()=>{resetH();renderH()});
+  hAutoBtn.el.addEventListener("click",()=>{if(ST.hAutoId){clearInterval(ST.hAutoId);ST.hAutoId=null;hAutoBtn.setText("\u23E9 Auto")}else{ST.hAutoId=setInterval(doDrawH,200);hAutoBtn.setText("\u23F8 Pause")}});
+
+  // RIGHT
+  const R=mkPanel("\u221E pool","hb-ptag-b","Binomial");panels.appendChild(R.panel);R.pmfLbl.textContent="PMF  P(X = k) \u2014 Binomial";
+  const bDrawBtn=createButton("\u{1F3B2} Draw","go"),bAutoBtn=createButton("\u23E9 Auto","auto"),bResetBtn=createButton("\u21BA Reset","reset");
+  R.btns.appendChild(bDrawBtn.el);R.btns.appendChild(bAutoBtn.el);R.btns.appendChild(bResetBtn.el);
+  const bSvg=document.createElementNS(svgNS,"svg");bSvg.setAttribute("viewBox","0 0 540 390");bSvg.style.cssText="width:100%;height:auto;display:block;";R.viz.appendChild(bSvg);
+  const POOL=150,PCOLS=15;
+
+  function renderB(){
+    const N=SL.N.val(),K=SL.K.val(),n=SL.n.val(),p=N>0?K/N:0;
+    while(bSvg.firstChild)bSvg.removeChild(bSvg.firstChild);
+    const padX=16,padY=28,areaW=508,areaH=345;
+    const pRows=Math.ceil(POOL/PCOLS),cellW=areaW/PCOLS,cellH=areaH/pRows;
+    const poolR=Math.max(2.5,Math.min(Math.min(cellW,cellH)*.34,9));
+    const defs=document.createElementNS(svgNS,"defs");
+    defs.innerHTML='<linearGradient id="fl"><stop offset="0%" stop-color="#f7f8fa" stop-opacity="1"/><stop offset="100%" stop-color="#f7f8fa" stop-opacity="0"/></linearGradient><linearGradient id="fr"><stop offset="0%" stop-color="#f7f8fa" stop-opacity="0"/><stop offset="100%" stop-color="#f7f8fa" stop-opacity="1"/></linearGradient><linearGradient id="ft" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f7f8fa" stop-opacity=".85"/><stop offset="100%" stop-color="#f7f8fa" stop-opacity="0"/></linearGradient><linearGradient id="fb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f7f8fa" stop-opacity="0"/><stop offset="100%" stop-color="#f7f8fa" stop-opacity=".85"/></linearGradient>';
+    bSvg.appendChild(defs);
+    const bBg=document.createElementNS(svgNS,"rect");
+    bBg.setAttribute("x",padX);bBg.setAttribute("y",padY);bBg.setAttribute("width",areaW);bBg.setAttribute("height",areaH);bBg.setAttribute("rx",10);bBg.setAttribute("ry",10);
+    bBg.setAttribute("fill","rgba(0,0,0,0)");
+    bBg.dataset.cat=ST.bDrawn?"undrawn":"b_pool";
+    bSvg.appendChild(bBg);
+    let drawnSet=null,drawnPosSet=null;
+    if(ST.bDrawn){const k=ST.bK;
+      const seedIdx=Math.floor(Math.random()*POOL);
+      const blockIdx=floodBlock(POOL,PCOLS,n,seedIdx);drawnSet=new Set(blockIdx);
+      const shuf=[...blockIdx];for(let i=shuf.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuf[i],shuf[j]]=[shuf[j],shuf[i]]}
+      drawnPosSet=new Set(shuf.slice(0,k));
+      const pathD=cellBoundaryPath(blockIdx,PCOLS,cellW,cellH,padX,padY,3,7);
+      if(pathD){const path=document.createElementNS(svgNS,"path");path.setAttribute("d",pathD);path.setAttribute("fill","rgba(100,50,150,0.07)");path.setAttribute("stroke","rgba(100,50,150,0.45)");path.setAttribute("stroke-width",2.2);path.setAttribute("stroke-dasharray","8 4");path.dataset.cat="drawn";path.dataset.origOp="1";bSvg.appendChild(path)}
+      const ys=blockIdx.map(i=>padY+Math.floor(i/PCOLS)*cellH),xs=blockIdx.map(i=>padX+(i%PCOLS)*cellW);}
+    for(let i=0;i<POOL;i++){const c=i%PCOLS,ro=Math.floor(i/PCOLS);
+      const cx=padX+c*cellW+cellW/2,cy=padY+ro*cellH+cellH/2;
+      const isDrawn=drawnSet?drawnSet.has(i):false;
+      if(!ST.bDrawn){const ci=mkCircle(bSvg,cx,cy,poolR,C.nu,C.nus,.7,.4);ci.dataset.cat="b_pool";
+        if(p>0&&p<1){const angle=p*2*Math.PI,x1=cx,y1=cy-poolR,x2=cx+poolR*Math.sin(angle),y2=cy-poolR*Math.cos(angle),la=angle>Math.PI?1:0;const pie=document.createElementNS(svgNS,"path");pie.setAttribute("d","M"+cx+" "+cy+" L"+x1+" "+y1+" A"+poolR+" "+poolR+" 0 "+la+" 1 "+x2+" "+y2+" Z");pie.setAttribute("fill",C.pu);pie.setAttribute("opacity",".45");pie.dataset.origOp=".45";pie.dataset.cat="b_pool";bSvg.appendChild(pie)}
+      }else if(isDrawn){const isP=drawnPosSet.has(i);const ci=mkCircle(bSvg,cx,cy,poolR,isP?C.pd:C.nd,isP?C.pds:C.nds,1.8,1);ci.dataset.cat="drawn";
+      }else{const ci=mkCircle(bSvg,cx,cy,poolR,C.nu,C.nus,.6,.18);ci.dataset.cat="undrawn";
+        if(p>0&&p<1){const angle=p*2*Math.PI,x1=cx,y1=cy-poolR,x2=cx+poolR*Math.sin(angle),y2=cy-poolR*Math.cos(angle),la=angle>Math.PI?1:0;const pie=document.createElementNS(svgNS,"path");pie.setAttribute("d","M"+cx+" "+cy+" L"+x1+" "+y1+" A"+poolR+" "+poolR+" 0 "+la+" 1 "+x2+" "+y2+" Z");pie.setAttribute("fill",C.pu);pie.setAttribute("opacity",".18");pie.dataset.origOp=".18";pie.dataset.cat="undrawn";bSvg.appendChild(pie)}}}
+    mkRect(bSvg,0,padY-4,24,areaH+8,0,"url(#fl)","none",0);mkRect(bSvg,516,padY-4,24,areaH+8,0,"url(#fr)","none",0);mkRect(bSvg,0,padY-8,540,20,0,"url(#ft)","none",0);mkRect(bSvg,0,padY+areaH-12,540,20,0,"url(#fb)","none",0);
+    attachHover(bSvg,cat=>bTip(cat,n,p),()=>resetOp(bSvg));renderPMF_B(p,n)}
+  function bTip(cat,n,p){
+    const k=ST.bK;
+    return({
+      b_pool:"<strong style='color:#7b2d8e'>Infinite population</strong><br>Probability <b>\u{1D45D} = "+p.toFixed(3)+"</b> per draw.",
+      drawn:"<strong style='color:"+C.pd+"'>Drawn Sample</strong><br><b>\u{1D458} = "+k+"</b> positive, <b>\u{1D45B} = "+n+"</b> samples.<br>This is the sample we observed.",
+      undrawn:"<strong style='color:#7b2d8e'>Infinite Pool</strong><br><span class='warn'>\u26A0 The source of uncertainty is the infinite pool.</span>"
+    })[cat]||"";
+  }
+  function renderPMF_B(p,n){const svg=R.pmfSvg;while(svg.firstChild)svg.removeChild(svg.firstChild);if(p<=0||p>=1||n===0)return;const theo=[];for(let kk=0;kk<=n;kk++)theo.push({k:kk,p:bPMF(kk,n,p)});drawPMFChart(svg,theo,ST.bHist,ST.bN,ST.bK,"#7b2d8e","#9b59b6",0,n)}
+  function doDrawB(){const N=SL.N.val(),K=SL.K.val(),n=SL.n.val();if(n===0)return;const p=N>0?K/N:0;ST.bK=sampleBinom(n,p);ST.bDrawn=true;ST.bHist[ST.bK]=(ST.bHist[ST.bK]||0)+1;ST.bN++;renderB()}
+  bDrawBtn.el.addEventListener("click",doDrawB);bResetBtn.el.addEventListener("click",()=>{resetB();renderB()});
+  bAutoBtn.el.addEventListener("click",()=>{if(ST.bAutoId){clearInterval(ST.bAutoId);ST.bAutoId=null;bAutoBtn.setText("\u23E9 Auto")}else{ST.bAutoId=setInterval(doDrawB,200);bAutoBtn.setText("\u23F8 Pause")}});
+  for(const s of[SL.N,SL.K,SL.n]){s.input.addEventListener("input",()=>{s.sync();clamp();resetH();resetB();renderH();renderB()})}
+
+  function drawPMFChart(svg,theo,hist,nDraws,obsK,lineClr,barClr,kMin,kMax){const pL=38,pR=10,pT=8,pB=26,cW=540-pL-pR,cH=170-pT-pB;const nBins=kMax-kMin+1;if(nBins<=0)return;const barW=Math.min(20,(cW*.85)/nBins),gap=nBins>1?(cW-barW*nBins)/(nBins+1):(cW-barW)/2;let maxP=0;for(const t of theo)if(t.p>maxP)maxP=t.p;let maxFreq=0;if(nDraws>0)for(let kk=kMin;kk<=kMax;kk++){const f=(hist[kk]||0)/nDraws;if(f>maxFreq)maxFreq=f}const yMax=Math.max(maxP,maxFreq)*1.1;if(yMax<=0)return;mkLine(svg,pL,pT+cH,540-pR,pT+cH,"#dde2e9",1);if(nDraws>0){for(let i=0;i<nBins;i++){const freq=(hist[kMin+i]||0)/nDraws,x=pL+gap+i*(barW+gap),h=(freq/yMax)*cH;const r=document.createElementNS(svgNS,"rect");r.setAttribute("x",x);r.setAttribute("y",pT+cH-h);r.setAttribute("width",barW);r.setAttribute("height",Math.max(0,h));r.setAttribute("rx",2);r.setAttribute("fill",barClr);r.setAttribute("opacity",.22);svg.appendChild(r)}}const pts=[];for(let i=0;i<nBins;i++)pts.push([pL+gap+i*(barW+gap)+barW/2,pT+cH-(theo[i].p/yMax)*cH]);if(pts.length>1){const ld=pts.map((pp,i)=>(i===0?"M":"L")+pp[0].toFixed(1)+","+pp[1].toFixed(1)).join(" ");const line=document.createElementNS(svgNS,"path");line.setAttribute("d",ld);line.setAttribute("fill","none");line.setAttribute("stroke",lineClr);line.setAttribute("stroke-width",2);line.setAttribute("stroke-linejoin","round");line.setAttribute("opacity",.8);svg.appendChild(line)}for(const[x,y]of pts)mkCircle(svg,x,y,2.5,lineClr,lineClr,0,.85);if(obsK!==null){const i=obsK-kMin;if(i>=0&&i<pts.length){const[x,y]=pts[i];mkCircle(svg,x,y,5.5,"none",lineClr,2.2,1);const lbl=document.createElementNS(svgNS,"text");lbl.setAttribute("x",x);lbl.setAttribute("y",y-9);lbl.setAttribute("text-anchor","middle");lbl.setAttribute("font-size","13");lbl.setAttribute("font-weight","700");lbl.setAttribute("fill",lineClr);lbl.setAttribute("font-family","var(--f-mono)");lbl.textContent=theo[i].p.toFixed(4);svg.appendChild(lbl)}}const step=nBins>35?Math.ceil(nBins/25):1;for(let i=0;i<nBins;i+=step)svgText(svg,pL+gap+i*(barW+gap)+barW/2,pT+cH+16,String(kMin+i),12,"#8e99a9");const yl=document.createElementNS(svgNS,"text");yl.setAttribute("x",14);yl.setAttribute("y",pT+cH/2);yl.setAttribute("text-anchor","middle");yl.setAttribute("transform","rotate(-90,14,"+(pT+cH/2)+")");yl.setAttribute("font-size","13");yl.setAttribute("fill","#8e99a9");yl.setAttribute("font-family","var(--f-mono)");yl.textContent="P(X=k)";svg.appendChild(yl);}
+
+
+  function mkCircle(par,cx,cy,r,fill,stroke,sw,op){const c=document.createElementNS(svgNS,"circle");c.setAttribute("cx",cx);c.setAttribute("cy",cy);c.setAttribute("r",r);c.setAttribute("fill",fill);c.setAttribute("stroke",stroke);c.setAttribute("stroke-width",sw);c.setAttribute("opacity",op);c.dataset.origOp=op;c.style.transition="opacity .12s";par.appendChild(c);return c}
+  function mkRect(par,x,y,w,h,rx,fill,stroke,sw){const r=document.createElementNS(svgNS,"rect");r.setAttribute("x",x);r.setAttribute("y",y);r.setAttribute("width",w);r.setAttribute("height",h);r.setAttribute("rx",rx);r.setAttribute("fill",fill);if(stroke!=="none"){r.setAttribute("stroke",stroke);r.setAttribute("stroke-width",sw)}par.appendChild(r);return r}
+  function mkLine(par,x1,y1,x2,y2,stroke,sw,dash){const l=document.createElementNS(svgNS,"line");l.setAttribute("x1",x1);l.setAttribute("y1",y1);l.setAttribute("x2",x2);l.setAttribute("y2",y2);l.setAttribute("stroke",stroke);l.setAttribute("stroke-width",sw);if(dash)l.setAttribute("stroke-dasharray",dash);par.appendChild(l);return l}
+  function svgText(par,x,y,text,size,fill){const t=document.createElementNS(svgNS,"text");t.setAttribute("x",x);t.setAttribute("y",y);t.setAttribute("text-anchor","middle");t.setAttribute("font-size",size||13);t.setAttribute("fill",fill||"#8e99a9");t.setAttribute("font-family","var(--f-mono)");t.setAttribute("font-weight","500");t.textContent=text;par.appendChild(t);return t}
+  function dotStyle(isP,isDrawn,hasDrawn){if(!hasDrawn)return isP?{fill:C.pu,stroke:C.pus,sw:1.2,op:1,cat:"pre_pos"}:{fill:C.nu,stroke:C.nus,sw:1.2,op:1,cat:"pre_neg"};if(isDrawn&&isP)return{fill:C.pd,stroke:C.pds,sw:1.8,op:1,cat:"drawn_pos"};if(isDrawn&&!isP)return{fill:C.nd,stroke:C.nds,sw:1.8,op:1,cat:"drawn_neg"};if(!isDrawn&&isP)return{fill:C.pu,stroke:C.pus,sw:1,op:.35,cat:"undrawn_pos"};return{fill:C.nu,stroke:C.nus,sw:.8,op:.2,cat:"undrawn_neg"}}
+  function attachHover(svg,tipFn,resetFn){
+    svg.onmousemove=(e)=>{
+      const target=e.target.closest("[data-cat]");
+      const cat=target?target.dataset.cat:null;
+      if(cat){
+        for(const el of svg.querySelectorAll("[data-cat]")){
+          if(!el.dataset.origOp)continue;
+          const orig=parseFloat(el.dataset.origOp);
+          if(cat==="drawn"||cat==="undrawn"){
+            if(el.dataset.cat===cat){
+              el.setAttribute("opacity", cat==="undrawn" ? Math.min(1, orig*3.2) : orig);
+            }else{
+              el.setAttribute("opacity", (cat==="undrawn"&&el.nodeName==="path"&&el.dataset.cat==="drawn") ? orig : orig*0.2);
+            }
+          }else{
+            if(el.dataset.cat===cat) el.setAttribute("opacity", Math.min(1, orig*3.2));
+            else el.setAttribute("opacity", orig*0.2);
+          }
+        }
+        showTip(e,tipFn(cat));
+      }else{resetFn();hideTip()}
+    };
+    svg.onmouseleave=()=>{resetFn();hideTip()}
+  }
+  function resetOp(svg){for(const el of svg.querySelectorAll("[data-cat]"))if(el.dataset.origOp)el.setAttribute("opacity",el.dataset.origOp)}
+  function svgPt(svg,e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse())}
+
+  invalidation.then(()=>{
+    if(ST.hAutoId)clearInterval(ST.hAutoId);
+    if(ST.bAutoId)clearInterval(ST.bAutoId);
+  });
+  clamp();renderH();renderB();return root;
+}
+```
+
 
 ### Phân phối Nhị thức (Binomial distribution)
 
@@ -39,313 +431,326 @@ Với:
 $$\underbrace{\binom{n}{k}}_{\text{Số cách chọn}} \cdot \underbrace{p^k}_{k \text{ lần thành công}} \cdot \underbrace{(1-p)^{n-k}}_{n-k \text{ lần thất bại}}$$
 :::
 
-#### Ví dụ
-
-Tung 1 đồng xu 10 lần, khả năng đếm được 1, 2, 3... mặt ngửa là bao nhiêu?
-
-- Tổng số lần thực hiện phép thử: $n = 10$
-- Xác suất ra mặt ngửa mỗi lần: $p = 0.5$
-
 ```{ojs}
-//| echo: false
-viewof coin_sim_manual = (() => {
-  // --- 1. SETUP DOM & STYLES ---
-  const container = document.createElement("div");
-  // Rigid container size: 400px width, 340px height (40px controls + 300px canvas)
-  container.style.cssText = `
-    width: 400px;
-    height: 340px; 
-    margin: 0 auto;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border: 1px solid transparent;
+viewof binomial_dist = (() => {
+  // ══════════════════════════════════════════════════════
+  // 1. MATH
+  // ══════════════════════════════════════════════════════
+  const lcCache = new Map();
+  function lc(n,k){
+    if(k<0||k>n)return -Infinity;
+    if(k>n-k)k=n-k;
+    const key=(n<<12)|k;
+    if(lcCache.has(key))return lcCache.get(key);
+    let r=0;for(let i=0;i<k;i++)r+=Math.log(n-i)-Math.log(i+1);
+    lcCache.set(key,r);return r;
+  }
+  function pmf(x,n,p){
+    if(x<0||x>n)return 0;
+    if(p<=0)return x===0?1:0;
+    if(p>=1)return x===n?1:0;
+    return Math.exp(lc(n,x)+x*Math.log(p)+(n-x)*Math.log(1-p));
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 2. WRAPPER + STYLE
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:900px;margin:0 auto;
   `;
 
-  // Inject UI HTML directly (Total Control, Zero Shift)
-  container.innerHTML = `
-    <style>
-      .coin-controls-row {
-        width: 100%;
-        height: 40px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 0px;
-      }
-      .coin-btn {
-        padding: 6px 14px;
-        border-radius: 6px;
-        border: 1px solid #d1d5db;
-        background-color: white;
-        color: #374151;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        line-height: 1.2;
-      }
-      .coin-btn:hover { background-color: #f3f4f6; }
-      
-      .coin-btn-primary {
-        background-color: #3b82f6; 
-        color: white; 
-        border-color: #2563eb;
-      }
-      .coin-btn-primary:hover { background-color: #2563eb; color: white; }
-      
-      .coin-toggle {
-        display: flex; align-items: center; gap: 6px;
-        font-size: 14px; font-weight: 500; color: #4b5563;
-        cursor: pointer; user-select: none;
-      }
-      .coin-toggle input { width: 16px; height: 16px; accent-color: #10b981; cursor: pointer; }
-      
-      canvas { display: block; } /* Removes ghost margin */
-    </style>
-
-    <div class="coin-controls-row">
-      <button id="btn-flip" class="coin-btn coin-btn-primary">Tung đồng xu</button>
-      <label class="coin-toggle">
-        <input type="checkbox" id="chk-auto">
-        Tự động chạy
-      </label>
-      <button id="btn-reset" class="coin-btn">Làm lại</button>
-    </div>
+  const style = document.createElement("style");
+  style.textContent = `
+    .bd-slider{position:relative;height:8px;border-radius:4px;background:#e2e8f0;}
+    .bd-slider-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;transition:width 0.04s;}
+    .bd-slider input[type=range]{
+      position:absolute;top:0;left:0;width:100%;height:100%;
+      -webkit-appearance:none;appearance:none;background:transparent;
+      cursor:pointer;margin:0;padding:0;
+    }
+    .bd-slider input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;appearance:none;
+      width:20px;height:20px;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.28);
+      cursor:pointer;margin-top:-6px;background:#475569;
+    }
+    .bd-slider input[type=range]::-moz-range-thumb{
+      width:14px;height:14px;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.28);
+      cursor:pointer;background:#475569;
+    }
+    .bd-slider input[type=range]::-webkit-slider-runnable-track{height:8px;background:transparent;}
+    .bd-slider input[type=range]::-moz-range-track{height:8px;background:transparent;}
+    .bd-slider-dark input[type=range]::-webkit-slider-thumb{background:#1e293b;}
+    .bd-slider-dark input[type=range]::-moz-range-thumb{background:#1e293b;}
+    .bd-slider-blue input[type=range]::-webkit-slider-thumb{background:#3b82f6;}
+    .bd-slider-blue input[type=range]::-moz-range-thumb{background:#3b82f6;}
   `;
+  wrapper.appendChild(style);
 
-  // --- 2. CANVAS SETUP ---
-  const width = 400;
-  const height = 300;
-  const canvas = document.createElement("canvas");
-  const dpr = window.devicePixelRatio || 1;
-  
-  canvas.width = width * dpr;
-  canvas.height = height * dpr;
-  canvas.style.width = `${width}px`;
-  canvas.style.height = `${height}px`;
-  
-  const ctx = canvas.getContext("2d", { alpha: false });
-  ctx.scale(dpr, dpr);
-  container.appendChild(canvas);
+  // ══════════════════════════════════════════════════════
+  // 3. SLIDERS
+  // ══════════════════════════════════════════════════════
+  function createSlider(label, min, max, step, val, color, cls) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:140px;";
 
-  // --- 3. STATE & CONSTANTS ---
-  const N = 10;
-  const P = 0.5;
-  
-  // Colors
-  const BG_COLOR="#fff", TEXT_COLOR="#2c3e50";
-  const HEAD_COLOR="#f1c40f", HEAD_BORDER="#d4ac0d";
-  const TAIL_COLOR="#bdc3c7", TAIL_BORDER="#95a5a6";
-  const CHART_BAR="#3498db", CHART_ACTIVE="#2980b9", CHART_THEO="rgba(44, 62, 80, 0.1)";
+    const head = document.createElement("div");
+    head.style.cssText = "display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;";
 
-  // Math Helper
-  function binomial(k, n, p) {
-    function nCr(n, r) {
-        if (r < 0 || r > n) return 0;
-        let res = 1;
-        for(let i=0; i<r; i++) res = res * (n - i) / (i + 1);
-        return res;
-    }
-    return nCr(n, k) * Math.pow(p, k) * Math.pow(1 - p, n - k);
+    const lbl = document.createElement("span");
+    lbl.style.cssText = "font-size:12px;font-weight:600;color:#64748b;letter-spacing:0.3px;text-transform:uppercase;";
+    lbl.textContent = label;
+
+    const valSpan = document.createElement("span");
+    valSpan.style.cssText = `font-size:18px;font-weight:800;color:${color};font-variant-numeric:tabular-nums;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;`;
+    valSpan.textContent = step < 1 ? Number(val).toFixed(2) : val;
+
+    head.appendChild(lbl); head.appendChild(valSpan);
+
+    const track = document.createElement("div");
+    track.className = "bd-slider bd-slider-" + cls;
+
+    const fill = document.createElement("div");
+    fill.className = "bd-slider-fill";
+    fill.style.background = color;
+    fill.style.width = ((val - min) / (max - min)) * 100 + "%";
+    track.appendChild(fill);
+
+    const input = document.createElement("input");
+    input.type = "range"; input.min = min; input.max = max;
+    input.step = step; input.value = val;
+    track.appendChild(input);
+
+    row.appendChild(head); row.appendChild(track);
+
+    return { el: row, input, valSpan, fill,
+      val() { return +input.value; },
+      sync() {
+        const v = +input.value;
+        valSpan.textContent = step < 1 ? v.toFixed(2) : String(v);
+        fill.style.width = ((v - min) / (max - min)) * 100 + "%";
+      }
+    };
   }
 
-  // Simulation State
-  const S = {
-     history: [], 
-     counts: {},  
-     totalFlips: 0,
-     currentResult: [], 
-     animation: 0, 
-     cooldown: 0,
-     isAuto: false
-  };
-  for(let i=0; i<=N; i++) S.counts[i] = 0;
+  const SL = {};
+  SL.n = createSlider("n (trials)", 1, 100, 1, 20, "#1e293b", "dark");
+  SL.p = createSlider("p (success probability)", 0.01, 0.99, 0.01, 0.50, "#3b82f6", "blue");
 
-  // --- 4. LOGIC ---
-  function runFlip() {
-     let heads = 0;
-     const res = [];
-     for(let i=0; i<N; i++) {
-        const isHead = Math.random() < P;
-        res.push(isHead ? 1 : 0);
-        if (isHead) heads++;
-     }
-     
-     const coinSize = 28;
-     const gap = 6;
-     const totalW = N * coinSize + (N-1)*gap;
-     const startX = (width - totalW) / 2 + coinSize/2;
+  const ctrlRow = document.createElement("div");
+  ctrlRow.style.cssText = "display:flex;gap:28px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
+  ctrlRow.appendChild(SL.n.el); ctrlRow.appendChild(SL.p.el);
+  wrapper.appendChild(ctrlRow);
 
-     S.currentResult = res.map((val, i) => ({
-        val: val,
-        x: width/2, 
-        y: 50,
-        targetX: startX + i * (coinSize + gap), 
-        targetY: 85,
-        r: coinSize / 2,
-        t: 0
-     }));
+  // ══════════════════════════════════════════════════════
+  // 4. SVG CHART (pre-allocated pools)
+  // ══════════════════════════════════════════════════════
+  const NS = "http://www.w3.org/2000/svg";
+  const W = 760, H = 380;
+  const mg = {t:16, r:20, b:48, l:56};
+  const cw = W-mg.l-mg.r, ch = H-mg.t-mg.b;
 
-     S.history.push(heads);
-     S.counts[heads] = (S.counts[heads] || 0) + 1;
-     S.totalFlips++;
-     S.animation = 1;
-     S.cooldown = 0;
+  const svg = document.createElementNS(NS,"svg");
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  svg.style.cssText = `width:100%;max-width:${W}px;background:#fafbfc;border-radius:10px;border:1px solid #e2e8f0;`;
+
+  function el(tag,a){const e=document.createElementNS(NS,tag);if(a)for(const[k,v]of Object.entries(a))e.setAttribute(k,v);return e;}
+
+  // Grid
+  const gridLines=[];
+  for(let i=0;i<=4;i++){const l=el("line",{stroke:"#e2e8f0","stroke-width":"0.7"});svg.appendChild(l);gridLines.push(l);}
+
+  // Y labels
+  const yLabels=[];
+  for(let i=0;i<=4;i++){const t=el("text",{"text-anchor":"end",fill:"#94a3b8","font-size":"10","font-family":"'SF Mono',monospace"});svg.appendChild(t);yLabels.push(t);}
+
+  // Bar pool
+  const POOL=101;
+  const bars=[];
+  for(let i=0;i<POOL;i++){
+    const r=el("rect",{rx:"2",fill:"#3b82f6",stroke:"#2563eb","stroke-width":"0.5"});
+    r.style.display="none";svg.appendChild(r);bars.push(r);
   }
 
-  function reset() {
-     S.history = [];
-     for(let i=0; i<=N; i++) S.counts[i] = 0;
-     S.totalFlips = 0;
-     S.currentResult = [];
-     S.animation = 0;
+  // Hover bar
+  const hoverBar=el("rect",{rx:"2",fill:"rgba(59,130,246,0.35)",stroke:"#1d4ed8","stroke-width":"1"});
+  hoverBar.style.display="none";svg.appendChild(hoverBar);
+
+  // X axis
+  const xAxisLine=el("line",{stroke:"#94a3b8"});svg.appendChild(xAxisLine);
+  const xTicks=[];
+  for(let i=0;i<30;i++){
+    const ln=el("line",{stroke:"#94a3b8",y2:"5"});ln.style.display="none";svg.appendChild(ln);
+    const t=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"11","font-family":"'SF Mono',monospace",dy:"16"});t.style.display="none";svg.appendChild(t);
+    xTicks.push({ln,t});
+  }
+  const xLabel=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"12",y:String(H-4)});
+  xLabel.textContent="Number of successes (k)";svg.appendChild(xLabel);
+
+  // Y axis
+  svg.appendChild(el("line",{x1:String(mg.l),x2:String(mg.l),y1:String(mg.t),y2:String(mg.t+ch),stroke:"#94a3b8"}));
+  const yLabel=el("text",{"text-anchor":"middle",fill:"#64748b","font-size":"12",x:"14",y:String(mg.t+ch/2),transform:`rotate(-90,14,${mg.t+ch/2})`});
+  yLabel.textContent="P(X = k)";svg.appendChild(yLabel);
+
+  // Tooltip
+  const tipG=el("g");tipG.style.display="none";
+  const tipRect=el("rect",{rx:"6",fill:"#1e293b",opacity:"0.92"});
+  const tipText1=el("text",{fill:"#fff","font-size":"12","font-weight":"700","font-family":"'SF Mono',monospace"});
+  const tipText2=el("text",{fill:"#94a3b8","font-size":"11","font-family":"'SF Mono',monospace"});
+  tipG.appendChild(tipRect);tipG.appendChild(tipText1);tipG.appendChild(tipText2);
+  svg.appendChild(tipG);
+
+  wrapper.appendChild(svg);
+
+  // ══════════════════════════════════════════════════════
+  // 5. RENDER
+  // ══════════════════════════════════════════════════════
+  let curData=[], curMaxY=0, hoverIdx=-1;
+  let sx, sy, barW, baseline;
+
+  function render(){
+    const nV=SL.n.val(), pV=SL.p.val();
+    const mean=nV*pV, sd=Math.sqrt(nV*pV*(1-pV));
+
+    let loX=Math.max(0,Math.floor(mean-4*sd-1));
+    let hiX=Math.min(nV,Math.ceil(mean+4*sd+1));
+    if(nV<=30){loX=0;hiX=nV;}
+
+    curData=[];curMaxY=0;
+    for(let x=loX;x<=hiX;x++){
+      const p=pmf(x,nV,pV);
+      curData.push({x,prob:p});
+      if(p>curMaxY)curMaxY=p;
+    }
+    curMaxY*=1.15;
+    if(curMaxY<1e-9)curMaxY=0.01;
+
+    const cnt=hiX-loX+1;
+    sx=x=>mg.l+((x-loX)/(hiX-loX))*cw;
+    sy=y=>mg.t+ch-(y/curMaxY)*ch;
+    barW=Math.max(2,Math.min(28,cw/cnt*0.75));
+    baseline=sy(0);
+
+    // Grid + Y labels
+    for(let i=0;i<=4;i++){
+      const v=(curMaxY/4)*i,yy=sy(v);
+      gridLines[i].setAttribute("x1",mg.l);gridLines[i].setAttribute("x2",W-mg.r);
+      gridLines[i].setAttribute("y1",yy);gridLines[i].setAttribute("y2",yy);
+      yLabels[i].setAttribute("x",mg.l-8);yLabels[i].setAttribute("y",yy+4);
+      yLabels[i].textContent=v.toFixed(v<0.01?4:3);
+    }
+
+    // Bars
+    for(let i=0;i<POOL;i++){
+      if(i<curData.length){
+        const d=curData[i];
+        const bx=sx(d.x)-barW/2,by=sy(d.prob);
+        bars[i].setAttribute("x",bx);bars[i].setAttribute("y",by);
+        bars[i].setAttribute("width",barW);bars[i].setAttribute("height",Math.max(0,baseline-by));
+        bars[i].style.display="";
+      }else{bars[i].style.display="none";}
+    }
+
+    // X axis
+    xAxisLine.setAttribute("x1",mg.l);xAxisLine.setAttribute("x2",W-mg.r);
+    xAxisLine.setAttribute("y1",baseline);xAxisLine.setAttribute("y2",baseline);
+    xLabel.setAttribute("x",mg.l+cw/2);
+
+    const span=hiX-loX;
+    const ts=span>80?10:span>40?5:span>20?2:1;
+    let ti=0;
+    for(let x=Math.ceil(loX/ts)*ts;x<=hiX&&ti<30;x+=ts){
+      const xx=sx(x);
+      xTicks[ti].ln.setAttribute("x1",xx);xTicks[ti].ln.setAttribute("x2",xx);
+      xTicks[ti].ln.setAttribute("y1",baseline);xTicks[ti].ln.setAttribute("y2",baseline+5);
+      xTicks[ti].ln.style.display="";
+      xTicks[ti].t.setAttribute("x",xx);xTicks[ti].t.setAttribute("y",baseline+5);
+      xTicks[ti].t.textContent=x;xTicks[ti].t.style.display="";
+      ti++;
+    }
+    for(;ti<30;ti++){xTicks[ti].ln.style.display="none";xTicks[ti].t.style.display="none";}
+
+    updateHover();
+    wrapper.value={n:nV,p:pV};
+    wrapper.dispatchEvent(new Event("input",{bubbles:true}));
   }
 
-  // --- 5. LOOP ---
-  function update() {
-     // Auto Run Logic
-     if (S.isAuto && S.animation === 0) {
-        S.cooldown++;
-        if (S.cooldown > 20) runFlip(); // Speed: ~0.3s
-     }
-
-     // Animation Logic
-     if (S.animation === 1) {
-       let done = true;
-       for (let c of S.currentResult) {
-          if (c.t < 1) {
-             c.t += 0.2; 
-             if (c.t > 1) c.t = 1;
-             const ease = 1 - Math.pow(1 - c.t, 3);
-             c.x = width/2 + (c.targetX - width/2) * ease;
-             c.y = c.targetY - Math.sin(c.t * Math.PI) * 20;
-             done = false;
-          }
-       }
-       if (done) S.animation = 0;
+  // ══════════════════════════════════════════════════════
+  // 6. HOVER
+  // ══════════════════════════════════════════════════════
+  function updateHover(){
+    if(hoverIdx<0||hoverIdx>=curData.length){
+      hoverBar.style.display="none";tipG.style.display="none";return;
     }
+    const d=curData[hoverIdx];
+    const bx=sx(d.x)-barW/2,by=sy(d.prob);
+    hoverBar.setAttribute("x",bx-1);hoverBar.setAttribute("y",by-1);
+    hoverBar.setAttribute("width",barW+2);hoverBar.setAttribute("height",Math.max(0,baseline-by)+2);
+    hoverBar.style.display="";
+
+    const t1="k = "+d.x;
+    const t2="P = "+d.prob.toFixed(5);
+    const tw=Math.max(t1.length,t2.length)*7.5+16;
+    const th=40;
+    let tx=sx(d.x)+barW/2+8,ty=by-10;
+    if(tx+tw>W-mg.r)tx=sx(d.x)-barW/2-tw-8;
+    if(ty<mg.t)ty=mg.t+4;
+
+    tipRect.setAttribute("x",tx);tipRect.setAttribute("y",ty);
+    tipRect.setAttribute("width",tw);tipRect.setAttribute("height",th);
+    tipText1.setAttribute("x",tx+8);tipText1.setAttribute("y",ty+16);tipText1.textContent=t1;
+    tipText2.setAttribute("x",tx+8);tipText2.setAttribute("y",ty+32);tipText2.textContent=t2;
+    tipG.style.display="";
   }
 
-  function draw() {
-    ctx.fillStyle = BG_COLOR;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.save();
-    ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fontVariantNumeric = "tabular-nums";
-    
-    // 1. Text Info
-    // Left: Count
-    ctx.textAlign = "left"; ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(`Lần chạy: ${S.totalFlips}`, 20, 30);
-    
-    // Center: Status
-    if (S.isAuto) {
-       ctx.textAlign = "center"; ctx.fillStyle = "#27ae60";
-       ctx.fillText("● Đang chạy...", 170, 30); // Adjusted center for visual balance
+  function onMove(e){
+    const rect=svg.getBoundingClientRect();
+    const mouseX=(e.clientX-rect.left)*(W/rect.width);
+    if(mouseX<mg.l||mouseX>W-mg.r||!curData.length){hoverIdx=-1;updateHover();return;}
+    let best=-1,bestD=Infinity;
+    for(let i=0;i<curData.length;i++){
+      const dist=Math.abs(sx(curData[i].x)-mouseX);
+      if(dist<bestD){bestD=dist;best=i;}
     }
-    
-    // Right: Result
-    if (S.currentResult.length > 0) {
-       const hCount = S.currentResult.filter(c => c.val===1).length;
-       ctx.textAlign = "right"; ctx.fillStyle = "#d35400";
-       ctx.fillText(`Mặt Ngửa: ${hCount} / ${N}`, width - 20, 30);
-    }
-    ctx.restore();
-
-    // 2. Coins
-    for (let c of S.currentResult) {
-       ctx.beginPath();
-       ctx.arc(c.x, c.y, c.r, 0, Math.PI*2);
-       ctx.fillStyle = c.val === 1 ? HEAD_COLOR : TAIL_COLOR;
-       ctx.fill();
-       ctx.lineWidth = 2;
-       ctx.strokeStyle = c.val === 1 ? HEAD_BORDER : TAIL_BORDER;
-       ctx.stroke();
-       ctx.fillStyle = "white";
-       ctx.textAlign = "center"; ctx.textBaseline = "middle";
-       ctx.font = `bold ${c.r}px sans-serif`;
-       ctx.fillText(c.val === 1 ? "N" : "S", c.x, c.y + 1);
-    }
-
-    // 3. Chart
-    const chartY = 280; 
-    const chartH = 140; 
-    const chartX = 40;
-    const chartW = width - 60;
-    
-    ctx.beginPath();
-    ctx.strokeStyle = "#bdc3c7"; ctx.lineWidth = 1;
-    ctx.moveTo(chartX, chartY); ctx.lineTo(chartX + chartW, chartY); ctx.stroke();
-
-    const barW = chartW / (N + 1);
-    const MAX_PROB = 0.246; 
-    const Y_SCALE_MAX = MAX_PROB * 1.2; 
-    const activeHeads = S.currentResult.filter(c => c.val===1).length;
-
-    for (let k = 0; k <= N; k++) {
-       const cx = chartX + k * barW + barW/2;
-       
-       // Theoretical
-       const prob = binomial(k, N, P);
-       const theoH = (prob / Y_SCALE_MAX) * chartH;
-       ctx.fillStyle = CHART_THEO;
-       ctx.fillRect(cx - barW*0.3, chartY - theoH, barW*0.6, theoH);
-       
-       // Actual
-       let observedProb = 0;
-       if (S.totalFlips > 0) observedProb = S.counts[k] / S.totalFlips;
-       let barH = (observedProb / Y_SCALE_MAX) * chartH;
-       if (barH > chartH + 10) barH = chartH + 10;
-
-       const isActive = (S.animation === 0 && k === activeHeads && S.totalFlips > 0);
-       ctx.fillStyle = isActive ? CHART_ACTIVE : CHART_BAR;
-       ctx.fillRect(cx - barW*0.3, chartY - barH, barW*0.6, barH);
-       
-       // Labels
-       ctx.save();
-       ctx.fontVariantNumeric = "tabular-nums";
-       ctx.fillStyle = TEXT_COLOR;
-       ctx.font = "10px sans-serif";
-       ctx.textAlign = "center";
-       ctx.fillText(k, cx, chartY + 15);
-       ctx.restore();
-    }
-    
-    // Y-Axis Label
-    ctx.save();
-    ctx.translate(12, chartY - chartH/2);
-    ctx.rotate(-Math.PI/2);
-    ctx.textAlign = "center";
-    ctx.font = "14px sans-serif";
-    ctx.fillStyle = "#7f8c8d";
-    ctx.fillText("Tần suất", 0, 0);
-    ctx.restore();
+    if(bestD>barW*1.2)best=-1;
+    if(best!==hoverIdx){hoverIdx=best;updateHover();}
   }
+  function onLeave(){hoverIdx=-1;updateHover();}
 
-  // --- 6. BINDINGS ---
-  const btnFlip = container.querySelector("#btn-flip");
-  const btnReset = container.querySelector("#btn-reset");
-  const chkAuto = container.querySelector("#chk-auto");
+  svg.addEventListener("mousemove",onMove);
+  svg.addEventListener("mouseleave",onLeave);
 
-  btnFlip.onclick = () => runFlip();
-  btnReset.onclick = () => reset();
-  chkAuto.onchange = (e) => { S.isAuto = e.target.checked; };
+  // ══════════════════════════════════════════════════════
+  // 7. EVENTS
+  // ══════════════════════════════════════════════════════
+  let rafId=0;
+  function schedule(){cancelAnimationFrame(rafId);rafId=requestAnimationFrame(render);}
+  function onN(){SL.n.sync();schedule();}
+  function onP(){SL.p.sync();schedule();}
+  SL.n.input.addEventListener("input",onN);
+  SL.p.input.addEventListener("input",onP);
 
-  let frameId;
-  function tick() {
-    update();
-    draw();
-    frameId = requestAnimationFrame(tick);
-  }
-  tick();
+  render();
 
-  if (this && this.invalidation) this.invalidation.then(() => cancelAnimationFrame(frameId));
+  // ══════════════════════════════════════════════════════
+  // 8. CLEANUP
+  // ══════════════════════════════════════════════════════
+  invalidation.then(()=>{
+    cancelAnimationFrame(rafId);
+    SL.n.input.removeEventListener("input",onN);
+    SL.p.input.removeEventListener("input",onP);
+    svg.removeEventListener("mousemove",onMove);
+    svg.removeEventListener("mouseleave",onLeave);
+    lcCache.clear();curData=[];
+  });
 
-  return container;
-})();
+  wrapper.value={};
+  return wrapper;
+})()
 ```
 
 #### Bảng Galton
@@ -353,331 +758,424 @@ viewof coin_sim_manual = (() => {
 Bảng Galton (Galton board) là một tấm bảng dựng đứng, được đóng các hàng đinh so le nhau theo hình tam giác. Ta thả những viên bi nhỏ từ đỉnh tháp. Khi một viên bi chạm vào một chiếc đinh, nó sẽ nảy sang trái hoặc sang phải. Sau khi đi hết các hàng đinh, viên bi sẽ rơi vào các ô chứa để hứng bi. Số lượng bi trong các ô chứa này tuân theo phân phối Nhị thức.
 
 ```{ojs}
-//| echo: false
+viewof galton_board = (() => {
+  const TAU = 6.283185307;
 
-viewof galton_sharp = Inputs.form({
-  rows: Inputs.range([8, 20], {value: 10, step: 1, label: "Số hàng đinh"}),
-  speed: Inputs.range([0.5, 3], {value: 2, step: 0.1, label: "Tốc độ"}),
-  total: Inputs.range([50, 800], {value: 200, step: 10, label: "Số viên bi"})
-})
-
-viewof galton_sim_dense = (() => {
-  // --- 1. CONFIGURATION ---
-  const config = {
-      rows: galton_sharp.rows,
-      speed: galton_sharp.speed,
-      maxBalls: galton_sharp.total
-  };
-
-  // --- 2. SETUP CONTAINER (Centered) ---
-  const outerWrapper = document.createElement("div");
-  outerWrapper.style.cssText = `
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
+  // ══════════════════════════════════════════════════════
+  // 1. WRAPPER + STYLE
+  // ══════════════════════════════════════════════════════
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = `
+    display:flex;flex-direction:column;align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    width:100%;max-width:520px;margin:0 auto;
   `;
 
-  const container = document.createElement("div");
-  container.style.cssText = `
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 380px; 
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  `;
-  outerWrapper.appendChild(container);
-
-  // --- 3. INJECT UI ---
-  container.innerHTML = `
-    <style>
-      .galton-ctrl-row {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-bottom: 10px;
-      }
-      .galton-btn {
-        padding: 6px 16px;
-        border-radius: 6px;
-        border: 1px solid #d1d5db;
-        background-color: white;
-        color: #374151;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.1s ease;
-      }
-      .galton-btn:hover { background-color: #f3f4f6; }
-      
-      .galton-btn-primary {
-        background-color: #3b82f6; 
-        color: white; 
-        border-color: #2563eb;
-      }
-      .galton-btn-primary:hover { background-color: #2563eb; color: white; }
-
-      canvas {
-        border-radius: 4px;
-      }
-    </style>
-
-    <div class="galton-ctrl-row">
-      <button id="btn-start" class="galton-btn galton-btn-primary">Bắt đầu</button>
-      <button id="btn-stop" class="galton-btn">Dừng</button>
-    </div>
-  `;
-
-  // --- 4. CANVAS SETUP ---
-  // INCREASED HEIGHT from 500 -> 600
-  const logicalWidth = 380;
-  const logicalHeight = 600; 
-  const dpr = window.devicePixelRatio || 1;
-
-  const canvas = document.createElement("canvas");
-  canvas.width = logicalWidth * dpr;
-  canvas.height = logicalHeight * dpr;
-  canvas.style.width = `${logicalWidth}px`;
-  canvas.style.height = `${logicalHeight}px`;
-  
-  const ctx = canvas.getContext("2d", { alpha: false });
-  ctx.scale(dpr, dpr);
-  container.appendChild(canvas);
-
-  // --- 5. GEOMETRY & STATE ---
-  const pegSpacing = logicalWidth / (config.rows + 3);
-  const startY = 60;
-  const pegRadius = pegSpacing * 0.12; 
-  const ballRadius = pegSpacing * 0.23; 
-  const rowHeight = pegSpacing * 0.85;
-
-  // Bin Geometry
-  const floorY = logicalHeight - 10;
-  const binWidth = pegSpacing;
-  const totalBinWidth = (config.rows + 1) * binWidth;
-  const binsStartX = (logicalWidth - totalBinWidth) / 2;
-  const wallsTopY = startY + (config.rows) * rowHeight + 15;
-
-  // DENSE PACKING FACTOR
-  // 70% Overlap means the vertical step is small.
-  // Normal Diameter = 2*r.
-  // We use step = 0.6 * r. This is very dense.
-  const stackStep = ballRadius * 0.6; 
-
-  // Pre-calculate Peg Positions
-  const pegGrid = []; 
-  for (let r = 0; r < config.rows; r++) {
-    const rowPegs = [];
-    const pegsInThisRow = r + 1;
-    const rowWidth = (pegsInThisRow - 1) * pegSpacing;
-    const rowStartX = (logicalWidth - rowWidth) / 2;
-    for (let p = 0; p < pegsInThisRow; p++) {
-      rowPegs.push({
-        x: rowStartX + p * pegSpacing,
-        y: startY + r * rowHeight
-      });
+  const style = document.createElement("style");
+  style.textContent = `
+    .gt-slider{position:relative;height:8px;border-radius:4px;background:#e2e8f0;}
+    .gt-slider-fill{position:absolute;left:0;top:0;height:100%;border-radius:4px;transition:width 0.04s;}
+    .gt-slider input[type=range]{
+      position:absolute;top:0;left:0;width:100%;height:100%;
+      -webkit-appearance:none;appearance:none;background:transparent;
+      cursor:pointer;margin:0;padding:0;
     }
-    pegGrid.push(rowPegs);
-  }
-
-  // Simulation State
-  const S = {
-    balls: [],
-    bins: new Array(config.rows + 1).fill(0),
-    spawned: 0,
-    running: false
-  };
-
-  // --- 6. LOGIC ---
-  function createBall() {
-    let currentInd = 0; 
-    let path = [];
-    path.push({ x: logicalWidth / 2, y: startY - 20 }); 
-
-    for (let r = 0; r < config.rows; r++) {
-       const peg = pegGrid[r][currentInd];
-       path.push({ x: peg.x, y: peg.y - pegRadius - ballRadius });
-       if (Math.random() > 0.5) currentInd++; 
+    .gt-slider input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;appearance:none;
+      width:20px;height:20px;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.28);
+      cursor:pointer;margin-top:-6px;background:#475569;
     }
+    .gt-slider input[type=range]::-moz-range-thumb{
+      width:14px;height:14px;border-radius:50%;
+      border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,0.28);
+      cursor:pointer;background:#475569;
+    }
+    .gt-slider input[type=range]::-webkit-slider-runnable-track{height:8px;background:transparent;}
+    .gt-slider input[type=range]::-moz-range-track{height:8px;background:transparent;}
+    .gt-slider-blue input[type=range]::-webkit-slider-thumb{background:#3b82f6;}
+    .gt-slider-blue input[type=range]::-moz-range-thumb{background:#3b82f6;}
+    .gt-slider-amber input[type=range]::-webkit-slider-thumb{background:#d97706;}
+    .gt-slider-amber input[type=range]::-moz-range-thumb{background:#d97706;}
+    .gt-slider-dark input[type=range]::-webkit-slider-thumb{background:#1e293b;}
+    .gt-slider-dark input[type=range]::-moz-range-thumb{background:#1e293b;}
+    .gt-btn{
+      flex:1;padding:8px 0;border-radius:8px;border:1px solid #d1d5db;
+      background:#fff;color:#374151;font-size:13px;font-weight:600;
+      cursor:pointer;transition:background 0.1s;font-family:inherit;text-align:center;
+    }
+    .gt-btn:hover{background:#f3f4f6;}
+    .gt-btn-go{background:#3b82f6;color:#fff;border-color:#2563eb;}
+    .gt-btn-go:hover{background:#2563eb;color:#fff;}
+    .gt-btn-reset{background:#fef2f2;color:#dc2626;border-color:#fecaca;}
+    .gt-btn-reset:hover{background:#fee2e2;color:#dc2626;}
+  `;
+  wrapper.appendChild(style);
 
-    const binX = binsStartX + currentInd * binWidth + binWidth/2;
-    path.push({ x: binX, y: wallsTopY });
-    path.push({ x: binX, y: floorY, isFloor: true, binIndex: currentInd });
+  // ══════════════════════════════════════════════════════
+  // 2. SLIDER FACTORY
+  // ══════════════════════════════════════════════════════
+  function createSlider(label, min, max, step, val, color, cls) {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:120px;";
 
-    return {
-      path: path,
-      segment: 0, t: 0, active: true,
-      x: path[0].x, y: path[0].y
+    const head = document.createElement("div");
+    head.style.cssText = "display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;";
+
+    const lbl = document.createElement("span");
+    lbl.style.cssText = "font-size:11px;font-weight:600;color:#64748b;letter-spacing:0.3px;text-transform:uppercase;";
+    lbl.textContent = label;
+
+    const valSpan = document.createElement("span");
+    valSpan.style.cssText = `font-size:17px;font-weight:800;color:${color};font-variant-numeric:tabular-nums;font-family:"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;`;
+    valSpan.textContent = step < 1 ? Number(val).toFixed(1) : val;
+
+    head.appendChild(lbl); head.appendChild(valSpan);
+
+    const track = document.createElement("div");
+    track.className = "gt-slider gt-slider-" + cls;
+
+    const fill = document.createElement("div");
+    fill.className = "gt-slider-fill";
+    fill.style.background = color;
+    fill.style.width = ((val - min) / (max - min)) * 100 + "%";
+    track.appendChild(fill);
+
+    const input = document.createElement("input");
+    input.type = "range"; input.min = min; input.max = max;
+    input.step = step; input.value = val;
+    track.appendChild(input);
+
+    row.appendChild(head); row.appendChild(track);
+
+    return { el: row, input, valSpan, fill,
+      val() { return +input.value; },
+      sync() {
+        const v = +input.value;
+        valSpan.textContent = step < 1 ? v.toFixed(1) : String(v);
+        fill.style.width = ((v - min) / (max - min)) * 100 + "%";
+      }
     };
   }
 
-  function spawn() {
-     if (S.spawned >= config.maxBalls) return;
-     
-     // Check capacity using new DENSE packing logic
-     // Available height = floorY - wallsTopY
-     // Height consumed = count * stackStep
-     const centerBin = Math.floor(config.rows/2);
-     const currentHeight = S.bins[centerBin] * stackStep;
-     
-     if (currentHeight > (floorY - wallsTopY - 20)) return; // -20 buffer
-     
-     S.balls.push(createBall());
-     S.spawned++;
+  const SL = {};
+  SL.rows  = createSlider("Peg rows", 8, 20, 1, 10, "#1e293b", "dark");
+  SL.total = createSlider("Balls", 50, 800, 10, 200, "#3b82f6", "blue");
+  SL.speed = createSlider("Speed", 0.5, 3, 0.1, 2.0, "#d97706", "amber");
+
+  // Row 1: peg rows + balls (2 equal columns)
+  const r1 = document.createElement("div");
+  r1.style.cssText = "display:flex;gap:24px;width:100%;margin-bottom:10px;";
+  r1.appendChild(SL.rows.el); r1.appendChild(SL.total.el);
+  wrapper.appendChild(r1);
+
+  // Row 2: speed — matched to first column width via same flex layout + invisible spacer
+  const r2 = document.createElement("div");
+  r2.style.cssText = "display:flex;gap:24px;width:100%;margin-bottom:12px;";
+  r2.appendChild(SL.speed.el);
+  const spacer = document.createElement("div");
+  spacer.style.cssText = "flex:1;min-width:120px;";
+  r2.appendChild(spacer);
+  wrapper.appendChild(r2);
+
+  // Row 3: buttons
+  const r3 = document.createElement("div");
+  r3.style.cssText = "display:flex;gap:10px;width:100%;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;";
+  const btnGo = document.createElement("button");
+  btnGo.className = "gt-btn gt-btn-go"; btnGo.textContent = "▶  Start";
+  const btnStop = document.createElement("button");
+  btnStop.className = "gt-btn"; btnStop.textContent = "⏸  Pause";
+  const btnReset = document.createElement("button");
+  btnReset.className = "gt-btn gt-btn-reset"; btnReset.textContent = "↺  Reset";
+  r3.appendChild(btnGo); r3.appendChild(btnStop); r3.appendChild(btnReset);
+  wrapper.appendChild(r3);
+
+  // ══════════════════════════════════════════════════════
+  // 3. RESPONSIVE CANVAS (fits on screen)
+  // ══════════════════════════════════════════════════════
+  const LW = 380, LH = 600, ASPECT = LH / LW;
+
+  const canvasWrap = document.createElement("div");
+  // max-height: 62vh ensures the canvas + controls all fit on one screen
+  // width derived from height to maintain aspect ratio
+  canvasWrap.style.cssText = `
+    width:100%;
+    display:flex;justify-content:center;
+  `;
+
+  const canvas = document.createElement("canvas");
+  canvas.style.cssText = `
+    max-height:62vh;
+    width:auto;
+    height:auto;
+    border-radius:10px;
+    border:1px solid #e2e8f0;
+    display:block;
+  `;
+  canvasWrap.appendChild(canvas);
+  wrapper.appendChild(canvasWrap);
+
+  const ctx = canvas.getContext("2d", { alpha: false });
+
+  function resizeCanvas() {
+    // Determine available height: 62vh, then width from aspect
+    const maxH = window.innerHeight * 0.62;
+    const maxW = canvasWrap.getBoundingClientRect().width;
+
+    // Height-limited: derive width from maxH
+    let cssH = maxH;
+    let cssW = cssH / ASPECT;
+
+    // If that's wider than container, clamp to container
+    if (cssW > maxW) {
+      cssW = maxW;
+      cssH = cssW * ASPECT;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+    canvas.style.width = cssW + "px";
+    canvas.style.height = cssH + "px";
+
+    ctx.setTransform((cssW * dpr) / LW, 0, 0, (cssW * dpr) / LW, 0, 0);
   }
 
-  function update(dt) {
-    if (S.running) {
-        const spawnChance = 0.25 * config.speed; 
-        if (Math.random() < spawnChance) spawn();
+  const ro = new ResizeObserver(resizeCanvas);
+  ro.observe(canvasWrap);
+  resizeCanvas();
+
+  // ══════════════════════════════════════════════════════
+  // 4. SIMULATION STATE
+  // ══════════════════════════════════════════════════════
+  let CFG = {}, pegGrid = [], S = {};
+
+  function initSim() {
+    const rows = SL.rows.val(), maxBalls = SL.total.val();
+    const pegSpacing = LW / (rows + 3);
+    const pegR = pegSpacing * 0.12;
+    const ballR = pegSpacing * 0.23;
+    const rowH = pegSpacing * 0.85;
+    const startY = 60;
+    const numBins = rows + 1;
+    const binW = pegSpacing;
+    const totalBinW = numBins * binW;
+    const binsX0 = (LW - totalBinW) / 2;
+    const wallsTopY = startY + rows * rowH + 15;
+    const floorY = LH - 10;
+    const stackStep = ballR * 0.6;
+
+    CFG = { rows, maxBalls, pegSpacing, pegR, ballR, rowH, startY,
+            numBins, binW, totalBinW, binsX0, wallsTopY, floorY, stackStep };
+
+    pegGrid = [];
+    for (let r = 0; r < rows; r++) {
+      const n = r+1, rw = (n-1)*pegSpacing, x0 = (LW-rw)/2;
+      const arr = new Float64Array(n*2);
+      const y = startY + r * rowH;
+      for (let p = 0; p < n; p++) { arr[p*2]=x0+p*pegSpacing; arr[p*2+1]=y; }
+      pegGrid.push(arr);
     }
 
-    for (let i = 0; i < S.balls.length; i++) {
-        const b = S.balls[i];
-        if (!b.active) continue;
-        if (!S.running) continue;
-
-        const moveSpeed = 3.0 * config.speed * dt;
-        b.t += moveSpeed;
-
-        if (b.t >= 1) {
-            b.t = 0;
-            b.segment++;
-            if (b.segment >= b.path.length - 1) {
-                b.active = false;
-                const finalPt = b.path[b.path.length - 1];
-                S.bins[finalPt.binIndex]++;
-                continue;
-            }
-        }
-
-        const p0 = b.path[b.segment];
-        const p1 = b.path[b.segment + 1];
-        const t = b.t;
-        const ease = t * t; 
-        
-        b.x = p0.x + (p1.x - p0.x) * t;
-        b.y = p0.y + (p1.y - p0.y) * (p1.isFloor ? ease : ease);
-    }
-    
-    if (S.balls.length > config.maxBalls + 50) {
-        S.balls = S.balls.filter(b => b.active);
-    }
+    if (S.pool) S.pool.length = 0;
+    if (S.active) S.active.length = 0;
+    S = { pool:[], active:[], bins:new Int32Array(numBins),
+          spawned:0, running:false, done:false };
   }
 
-  // --- 7. DRAW LOOP ---
-  function draw() {
-    // Clear
-    ctx.fillStyle = "#f8f9fa";
-    ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+  // ══════════════════════════════════════════════════════
+  // 5. BALL LOGIC (object pool)
+  // ══════════════════════════════════════════════════════
+  function allocBall() {
+    if (S.pool.length) return S.pool.pop();
+    return { pathX:new Float64Array(30), pathY:new Float64Array(30),
+             pathLen:0,seg:0,t:0,x:0,y:0,binIdx:0 };
+  }
+
+  function buildPath(b) {
+    const {rows,pegSpacing,pegR,ballR,rowH,startY,binW,binsX0,wallsTopY,floorY}=CFG;
+    let idx=0,pi=0;
+    b.pathX[pi]=LW/2; b.pathY[pi]=startY-20; pi++;
+    for(let r=0;r<rows;r++){
+      const n=r+1,rw=(n-1)*pegSpacing,x0=(LW-rw)/2;
+      const px=x0+idx*pegSpacing,py=startY+r*rowH;
+      const right=Math.random()>0.5;
+      b.pathX[pi]=px+(right?1:-1)*(pegR+ballR)*0.85;
+      b.pathY[pi]=py; pi++;
+      if(right)idx++;
+    }
+    const cx=binsX0+idx*binW+binW/2;
+    b.pathX[pi]=cx;b.pathY[pi]=wallsTopY;pi++;
+    b.pathX[pi]=cx;b.pathY[pi]=floorY-ballR;pi++;
+    b.pathLen=pi;b.seg=0;b.t=0;
+    b.x=b.pathX[0];b.y=b.pathY[0];b.binIdx=idx;
+  }
+
+  function spawn(){
+    if(S.spawned>=CFG.maxBalls)return;
+    const b=allocBall();buildPath(b);
+    S.active.push(b);S.spawned++;
+  }
+
+  function update(dt){
+    if(!S.running)return;
+    const speed=SL.speed.val();
+    if(S.spawned<CFG.maxBalls&&Math.random()<0.25*speed)spawn();
+    const mv=3.0*speed*dt;
+    let wi=0;
+    for(let i=0;i<S.active.length;i++){
+      const b=S.active[i];
+      b.t+=mv;
+      while(b.t>=1&&b.seg<b.pathLen-2){b.t-=1;b.seg++;}
+      if(b.t>=1&&b.seg>=b.pathLen-2){S.bins[b.binIdx]++;S.pool.push(b);continue;}
+      const s=b.seg,t=b.t,ease=t*t;
+      b.x=b.pathX[s]+(b.pathX[s+1]-b.pathX[s])*t;
+      b.y=b.pathY[s]+(b.pathY[s+1]-b.pathY[s])*ease;
+      S.active[wi++]=b;
+    }
+    S.active.length=wi;
+    if(S.spawned>=CFG.maxBalls&&S.active.length===0){S.running=false;S.done=true;}
+  }
+
+  // ══════════════════════════════════════════════════════
+  // 6. DRAW — FLAT
+  // ══════════════════════════════════════════════════════
+  function draw(){
+    const {pegR,ballR,numBins,binW,totalBinW,binsX0,wallsTopY,floorY,stackStep}=CFG;
+
+    ctx.fillStyle="#f8f9fa";
+    ctx.fillRect(0,0,LW,LH);
 
     // Pegs
-    ctx.fillStyle = "#9ca3af";
+    ctx.fillStyle="#94a3b8";
     ctx.beginPath();
-    for (let r = 0; r < pegGrid.length; r++) {
-      for (let p = 0; p < pegGrid[r].length; p++) {
-         const peg = pegGrid[r][p];
-         ctx.moveTo(peg.x + pegRadius, peg.y);
-         ctx.arc(peg.x, peg.y, pegRadius, 0, Math.PI*2);
+    for(let r=0;r<pegGrid.length;r++){
+      const a=pegGrid[r];
+      for(let p=0;p<a.length;p+=2){
+        ctx.moveTo(a[p]+pegR,a[p+1]);
+        ctx.arc(a[p],a[p+1],pegR,0,TAU);
       }
     }
-    ctx.fill(); 
+    ctx.fill();
 
-    // Active Balls
-    ctx.fillStyle = "#3b82f6";
+    // Walls & floor
+    ctx.strokeStyle="#cbd5e1";
+    ctx.lineWidth=1.5;
     ctx.beginPath();
-    for (let i = 0; i < S.balls.length; i++) {
-       const b = S.balls[i];
-       if (b.active) {
-         ctx.moveTo(b.x + ballRadius, b.y);
-         ctx.arc(b.x, b.y, ballRadius, 0, Math.PI*2);
-       }
-    }
-    ctx.fill(); 
-
-    // BINS (Dense Stacking)
-    ctx.fillStyle = "#3b82f6";
-    ctx.strokeStyle = "#1d4ed8"; // Darker border for definition
-    ctx.lineWidth = 1;
-    
-    for (let i = 0; i < S.bins.length; i++) {
-       const count = S.bins[i];
-       if (count === 0) continue;
-       
-       const cx = binsStartX + i * binWidth + binWidth/2;
-       
-       ctx.beginPath();
-       for (let j = 0; j < count; j++) {
-          // DENSE LOGIC: stackStep = 0.6 * r
-          const cy = floorY - ballRadius - (j * stackStep);
-          
-          if (cy < wallsTopY) break; 
-          ctx.moveTo(cx + ballRadius, cy);
-          ctx.arc(cx, cy, ballRadius, 0, Math.PI*2);
-       }
-       ctx.fill();
-       ctx.stroke();
-    }
-
-    // Walls/Floor
-    ctx.strokeStyle = "#d1d5db";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(binsStartX, floorY);
-    ctx.lineTo(binsStartX + totalBinWidth, floorY);
-    for (let i = 0; i <= config.rows + 1; i++) {
-       const x = binsStartX + i * binWidth;
-       ctx.moveTo(x, wallsTopY);
-       ctx.lineTo(x, floorY);
+    ctx.moveTo(binsX0,floorY);
+    ctx.lineTo(binsX0+totalBinW,floorY);
+    for(let i=0;i<=numBins;i++){
+      const x=binsX0+i*binW;
+      ctx.moveTo(x,wallsTopY);ctx.lineTo(x,floorY);
     }
     ctx.stroke();
 
-    // Text
-    ctx.fillStyle = "#374151";
-    ctx.font = "bold 14px sans-serif";
-    ctx.fillText(`Số bi: ${S.spawned} / ${config.maxBalls}`, 10, 25);
+    // Stacked balls
+    ctx.fillStyle="#3b82f6";
+    ctx.strokeStyle="#2563eb";
+    ctx.lineWidth=0.7;
+    ctx.beginPath();
+    for(let i=0;i<numBins;i++){
+      const count=S.bins[i];
+      if(!count)continue;
+      const cx=binsX0+i*binW+binW/2;
+      for(let j=0;j<count;j++){
+        const cy=floorY-ballR-j*stackStep;
+        if(cy<wallsTopY)break;
+        ctx.moveTo(cx+ballR,cy);
+        ctx.arc(cx,cy,ballR,0,TAU);
+      }
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    // Active balls
+    ctx.fillStyle="#3b82f6";
+    ctx.beginPath();
+    for(let i=0;i<S.active.length;i++){
+      const b=S.active[i];
+      ctx.moveTo(b.x+ballR,b.y);
+      ctx.arc(b.x,b.y,ballR,0,TAU);
+    }
+    ctx.fill();
+
+    // Counter pill
+    ctx.font="bold 12px 'SF Mono',SFMono-Regular,Menlo,monospace";
+    const txt=S.spawned+" / "+CFG.maxBalls;
+    const tw=ctx.measureText(txt).width;
+    const bx=12,by=14,bh=20,bpw=tw+16;
+    ctx.fillStyle="rgba(255,255,255,0.8)";
+    ctx.beginPath();ctx.roundRect(bx,by,bpw,bh,10);ctx.fill();
+    ctx.strokeStyle="#e2e8f0";ctx.lineWidth=1;
+    ctx.beginPath();ctx.roundRect(bx,by,bpw,bh,10);ctx.stroke();
+    ctx.fillStyle="#334155";ctx.textAlign="left";
+    ctx.fillText(txt,bx+8,by+14);
+
+    if(S.done){
+      const d="\u2713 Complete";
+      const dw=ctx.measureText(d).width;
+      ctx.fillStyle="rgba(240,253,244,0.9)";
+      ctx.beginPath();ctx.roundRect(bx+bpw+6,by,dw+16,bh,10);ctx.fill();
+      ctx.strokeStyle="#bbf7d0";ctx.lineWidth=1;
+      ctx.beginPath();ctx.roundRect(bx+bpw+6,by,dw+16,bh,10);ctx.stroke();
+      ctx.fillStyle="#16a34a";
+      ctx.fillText(d,bx+bpw+14,by+14);
+    }
   }
 
-  // --- 8. RUNTIME ---
-  let lastTime = performance.now();
-  let frameId;
-  
-  function tick(now) {
-    const dt = Math.min((now - lastTime) / 1000, 0.1); 
-    lastTime = now;
-    
-    update(dt);
-    draw();
-    frameId = requestAnimationFrame(tick);
+  // ══════════════════════════════════════════════════════
+  // 7. LOOP
+  // ══════════════════════════════════════════════════════
+  let lastT=0,rafId=0;
+  function tick(now){
+    const dt=Math.min((now-lastT)/1000,0.06);
+    lastT=now;update(dt);draw();
+    rafId=requestAnimationFrame(tick);
   }
 
-  // Bind Buttons
-  const btnStart = container.querySelector("#btn-start");
-  const btnStop = container.querySelector("#btn-stop");
+  // ══════════════════════════════════════════════════════
+  // 8. EVENTS
+  // ══════════════════════════════════════════════════════
+  function fullReset(){
+    cancelAnimationFrame(rafId);initSim();
+    SL.rows.sync();SL.speed.sync();SL.total.sync();
+    lastT=performance.now();rafId=requestAnimationFrame(tick);
+  }
+  function onStart(){if(S.done)fullReset();S.running=true;}
+  function onStop(){S.running=false;}
+  function onRows(){SL.rows.sync();if(!S.running)fullReset();}
+  function onTotal(){SL.total.sync();if(!S.running)fullReset();}
+  function onSpeed(){SL.speed.sync();}
 
-  btnStart.onclick = () => {
-     if (!S.running && S.spawned === 0) {
-         S.running = true;
-     } else {
-         S.running = true;
-         if (S.spawned >= config.maxBalls) {
-             S.balls = [];
-             S.bins.fill(0);
-             S.spawned = 0;
-         }
-     }
-  };
-  
-  btnStop.onclick = () => {
-      S.running = false;
-  };
+  btnGo.addEventListener("click",onStart);
+  btnStop.addEventListener("click",onStop);
+  btnReset.addEventListener("click",fullReset);
+  SL.rows.input.addEventListener("input",onRows);
+  SL.total.input.addEventListener("input",onTotal);
+  SL.speed.input.addEventListener("input",onSpeed);
 
-  tick(performance.now());
-  invalidation.then(() => cancelAnimationFrame(frameId));
+  // ══════════════════════════════════════════════════════
+  // 9. INIT & CLEANUP
+  // ══════════════════════════════════════════════════════
+  initSim();lastT=performance.now();rafId=requestAnimationFrame(tick);
 
-  return outerWrapper;
-})();
+  invalidation.then(()=>{
+    cancelAnimationFrame(rafId);
+    ro.disconnect();
+    btnGo.removeEventListener("click",onStart);
+    btnStop.removeEventListener("click",onStop);
+    btnReset.removeEventListener("click",fullReset);
+    SL.rows.input.removeEventListener("input",onRows);
+    SL.total.input.removeEventListener("input",onTotal);
+    SL.speed.input.removeEventListener("input",onSpeed);
+    if(S.pool)S.pool.length=0;
+    if(S.active)S.active.length=0;
+    S={};CFG={};pegGrid=[];
+  });
+
+  wrapper.value={};
+  return wrapper;
+})()
 ```
 
 **Tại sao lại là phân phối Nhị thức?**
@@ -685,209 +1183,6 @@ viewof galton_sim_dense = (() => {
 - Mỗi lần viên bi chạm vào chiếc đinh, có hai trường hợp xảy ra: viên bi sẽ nảy sang trái hoặc sang phải, xác suất nảy sang mỗi bên là $p = 0.5$, giống như tung đồng xu. Đây là một phép thử Bernoulli.
 - Nếu bảng có 10 hàng đinh, viên bi sẽ thực hiện chuỗi Bernoulli có 10 phép thử liên tiếp.
 - Các ô chứa tương ứng với số lần viên bi nảy về bên phải. Để vào ô giữa, viên bi phải nảy sang bên phải 5 lần (và bên trái 5 lần), để vào ô cuối cùng, viên bi phải nảy sang bên phải 10 lần (và bên trái 0 lần).
-
-#### Hồi quy logistic
-
-```{r}
-#| eval: false
-glm(formula, data, family = binomial(link = "logit"))
-glm(formula, data, family = "binomial")
-```
-
-**Tại sao trong hồi quy logistic lại ghi `family = "binomial"`?**
-
-Ví dụ: Hút thuốc lá có làm tăng nguy cơ ung thư phổi không?
-
-- Biến độc lập: Số điếu thuốc hút mỗi ngày
-- Biến phụ thuộc: Tình trạng ung thư phổi (1 = Có bệnh, 0 = Không bệnh)
-
-Khi xây dựng mô hình, chúng ta xem xét từng cá nhân trong dữ liệu như một phép thử ngẫu nhiên:
-
-- Với một người cụ thể (ví dụ: anh A, hút 1 gói/ngày), việc anh ta có bị ung thư hay không giống như việc tung một đồng xu: mặt ngửa (1) là bị ung thư, mặt sấp (0) là không bị ung thư. **Nhưng** xác suất tung ra mặt ngửa của đồng xu này không phải là 0.5, mà phụ thuộc vào việc anh ta hút bao nhiêu thuốc.
-- Khi chúng ta tiến hành nghiên cứu trên $n$ người, đây là 1 chuỗi Bernoulli, vì vậy có thể chọn phân phối Binomial để mô hình nó.
-
-Khai báo `family = "binomial"` nghĩa là: "Biến kết quả ($Y$) là đếm số lần thành công (hoặc thất bại) từ các phép thử nhị phân, hãy dùng công thức xác suất của phân phối Nhị thức để ước lượng."
-
-#### Xấp xỉ phân phối Chuẩn
-
-Định lý Moivre-Laplace (một dạng đặc biệt của Định lý Giới hạn Trung tâm): Khi số lượng phép thử $n$ đủ lớn, hình dáng của phân phối Nhị thức sẽ tiệm cận về phân phối Chuẩn.
-
-```{ojs}
-//| echo: false
-viewof normal_approx_fixed_axis = (() => {
-  // --- 1. SETUP CONTAINER ---
-  const wrapper = document.createElement("div");
-  wrapper.style.cssText = `
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    margin-top: 20px;
-    width: 100%;
-    min-height: 500px;
-  `;
-
-  // --- 2. INPUT CREATION ---
-  function createInput(id, label, min, max, step, val) {
-    const container = document.createElement("div");
-    container.style.cssText = "display: flex; flex-direction: column; width: 220px;";
-    
-    const labelEl = document.createElement("label");
-    labelEl.htmlFor = id;
-    labelEl.style.cssText = "font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 6px;";
-    labelEl.innerHTML = `${label} <span style="color: #be185d;">${val}</span>`;
-    
-    const input = document.createElement("input");
-    input.type = "range";
-    input.id = id;
-    input.min = min;
-    input.max = max;
-    input.step = step;
-    input.value = val;
-    input.style.width = "100%";
-    input.style.accentColor = "#be185d"; 
-    
-    container.appendChild(labelEl);
-    container.appendChild(input);
-    return { container, input, labelEl };
-  }
-
-  const nCtrl = createInput("n_val_fx", "Số phép thử (n):", 10, 500, 10, 50);
-  const pCtrl = createInput("p_val_fx", "Xác suất (p):", 0.05, 0.95, 0.05, 0.5);
-
-  const controlsDiv = document.createElement("div");
-  controlsDiv.style.cssText = "display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin-bottom: 20px; width: 100%;";
-  controlsDiv.appendChild(nCtrl.container);
-  controlsDiv.appendChild(pCtrl.container);
-  wrapper.appendChild(controlsDiv);
-
-  // Stats Display
-  const statsDiv = document.createElement("div");
-  statsDiv.style.cssText = "font-size: 16px; color: #374151; margin-bottom: 10px; font-weight: 500; font-family: monospace;";
-  wrapper.appendChild(statsDiv);
-  
-  // Plot Container
-  const plotContainer = document.createElement("div");
-  wrapper.appendChild(plotContainer);
-
-  // --- 3. MATH KERNEL ---
-  function logFact(n) {
-    if (n <= 1) return 0;
-    return n * Math.log(n) - n + 0.5 * Math.log(2 * Math.PI * n);
-  }
-
-  function getBinomialProb(k, n, p) {
-    if (k < 0 || k > n) return 0;
-    if (p <= 0) return k === 0 ? 1 : 0;
-    if (p >= 1) return k === n ? 1 : 0;
-    
-    const logP = logFact(n) - logFact(k) - logFact(n - k) + k * Math.log(p) + (n - k) * Math.log(1 - p);
-    return Math.exp(logP);
-  }
-
-  function normalPDF(x, mu, sigma) {
-    if (sigma <= 0) return 0;
-    return (1 / (sigma * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
-  }
-
-  // --- 4. RENDER LOGIC ---
-  function update() {
-    const n = parseFloat(nCtrl.input.value);
-    const p = parseFloat(pCtrl.input.value);
-
-    // Update Text
-    nCtrl.labelEl.querySelector("span").textContent = n;
-    pCtrl.labelEl.querySelector("span").textContent = p.toFixed(2);
-
-    const mu = n * p;
-    const sigma = Math.sqrt(n * p * (1 - p));
-
-    // Stats
-    statsDiv.innerHTML = `&mu; = <b>${mu.toFixed(2)}</b> &nbsp;|&nbsp; &sigma; = <b>${sigma.toFixed(2)}</b>`;
-
-    // CALCULATION WINDOW: We still optimize calculation to +/- 4 sigma
-    // to keep performance high, even though visual axis is 0-n.
-    let startK = Math.floor(mu - 4 * sigma);
-    let endK = Math.ceil(mu + 4 * sigma);
-    if (startK < 0) startK = 0;
-    if (endK > n) endK = n;
-
-    // 1. Generate Binomial Data
-    const binomData = [];
-    for (let k = startK; k <= endK; k++) {
-      binomData.push({ 
-          k: k, 
-          x1: k - 0.5, 
-          x2: k + 0.5,
-          prob: getBinomialProb(k, n, p) 
-      });
-    }
-
-    // 2. Generate Normal Data
-    const normalData = [];
-    const step = (endK - startK) / 100;
-    const safeStep = step > 0.1 ? step : 0.1;
-    
-    for (let x = startK; x <= endK; x += safeStep) {
-      normalData.push({ x: x, y: normalPDF(x, mu, sigma) });
-    }
-
-    // 3. Plot
-    const chart = Plot.plot({
-      width: 600,
-      height: 380,
-      marginTop: 30,
-      marginLeft: 40,
-      marginBottom: 30,
-      x: { 
-        label: "Số lần thành công (k)",
-        // FIX: Hard-code domain to full range [0, n] to prevent jumping
-        domain: [0, n]
-      },
-      y: { 
-        label: "Xác suất", 
-        grid: true 
-      },
-      marks: [
-        // Binomial
-        Plot.rectY(binomData, {
-          x1: "x1", 
-          x2: "x2", 
-          y: "prob", 
-          fill: "#3b82f6", 
-          fillOpacity: 0.5,
-          title: d => `k: ${d.k}\nP: ${d.prob.toFixed(4)}`
-        }),
-        
-        // Normal Curve
-        Plot.line(normalData, {
-          x: "x", 
-          y: "y", 
-          stroke: "#be185d", 
-          strokeWidth: 3
-        }),
-        
-        // Mean Line
-        Plot.ruleX([mu], {
-          stroke: "#374151", 
-          strokeDasharray: "4,4", 
-          strokeOpacity: 0.6
-        })
-      ]
-    });
-
-    plotContainer.innerHTML = "";
-    plotContainer.appendChild(chart);
-  }
-
-  nCtrl.input.addEventListener("input", update);
-  pCtrl.input.addEventListener("input", update);
-  
-  update();
-
-  return wrapper;
-})();
-```
 
 ### Phân phối Siêu bội (Hypergeometric distribution)
 
